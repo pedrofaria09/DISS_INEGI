@@ -1,0 +1,11 @@
+{% include 'messages.html' %}
+
+{% for tower in towers%}
+    Tower ID: {{tower.id}} <br>
+    Tower name:  {{tower.name}} <br>
+    Tower code: {{tower.code}} <br>
+
+    <a href="{% url "delete_tower" tower.id %}">Delete</a><br>
+
+    <hr>
+{% endfor %}
