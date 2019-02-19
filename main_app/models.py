@@ -7,8 +7,8 @@ connect('INEGI')
 # Create your models here.
 
 class Tower(models.Model):
-    code = models.CharField(max_length=20)
-    name = models.CharField(max_length=30)
+    code = models.CharField(max_length=20, null=False)
+    name = models.CharField(max_length=30, null=False)
 
 
 class DataRaw(EmbeddedDocument):

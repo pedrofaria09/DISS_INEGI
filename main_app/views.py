@@ -5,6 +5,8 @@ from django.contrib import messages
 from datetime import datetime
 
 from .models import Tower, TowerData, DataRaw, InfluxData, Meta
+from .forms import TowerForm
+
 
 # Create your views here.
 
@@ -21,13 +23,21 @@ def index(request):
     return render(request, 'home.html', data)
 
 
-def create_tower(request):
-    tower = Tower(code='1', name='Tower1')
-    tower.save()
+def add_tower(request):
 
-    messages.success(request, 'Torre criada com sucesso!')
+    if request.method == 'POST':
+        form = TowerForm(request.POST)
+        if form.is_valid():
+            form.save()
 
-    return HttpResponseRedirect(reverse("show_towers"))
+            messages.success(request, 'Torre criada com sucesso!')
+            return HttpResponseRedirect(reverse("show_towers"))
+        else:
+            messages.warning(request, 'A Torre não foi adicionada')
+    else:
+        form = TowerForm()
+
+    return render(request, 'add_tower.html', {'form': form})
 
 
 def show_towers(request):
