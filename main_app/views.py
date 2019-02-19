@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.urls import reverse
 from django.contrib import messages
 from datetime import datetime
@@ -46,12 +46,15 @@ def show_towers(request):
     return render(request, 'show_towers.html', {'towers': towers})
 
 
-def delete_tower(request, tower_id):
-    tower = get_object_or_404(Tower, pk=tower_id)
-    tower.delete()
-    messages.success(request, 'Torre apagada com sucesso!')
+def delete_tower(request):
 
-    return HttpResponseRedirect(reverse("show_towers"))
+    if request.is_ajax and request.method == 'POST':
+        tower = Tower.objects.get(id=request.POST["id"])
+        tower.delete()
+        messages.success(request, 'A Torre foi removida com sucesso!')
+        return HttpResponse("ok")
+    messages.error(request, 'Aconteceu um problema na remoção da Torre!')
+    return HttpResponse("not ok")
 
 
 def create_tower_data(request, tower_id):
