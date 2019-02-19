@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.contrib import messages
 from datetime import datetime
 
-from .models import Tower, TowerData, DataRaw, InfluxData
+from .models import Tower, TowerData, DataRaw, InfluxData, Meta
 
 # Create your views here.
 

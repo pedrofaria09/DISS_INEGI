@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main_app',
+    'influxdb',
 ]
 
 MIDDLEWARE = [
@@ -79,10 +80,12 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'USER': 'postgres',
-        'NAME': 'INEGI',
-        'PASSWORD': 'inegi',
+        'NAME': 'pedrofaria',
+        'PASSWORD': 'pedrofaria',
         'HOST': 'localhost',
-        'PORT': '',
+        'PORT': '5432',
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        # 'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     },
     'influx_data': {
         'NAME': 'INEGI_INFLUX',
