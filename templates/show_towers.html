@@ -1,11 +1,18 @@
-{% include 'messages.html' %}
+{% extends 'base.html' %}
+{% load staticfiles %}
 
-{% for tower in towers%}
-    Tower ID: {{tower.id}} <br>
-    Tower name:  {{tower.name}} <br>
-    Tower code: {{tower.code}} <br>
+{% block content %}
 
-    <a href="{% url "delete_tower" tower.id %}">Delete</a><br>
 
-    <hr>
-{% endfor %}
+    {% for tower in towers%}
+        Tower ID: {{tower.id}} <br>
+        Tower name:  {{tower.name}} <br>
+        Tower code: {{tower.code}} <br>
+
+        <a href="{% url "delete_tower" tower.id %}">Delete</a><br>
+
+        <hr>
+    {% endfor %}
+
+
+{% endblock %}

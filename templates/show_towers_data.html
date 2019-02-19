@@ -1,4 +1,8 @@
-{% include 'messages.html' %}
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+
 
 <a href="{% url "add_raw_data" %}">Add Raw Data</a><br>
 
@@ -14,3 +18,6 @@
 
     <hr>
 {% endfor %}
+
+
+{% endblock %}
