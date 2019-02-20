@@ -11,7 +11,7 @@
         <!-- DataTales Example -->
         <div class="card shadow mb-4">
             <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">DataTables Example</h6>
+                <h6 class="m-0 font-weight-bold text-primary">Tabela de Torres</h6>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -34,12 +34,10 @@
 
                         {% for tower in towers %}
                             <tr>
-                                <td>{{ tower.code }}</td>
-                                <td>{{ tower.name }}</td>
+                                <td><a href="{% url "view_tower" tower.id %}">{{ tower.code }}</a></td>
+                                <td><a href="{% url "view_tower" tower.id %}">{{ tower.name }}</a></td>
                                 <td>
-                                    <a href="#" class="btn btn-sm btn-info">Ver</a>
-                                    <a href="#" class="btn btn-sm btn-warning">Editar</a>
-                                    <a href="#" name="delete_tower" data-id="{{ tower.id }}" class="btn btn-sm btn-danger">Apagar</a>
+                                    <a href="{% url "view_tower" tower.id %}" class="btn btn-sm btn-info">Ver - Editar</a>
                                 </td>
                             </tr>
                         {% endfor %}

@@ -5,7 +5,7 @@ from django.contrib import messages
 from datetime import datetime
 
 from .models import Tower, TowerData, DataRaw, InfluxData, Meta
-from .forms import TowerForm
+from .forms import TowerForm, TowerViewForm
 
 
 # Create your views here.
@@ -31,7 +31,7 @@ def add_tower(request):
             form.save()
 
             messages.success(request, 'Torre criada com sucesso!')
-            return HttpResponseRedirect(reverse("show_towers"))
+            return HttpResponseRedirect(reverse("list_towers"))
         else:
             messages.warning(request, 'A Torre não foi adicionada')
     else:
@@ -40,19 +40,38 @@ def add_tower(request):
     return render(request, 'add_tower.html', {'form': form})
 
 
-def show_towers(request):
+def list_towers(request):
     towers = Tower.objects.all()
 
-    return render(request, 'show_towers.html', {'towers': towers})
+    return render(request, 'list_towers.html', {'towers': towers})
+
+
+def view_tower(request, tower_id):
+    try:
+        tower = Tower.objects.get(id=tower_id)
+    except Tower.DoesNotExist:
+        return HttpResponseRedirect(reverse("list_towers"))
+
+    if request.method == 'GET':
+        form = TowerViewForm(instance=tower)
+    elif request.method == 'POST':
+        form = TowerViewForm(request.POST, instance=tower)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'A torre foi editada com sucesso')
+            return HttpResponseRedirect(reverse("list_towers"))
+        else:
+            messages.warning(request, 'A torre não foi editada')
+
+    return render(request, 'view_tower.html', {'form': form, 'tower_id': tower_id})
 
 
 def delete_tower(request):
-
     if request.is_ajax and request.method == 'POST':
         tower = Tower.objects.get(id=request.POST["id"])
         tower.delete()
         messages.success(request, 'A Torre foi removida com sucesso!')
-        return HttpResponse("ok")
+        return HttpResponse('ok')
     messages.error(request, 'Aconteceu um problema na remoção da Torre!')
     return HttpResponse("not ok")
 

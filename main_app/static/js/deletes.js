@@ -12,7 +12,7 @@ $(function () {
                 }
             });
 
-            $.post("delete_tower",
+            $.post('/delete_tower',
                 {
                     id: $(this).attr('data-id'),
                 },
