@@ -4,8 +4,8 @@ from django.urls import reverse
 from django.contrib import messages
 from datetime import datetime
 
-from .models import Tower, TowerData, DataRaw, InfluxData, Meta
-from .forms import TowerForm, TowerViewForm
+from .models import Tower, TowerData, DataRaw, MyUser, InfluxData, Meta
+from .forms import TowerForm, TowerViewForm, RegisterForm
 
 
 # Create your views here.
@@ -23,6 +23,30 @@ def index(request):
     return render(request, 'home.html', data)
 
 
+def add_user(request):
+
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            print(username)
+            messages.success(request, 'User added!')
+            return HttpResponseRedirect(reverse("list_users"))
+        else:
+            messages.warning(request, 'User not added!!!')
+    else:
+        form = RegisterForm()
+
+    return render(request, 'add_user.html', {'form': form})
+
+
+def list_users(request):
+    users = MyUser.objects.all()
+
+    return render(request, 'list_users.html', {'users': users})
+
+
 def add_tower(request):
 
     if request.method == 'POST':
@@ -30,10 +54,10 @@ def add_tower(request):
         if form.is_valid():
             form.save()
 
-            messages.success(request, 'Torre criada com sucesso!')
+            messages.success(request, 'Tower created successfully!')
             return HttpResponseRedirect(reverse("list_towers"))
         else:
-            messages.warning(request, 'A Torre não foi adicionada')
+            messages.warning(request, 'Tower not added!!!')
     else:
         form = TowerForm()
 

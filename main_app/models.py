@@ -1,10 +1,20 @@
 from django.db import models
 from mongoengine import *
+from django.contrib.auth.models import AbstractUser
+
 import datetime
 
 connect('INEGI')
 
 # Create your models here.
+
+
+class MyUser(AbstractUser):
+    full_name = models.CharField(max_length=100)
+    birthdate = models.DateField(null=True)
+    is_client = models.BooleanField(default=False)
+    is_manager = models.BooleanField(default=False)
+
 
 class Tower(models.Model):
     code = models.CharField(max_length=20, null=False)
