@@ -5,6 +5,17 @@ from django.contrib.auth.forms import UserCreationForm
 from bootstrap_datepicker_plus import DatePickerInput
 
 
+class LoginForm(forms.Form):
+    username = forms.CharField(label='User Name', max_length=64)
+    password = forms.CharField(widget=forms.PasswordInput())
+
+    def __init__(self, *args, **kwargs):
+        super(LoginForm, self).__init__(*args, **kwargs)
+        self.fields['username'].label = "Username"
+        self.fields['username'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['password'].widget.attrs.update({'class': 'form-control mandatory'})
+
+
 class RegisterForm(UserCreationForm):
     class Meta:
         model = MyUser

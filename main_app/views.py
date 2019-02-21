@@ -2,10 +2,11 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.urls import reverse
 from django.contrib import messages
+from django.contrib.auth import login, authenticate, logout
 from datetime import datetime
 
 from .models import Tower, TowerData, DataRaw, MyUser, InfluxData, Meta
-from .forms import TowerForm, TowerViewForm, RegisterForm
+from .forms import TowerForm, TowerViewForm, RegisterForm, LoginForm
 
 
 # Create your views here.
@@ -19,8 +20,42 @@ def get_obj_or_404_2(klass, *args, **kwargs):
 
 
 def index(request):
-    data ={}
-    return render(request, 'home.html', data)
+    if request.user.id is None:
+        form = LoginForm()
+        return render(request, 'home.html', {'form': form})
+    else:
+        return render(request, 'home.html', {})
+
+
+def login_view(request):
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            try:
+                user = MyUser.objects.get(username=username)
+            except MyUser.DoesNotExist:
+                user = None
+
+            print(user)
+            if user is not None:
+                    raw_password = form.cleaned_data.get('password')
+                    user = authenticate(username=username, password=raw_password)
+                    if user is not None:
+                        if user.is_active:
+                            messages.success(request, 'Login done!')
+                            login(request, user)
+                    else:
+                        messages.error(request, 'Error in the values')
+            else:
+                messages.error(request, 'This user is not registered!!!')
+        return redirect('/')
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('/')
+
 
 
 def add_user(request):
