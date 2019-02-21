@@ -2,7 +2,7 @@ $(function () {
 
     $('a[name=delete_tower]').on('click', function () {
 
-        if (window.confirm("Tem a certeza que deseja remover a Torre?")) {
+        if (window.confirm("Do you really want to delete the tower?")) {
             var csrftoken = getCookie('csrftoken');
             $.ajaxSetup({
                 beforeSend: function (xhr, settings) {
@@ -13,6 +13,50 @@ $(function () {
             });
 
             $.post('/delete_tower',
+                {
+                    id: $(this).attr('data-id'),
+                },
+                function (data, status) {
+                    location.reload();
+                });
+        }
+    })
+
+    $('a[name=delete_user]').on('click', function () {
+
+        if (window.confirm("Do you really want to delete the user?")) {
+            var csrftoken = getCookie('csrftoken');
+            $.ajaxSetup({
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                }
+            });
+
+            $.post('/delete_user',
+                {
+                    id: $(this).attr('data-id'),
+                },
+                function (data, status) {
+                    location.reload();
+                });
+        }
+    })
+
+    $('a[name=ban_user]').on('click', function () {
+
+        if (window.confirm("Do you really want to ban/activate the user?")) {
+            var csrftoken = getCookie('csrftoken');
+            $.ajaxSetup({
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                }
+            });
+
+            $.post('/ban_user',
                 {
                     id: $(this).attr('data-id'),
                 },

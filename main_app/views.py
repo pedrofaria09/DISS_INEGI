@@ -57,6 +57,50 @@ def list_users(request):
 
     return render(request, 'list_users.html', {'users': users})
 
+def view_user(request, user_id):
+    try:
+        user = MyUser.objects.get(id=user_id)
+    except MyUser.DoesNotExist:
+        return HttpResponseRedirect(reverse("list_users"))
+
+    if request.method == 'GET':
+        form = RegisterForm(instance=user)
+    elif request.method == 'POST':
+        form = RegisterForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'User was edited successfully')
+            return HttpResponseRedirect(reverse("list_users"))
+        else:
+            messages.warning(request, 'User was not edited!!!')
+
+    return render(request, 'view_user.html', {'form': form, 'user': user})
+
+
+def delete_user(request):
+    if request.is_ajax and request.method == 'POST':
+        user = MyUser.objects.get(id=request.POST["id"])
+        user.delete()
+        messages.success(request, 'User was deleted!')
+        return HttpResponse('ok')
+    messages.error(request, 'A problem happen when removing the user!!!')
+    return HttpResponse("not ok")
+
+
+def ban_user(request):
+
+    if request.is_ajax and request.method == 'POST':
+        user = MyUser.objects.get(id=request.POST["id"])
+        actual_info = user.is_active
+        user.is_active = not user.is_active
+        user.save()
+
+        if actual_info != user.is_active:
+            messages.success(request, 'User was modified successfully')
+        return HttpResponse('ok')
+    messages.error(request, 'A problem happen when removing the user!!!')
+    return HttpResponse("not ok")
+
 
 def add_tower(request):
 
