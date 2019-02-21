@@ -27,12 +27,23 @@ def add_user(request):
 
     if request.method == 'POST':
         form = RegisterForm(request.POST)
+
         if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get('username')
-            print(username)
-            messages.success(request, 'User added!')
-            return HttpResponseRedirect(reverse("list_users"))
+
+            bool_client = form.cleaned_data.get('is_client')
+            bool_staff = form.cleaned_data.get('is_staff')
+            bool_manager = form.cleaned_data.get('is_manager')
+
+            if bool_client and bool_manager:
+                form._errors['is_manager'] = ['You cant be a client and a manager']
+            elif bool_client and bool_staff:
+                form._errors['is_staff'] = ['You cant be a client and a administrator']
+            elif form.is_valid():
+                form.save()
+                messages.success(request, 'User added!')
+                return HttpResponseRedirect(reverse("list_users"))
+            else:
+                messages.warning(request, 'User not added!!!')
         else:
             messages.warning(request, 'User not added!!!')
     else:

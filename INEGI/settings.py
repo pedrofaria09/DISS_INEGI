@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main_app',
     'widget_tweaks',
+    'bootstrap_datepicker_plus',
+    'bootstrap4',
 ]
 
 MIDDLEWARE = [
@@ -145,3 +147,7 @@ MESSAGE_TAGS = {
 
 
 AUTH_USER_MODEL = 'main_app.MyUser'
+
+BOOTSTRAP4 = {
+    'include_jquery': True,
+}
