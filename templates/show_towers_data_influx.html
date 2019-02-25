@@ -1,5 +1,14 @@
-{% include 'messages.html' %}
+{% extends 'base.html' %}
+{% load staticfiles %}
 
-<a href="{% url "add_raw_data" %}">Add Raw Data</a><br>
+{% block content %}
 
-<p> Teste </p>
+
+{% for k in data %}
+    {% for time, value in k.items %}
+        {{ time }} {{ value }}<br>
+        <hr>
+    {% endfor %}
+{% endfor %}
+
+{% endblock %}

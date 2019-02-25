@@ -3,11 +3,14 @@ from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
-from datetime import datetime
+import datetime, json
 
-from .models import Tower, TowerData, DataRaw, MyUser, InfluxData, Meta
+from .models import Tower, TowerData, DataRaw, MyUser, InfluxData, Meta, InfluxDBClient, MySeriesHelper
 from .forms import TowerForm, TowerViewForm, RegisterForm, LoginForm
+from collections import namedtuple
+from django.core import serializers
 
+myclient = InfluxDBClient(host='localhost', port=8086, database='INEGI_INFLUX')
 
 # Create your views here.
 
@@ -37,7 +40,6 @@ def login_view(request):
             except MyUser.DoesNotExist:
                 user = None
 
-            print(user)
             if user is not None:
                     raw_password = form.cleaned_data.get('password')
                     user = authenticate(username=username, password=raw_password)
@@ -259,9 +261,33 @@ def add_raw_data(request):
 
 
 def show_towers_data_influx(request):
-    data = InfluxData.objects.all()
+    # points = []
+    # for x in range(0, 3):
+    #     point = {
+    #         "measurement": 'test',
+    #         "time": datetime.datetime.now(),
+    #         "fields": {
+    #             "value": x
+    #         }
+    #     }
+    #     points.append(point)
+    #
+    # for p in points:
+    #     print(p)
+    #
+    # myclient.write_points(points)
 
-    for das in data:
-        print(das)
+    # MySeriesHelper(server_name='test', time=datetime.datetime.now(), value=8888)
+    # MySeriesHelper(server_name='test', value=111111)
+    # MySeriesHelper.commit()
 
-    return render(request, 'show_towers_data_influx.html', {'data': data})
+    result = myclient.query("select time, value from test")
+
+    print("Result: {0}".format(result))
+
+    print(json.dumps(list(result)[0]))
+
+    result = list(result)[0]
+
+    print(result)
+    return render(request, "show_towers_data_influx.html", {'data': result}, content_type="text/html")
