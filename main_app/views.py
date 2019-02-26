@@ -12,6 +12,7 @@ from django.core import serializers
 
 myclient = InfluxDBClient(host='localhost', port=8086, database='INEGI_INFLUX')
 
+
 # Create your views here.
 
 
@@ -41,14 +42,14 @@ def login_view(request):
                 user = None
 
             if user is not None:
-                    raw_password = form.cleaned_data.get('password')
-                    user = authenticate(username=username, password=raw_password)
-                    if user is not None:
-                        if user.is_active:
-                            messages.success(request, 'Login done!')
-                            login(request, user)
-                    else:
-                        messages.error(request, 'Error in the values')
+                raw_password = form.cleaned_data.get('password')
+                user = authenticate(username=username, password=raw_password)
+                if user is not None:
+                    if user.is_active:
+                        messages.success(request, 'Login done!')
+                        login(request, user)
+                else:
+                    messages.error(request, 'Error in the values')
             else:
                 messages.error(request, 'This user is not registered!!!')
         return redirect('/')
@@ -59,9 +60,7 @@ def logout_view(request):
     return redirect('/')
 
 
-
 def add_user(request):
-
     if request.method == 'POST':
         form = RegisterForm(request.POST)
 
@@ -94,6 +93,7 @@ def list_users(request):
 
     return render(request, 'list_users.html', {'users': users})
 
+
 def view_user(request, user_id):
     try:
         user = MyUser.objects.get(id=user_id)
@@ -125,7 +125,6 @@ def delete_user(request):
 
 
 def ban_user(request):
-
     if request.is_ajax and request.method == 'POST':
         user = MyUser.objects.get(id=request.POST["id"])
         actual_info = user.is_active
@@ -140,7 +139,6 @@ def ban_user(request):
 
 
 def add_tower(request):
-
     if request.method == 'POST':
         form = TowerForm(request.POST)
         if form.is_valid():
@@ -195,7 +193,6 @@ def delete_tower(request):
 def create_tower_data(request, tower_id):
     get_object_or_404(Tower, pk=tower_id)
 
-
     try:
         tower = TowerData.objects.get(tower_code=tower_id)
     except TowerData.DoesNotExist:
@@ -219,7 +216,6 @@ def show_towers_data(request):
 
 
 def add_raw_data(request):
-
     with open('files/2018_10_01_0000.row') as f:
         first_line = f.readline()
 
@@ -240,15 +236,16 @@ def add_raw_data(request):
         hour = int(mylist[2][0:2])
         minute = int(mylist[2][3:5])
         second = 0
+        values = mylist[3][:-2]
 
         if hour is 24:
             hour = 23
             minute = 59
             second = 59
 
-        time = datetime(year, month, day, hour, minute, second)
+        time = datetime.datetime(year, month, day, hour, minute, second)
 
-        raw = DataRaw(time=time, data=mylist[3])
+        raw = DataRaw(time=time, data=values)
 
         tower_data.raw_datas += [raw]
         tower_data.save()
@@ -261,33 +258,65 @@ def add_raw_data(request):
 
 
 def show_towers_data_influx(request):
-    # points = []
-    # for x in range(0, 3):
-    #     point = {
-    #         "measurement": 'test',
-    #         "time": datetime.datetime.now(),
-    #         "fields": {
-    #             "value": x
-    #         }
-    #     }
-    #     points.append(point)
-    #
-    # for p in points:
-    #     print(p)
-    #
-    # myclient.write_points(points)
 
-    # MySeriesHelper(server_name='test', time=datetime.datetime.now(), value=8888)
-    # MySeriesHelper(server_name='test', value=111111)
+
+    result = myclient.query("select time, value from PORT1000")
+
+    # print("Result: {0}".format(result))
+
+    # print(json.dumps(list(result)[0]))
+
+    # for obj in list(result)[0]:
+    #     print(obj)
+    if result:
+        result = list(result)[0]
+
+    # print(result)
+    return render(request, "show_towers_data_influx.html", {'data': result}, content_type="text/html")
+
+
+def add_raw_data_influx(request):
+    with open('files/2018_10_01_0000.row') as f:
+        first_line = f.readline()
+
+    tower_code = first_line.split(',', 1)[0]
+
+    # MySeriesHelper(measurement='test', time=datetime.datetime.now(), value=111)
+    # MySeriesHelper(measurement='test', value=222)
     # MySeriesHelper.commit()
 
-    result = myclient.query("select time, value from test")
+    f = open("files/2018_10_01_0000.row", "r")
+    points = []
+    for line in f:
+        print(line)
+        mylist = line.split(",", 3)
 
-    print("Result: {0}".format(result))
+        year = int(mylist[1][0:4])
+        month = int(mylist[1][4:6])
+        day = int(mylist[1][6:8])
+        hour = int(mylist[2][0:2])
+        minute = int(mylist[2][3:5])
+        second = 0
 
-    print(json.dumps(list(result)[0]))
+        if hour is 24:
+            hour = 23
+            minute = 59
+            second = 59
 
-    result = list(result)[0]
+        time = datetime.datetime(year, month, day, hour, minute, second)
 
-    print(result)
-    return render(request, "show_towers_data_influx.html", {'data': result}, content_type="text/html")
+        point = {
+            "measurement": tower_code,
+            "time": time,
+            "fields": {
+                "value": mylist[3][:-2]
+            }
+        }
+        points.append(point)
+
+    f.close()
+    # for p in points:
+    #     print(p)
+    myclient.write_points(points)
+
+    return HttpResponseRedirect(reverse("show_towers_data_influx"))

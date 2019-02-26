@@ -3,12 +3,13 @@
 
 {% block content %}
 
+    <a href="{% url "add_raw_data_influx" %}">Add Raw Data</a><br>
+
 
 {% for k in data %}
-    {% for time, value in k.items %}
-        {{ time }} {{ value }}<br>
-        <hr>
-    {% endfor %}
+    Time: {{ k.time }} <br>
+    Value: {{ k.value }}
+    <hr>
 {% endfor %}
 
 {% endblock %}
