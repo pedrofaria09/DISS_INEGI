@@ -7,6 +7,7 @@ import datetime
 import json
 import os
 import re
+import io
 
 from .models import Tower, TowerData, DataRaw, MyUser, InfluxData, Meta, InfluxDBClient, MySeriesHelper
 from .forms import TowerForm, TowerViewForm, RegisterForm, LoginForm
@@ -27,16 +28,28 @@ def get_obj_or_404_2(klass, *args, **kwargs):
 
 
 def index(request):
-    path = 'files/PORT1000'
-    files = os.listdir(path)
-    for f in files:
-        file = re.findall('[0-9]{4}_[0-9]{2}.row', f)
-        if file:
-            print(file)
-            to_open = path+'/'+f
-            op = open(to_open, "r")
-            for line in op:
-                print(line)
+    # path = 'files/PORT1000'
+    # files = os.listdir(path)
+    # for f in files:
+    #     file = re.findall('[0-9]{4}_[0-9]{2}.row', f)
+    #     if file:
+    #         print(file)
+    #         to_open = path+'/'+f
+    #         op = open(to_open, "r")
+    #         for line in op:
+    #             print(line)
+
+    if request.method == 'POST':
+        for afile in request.FILES.getlist('document'):
+            filename = str(afile)
+            new_file = io.BytesIO(afile.read())
+            file = re.findall('[0-9]{4}_[0-9]{2}.row', filename)
+            if file:
+                for line in new_file:
+                    line = str(line).replace("b'", '')
+                    line = str(line).replace("'", '')
+                    line = line[:-5]
+                    print(line)
 
     if request.user.id is None:
         form = LoginForm()

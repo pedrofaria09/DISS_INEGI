@@ -9,10 +9,26 @@
             <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
         </div>
 
-        <a href="{% url "add_tower" %}">Add Tower</a><br>
-        <a href="{% url "list_towers" %}">List Towers</a><br>
-        <a href="{% url "show_towers_data" %}">Show Towers Data Mongo</a><br>
-        <a href="{% url "show_towers_data_influx" %}">Show Towers Data Influx</a><br>
+        <div class="row">
+            <div class="col-12">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <input type="file" class="form-control-file" name="document" multiple="true" directory="true"/> <br>
+                    <button type="submit" class="btn btn-primary btn-block">Upload to Database</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-6">
+                <br>
+                <a href="{% url "add_tower" %}">Add Tower</a><br>
+                <a href="{% url "list_towers" %}">List Towers</a><br>
+                <a href="{% url "show_towers_data" %}">Show Towers Data Mongo</a><br>
+                <a href="{% url "show_towers_data_influx" %}">Show Towers Data Influx</a><br>
+            </div>
+        </div>
 
 
     </div>
