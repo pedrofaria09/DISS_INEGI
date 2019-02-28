@@ -1,0 +1,94 @@
+Logger Status (PORT1000) from  20.12.2018 at 11:33:49
+
+
+Logger Configuration:
+
+Type:			METEO-32
+Version:		V 1.6
+Releasedate:		01nov07
+Serial Number:		C080107
+User Number:		00
+Clock:			20.12.2018 at 11:33:52
+
+Logger Connection Status:
+
+Remote Connection (Microsoft® TAPI®) active
+to Modem Number: 	936003772
+Latest GSM configuration times:
+Online time 1: 	09:30
+Online time 2: 	11:30
+Online time 3: 	15:00
+Online time 4: 	16:30
+Window(s) remain(s) open for 60 minutes
+Entered PIN: 	0000
+
+RS485 SCADA broadcast:	9600 bps
+Logger DC output:	steady-on
+
+AD_12:	&adc12 R:  0 8192 0 0 0 0 0 0 0 0
+
+Measure Interval:		1 second(s)
+Store Interval:		600 measure interval(s)
+Data is logged every 600 second(s) resp. ~10 minute(s).
+Activated Channels:		9
+Memory Capacity:		657,7 days
+Current online values:
+59 55 160 160 96 2807 140 81 88 / 8.0'Tin  14.0Vex 8.1Vbl  8.8Vbr  O+ S-
+
+Channel Configuration:
+
+channelname        (index):	mean	max	min	sigma
+___________________________	____	___	___	_____
+
+Wind Speed 1       (CH 01):	s1a 	s1x 	s1i 	s1s 	 slope: 0462 	offset: 0021
+
+Wind Speed 2       (CH 02):	s2a 	s2x 	s2i 	s2s 	 slope: 0500 	offset: 0030
+
+Wind Speed 3       (CH 03):					 slope: 0480 	offset: 0022
+
+Wind Direction 1   (CH 04):	d1a 	d1x 	d1i 	d1s 	 	 	offset: 0000
+
+Wind Direction 2   (CH 05):	d2a 	d2x 	d2i 	d2s 	 	 	offset: 0000
+
+Rel. Humidity      (CH 06):	h1a 				 slope: 0100 	
+
+Temperature        (CH 07):	t1a 				 slope: 0100 	offset: 0030
+
+Air Pressure       (CH 08):					 slope: 0060 	offset: 0800
+
+Radiation          (CH 09):					 slope: 0100 	
+
+Rain (W-Speed4)    (CH 10):					 slope: 0100 	offset: 0000
+
+Sonic Hor.         (CH 11):					 	 	
+
+Sonic Dir.         (CH 12):					 	 	
+
+Sonic Ver.         (CH 13):					 	 	
+
+Temp. intern       (CH 14):					 	 	
+
+Ext. Supply        (CH 15):	vxa 				 	 	
+
+Battery left       (CH 16):	bla 				 	 	
+
+Battery right      (CH 17):	bra 				 	 	
+
+Cascade 1          (CH 18):					 	 	
+
+Cascade 2          (CH 19):					 	 	
+
+Cascade 3          (CH 20):					 	 	
+
+Cascade 4          (CH 21):					 	 	
+
+Cascade 5          (CH 22):					 	 	
+
+Cascade 6          (CH 23):					 	 	
+
+Cascade 7          (CH 24):					 	 	
+
+Cascade 8          (CH 25):					 	 	
+
+
+

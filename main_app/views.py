@@ -3,7 +3,10 @@ from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
-import datetime, json
+import datetime
+import json
+import os
+import re
 
 from .models import Tower, TowerData, DataRaw, MyUser, InfluxData, Meta, InfluxDBClient, MySeriesHelper
 from .forms import TowerForm, TowerViewForm, RegisterForm, LoginForm
@@ -24,6 +27,17 @@ def get_obj_or_404_2(klass, *args, **kwargs):
 
 
 def index(request):
+    path = 'files/PORT1000'
+    files = os.listdir(path)
+    for f in files:
+        file = re.findall('[0-9]{4}_[0-9]{2}.row', f)
+        if file:
+            print(file)
+            to_open = path+'/'+f
+            op = open(to_open, "r")
+            for line in op:
+                print(line)
+
     if request.user.id is None:
         form = LoginForm()
         return render(request, 'home.html', {'form': form})
@@ -251,8 +265,6 @@ def add_raw_data(request):
         tower_data.save()
 
     f.close()
-
-    # TODO - abrir vários .row dentro de uma pasta e adicionar à DB
 
     return HttpResponseRedirect(reverse("show_towers_data"))
 
