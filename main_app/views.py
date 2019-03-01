@@ -4,10 +4,12 @@ from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
 import datetime
+import time
 import json
 import os
 import re
 import io
+import sys
 
 from .models import Tower, TowerData, DataRaw, MyUser, InfluxData, Meta, InfluxDBClient, MySeriesHelper
 from .forms import TowerForm, TowerViewForm, RegisterForm, LoginForm
@@ -40,16 +42,69 @@ def index(request):
     #             print(line)
 
     if request.method == 'POST':
-        for afile in request.FILES.getlist('document'):
-            filename = str(afile)
-            new_file = io.BytesIO(afile.read())
-            file = re.findall('[0-9]{4}_[0-9]{2}.row', filename)
+        total_time_operation = 0
+        total_time_insertion = 0
+        for file in request.FILES.getlist('document'):
+            decoded_file = file.read().decode('utf-8')
+            io_file = io.StringIO(decoded_file)
+
+            file = re.findall('[0-9]{4}_[0-9]{2}.row', str(file))
+
             if file:
-                for line in new_file:
-                    line = str(line).replace("b'", '')
-                    line = str(line).replace("'", '')
-                    line = line[:-5]
-                    print(line)
+                firstime = True
+                start_time = time.clock()
+                dataraw = []
+
+                for line in io_file:
+
+                    if line.strip()[-1] is ',':
+                        line = line.strip()[:-1]
+
+                    if firstime:
+                        firstime = False
+                        tower_code = line.split(',', 1)[0]
+
+                        try:
+                            tower_data = TowerData.objects.get(tower_code=tower_code)
+                        except TowerData.DoesNotExist:
+                            tower_data = TowerData(tower_code=tower_code, raw_datas=[])
+
+                    mylist = line.split(",", 3)
+
+                    year = int(mylist[1][0:4])
+                    month = int(mylist[1][4:6])
+                    day = int(mylist[1][6:8])
+                    hour = int(mylist[2][0:2])
+                    minute = int(mylist[2][3:5])
+                    second = 0
+                    values = mylist[3]
+
+                    if hour is 24:
+                        hour = 23
+                        minute = 59
+                        second = 59
+
+                    time_value = datetime.datetime(year, month, day, hour, minute, second)
+
+                    raw = DataRaw(time=time_value, data=values)
+
+                    dataraw.append(raw)
+
+                end_time = time.clock()
+                total_time = (end_time - start_time)
+                total_time_operation += total_time
+                print(str(file), '\ntime of operation: ', total_time, ' seconds')
+
+                start_time = time.clock()
+                tower_data.raw_datas += dataraw
+                tower_data.save()
+                end_time = time.clock()
+                total_time = (end_time - start_time)
+                total_time_insertion += total_time
+                print('time to insert in database: ', total_time, ' seconds')
+
+        print('Total time of operation: ', total_time_operation, ' seconds')
+        print('Total time to insert in database: ', total_time_insertion, ' seconds')
 
     if request.user.id is None:
         form = LoginForm()
@@ -253,8 +308,12 @@ def add_raw_data(request):
     except TowerData.DoesNotExist:
         tower_data = TowerData(tower_code=tower_code, raw_datas=[])
 
-    f = open("files/2018_10_01_0000.row", "r")
+    f = open("files/2019_02.row", "r")
+    total_time = 0;
     for line in f:
+        if line.strip()[-1] is ',':
+            line = line.strip()[:-1]
+
         mylist = line.split(",", 3)
 
         year = int(mylist[1][0:4])
@@ -263,22 +322,27 @@ def add_raw_data(request):
         hour = int(mylist[2][0:2])
         minute = int(mylist[2][3:5])
         second = 0
-        values = mylist[3][:-2]
+        values = mylist[3]
+
 
         if hour is 24:
             hour = 23
             minute = 59
             second = 59
 
-        time = datetime.datetime(year, month, day, hour, minute, second)
+        time_value = datetime.datetime(year, month, day, hour, minute, second)
 
-        raw = DataRaw(time=time, data=values)
+        raw = DataRaw(time=time_value, data=values)
 
         tower_data.raw_datas += [raw]
-        tower_data.save()
+
+    start_time = time.clock()
+    tower_data.save()
+    end_time = time.clock()
+    total_time += (end_time - start_time)
 
     f.close()
-
+    print(total_time, ' seconds')
     return HttpResponseRedirect(reverse("show_towers_data"))
 
 
