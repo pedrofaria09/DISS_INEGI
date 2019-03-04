@@ -22,8 +22,10 @@ urlpatterns =[
     url(r'^ban_user/?$', views.ban_user, name='ban_user'),
 
 
-    url(r'^show_towers_data/?$', views.show_towers_data, name='show_towers_data'),
-    url(r'^add_raw_data/?$', views.add_raw_data, name='add_raw_data'),
-    url(r'^add_raw_data_influx/?$', views.add_raw_data_influx, name='add_raw_data_influx'),
+    url(r'^show_towers_data_mongo/?$', views.show_towers_data_mongo, name='show_towers_data_mongo'),
+    url(r'^add_raw_data_mongo/?$', views.add_raw_data_mongo, name='add_raw_data_mongo'),
+
     url(r'^show_towers_data_influx/?$', views.show_towers_data_influx, name='show_towers_data_influx'),
+    url(r'^add_raw_data_influx/?$', views.add_raw_data_influx, name='add_raw_data_influx'),
+
 ]

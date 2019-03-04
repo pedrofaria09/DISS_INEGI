@@ -30,82 +30,6 @@ def get_obj_or_404_2(klass, *args, **kwargs):
 
 
 def index(request):
-    # path = 'files/PORT1000'
-    # files = os.listdir(path)
-    # for f in files:
-    #     file = re.findall('[0-9]{4}_[0-9]{2}.row', f)
-    #     if file:
-    #         print(file)
-    #         to_open = path+'/'+f
-    #         op = open(to_open, "r")
-    #         for line in op:
-    #             print(line)
-
-    if request.method == 'POST':
-        total_time_operation = 0
-        total_time_insertion = 0
-        for file in request.FILES.getlist('document'):
-            decoded_file = file.read().decode('utf-8')
-            io_file = io.StringIO(decoded_file)
-
-            file = re.findall('[0-9]{4}_[0-9]{2}.row', str(file))
-
-            if file:
-                firstime = True
-                start_time = time.clock()
-                dataraw = []
-
-                for line in io_file:
-
-                    if line.strip()[-1] is ',':
-                        line = line.strip()[:-1]
-
-                    if firstime:
-                        firstime = False
-                        tower_code = line.split(',', 1)[0]
-
-                        try:
-                            tower_data = TowerData.objects.get(tower_code=tower_code)
-                        except TowerData.DoesNotExist:
-                            tower_data = TowerData(tower_code=tower_code, raw_datas=[])
-
-                    mylist = line.split(",", 3)
-
-                    year = int(mylist[1][0:4])
-                    month = int(mylist[1][4:6])
-                    day = int(mylist[1][6:8])
-                    hour = int(mylist[2][0:2])
-                    minute = int(mylist[2][3:5])
-                    second = 0
-                    values = mylist[3]
-
-                    if hour is 24:
-                        hour = 23
-                        minute = 59
-                        second = 59
-
-                    time_value = datetime.datetime(year, month, day, hour, minute, second)
-
-                    raw = DataRaw(time=time_value, data=values)
-
-                    dataraw.append(raw)
-
-                end_time = time.clock()
-                total_time = (end_time - start_time)
-                total_time_operation += total_time
-                print(str(file), '\ntime of operation: ', total_time, ' seconds')
-
-                start_time = time.clock()
-                tower_data.raw_datas += dataraw
-                tower_data.save()
-                end_time = time.clock()
-                total_time = (end_time - start_time)
-                total_time_insertion += total_time
-                print('time to insert in database: ', total_time, ' seconds')
-
-        print('Total time of operation: ', total_time_operation, ' seconds')
-        print('Total time to insert in database: ', total_time_insertion, ' seconds')
-
     if request.user.id is None:
         form = LoginForm()
         return render(request, 'home.html', {'form': form})
@@ -289,67 +213,132 @@ def create_tower_data(request, tower_id):
     return redirect('/')
 
 
-def show_towers_data(request):
+def show_towers_data_mongo(request):
     data = {}
     towers = TowerData.objects.all()
     data['towers'] = towers
 
-    return render(request, 'show_towers_data.html', data)
+    return render(request, 'show_towers_data_mongo.html', data)
 
 
-def add_raw_data(request):
-    with open('files/2018_10_01_0000.row') as f:
-        first_line = f.readline()
+def add_raw_data_mongo(request):
+    total_time_operation = 0
+    total_time_insertion = 0
 
-    tower_code = first_line.split(',', 1)[0]
+    for file in request.FILES.getlist('document'):
+        conta = conta + 1
 
-    try:
-        tower_data = TowerData.objects.get(tower_code=tower_code)
-    except TowerData.DoesNotExist:
-        tower_data = TowerData(tower_code=tower_code, raw_datas=[])
+    if conta > 30:
+        messages.error(request, "Please select at max. 30 files")
+        return HttpResponseRedirect(reverse("show_towers_data_mongo"))
 
-    f = open("files/2019_02.row", "r")
-    total_time = 0;
-    for line in f:
-        if line.strip()[-1] is ',':
-            line = line.strip()[:-1]
+    for file in request.FILES.getlist('document'):
+        decoded_file = file.read().decode('utf-8')
+        io_file = io.StringIO(decoded_file)
 
-        mylist = line.split(",", 3)
+        file = re.findall('[0-9]{4}_[0-9]{2}.row', str(file))
 
-        year = int(mylist[1][0:4])
-        month = int(mylist[1][4:6])
-        day = int(mylist[1][6:8])
-        hour = int(mylist[2][0:2])
-        minute = int(mylist[2][3:5])
-        second = 0
-        values = mylist[3]
+        if file:
+            firstime = True
+            start_time = time.clock()
+            dataraw = []
 
+            tt_timedate = 0
 
-        if hour is 24:
-            hour = 23
-            minute = 59
-            second = 59
+            for line in io_file:
 
-        time_value = datetime.datetime(year, month, day, hour, minute, second)
+                # remove the \n at the end
+                line = line.rstrip()
 
-        raw = DataRaw(time=time_value, data=values)
+                try:
+                    if line.strip()[-1] is ',':
+                        line = line.strip()[:-1]
+                except IndexError:
+                    messages.error(request, 'Error reading a line, check your file -> ' + str(
+                        file) + '. No values was entered on the DB')
+                    return HttpResponseRedirect(reverse("show_towers_data_mongo"))
 
-        tower_data.raw_datas += [raw]
+                if firstime:
+                    firstime = False
+                    tower_code = line.split(',', 1)[0]
+                    tower_code = tower_code.lower()
+                    try:
+                        tower_data = TowerData.objects.get(tower_code=tower_code)
+                    except TowerData.DoesNotExist:
+                        tower_data = TowerData(tower_code=tower_code, raw_datas=[])
 
-    start_time = time.clock()
-    tower_data.save()
-    end_time = time.clock()
-    total_time += (end_time - start_time)
+                mylist = line.split(",", 3)
 
-    f.close()
-    print(total_time, ' seconds')
-    return HttpResponseRedirect(reverse("show_towers_data"))
+                str_timedate = time.clock()
+                # 3 to 4 times faster than using strptime
+                year = int(mylist[1][0:4])
+                month = int(mylist[1][4:6])
+                day = int(mylist[1][6:8])
+                hour = int(mylist[2][0:2])
+                minute = int(mylist[2][3:5])
+                second = 0
+                values = mylist[3]
+
+                if hour is 24:
+                    hour = 23
+                    minute = 50
+                    time_value = datetime.datetime(year, month, day, hour, minute, second)
+                else:
+                    time_value = datetime.datetime(year, month, day, hour, minute, second) - datetime.timedelta(
+                        minutes=10)
+
+                # values = mylist[3]
+                # if int(mylist[2][0:2]) is 24:
+                #     mydate = str(mylist[1]) + " 23:50"
+                #     time_value = datetime.datetime.strptime(mydate, '%Y%m%d %H:%M')
+                # else:
+                #     mydate = str(mylist[1]) + " " + str(mylist[2])
+                #     time_value = datetime.datetime.strptime(mydate, '%Y%m%d %H:%M') - datetime.timedelta(minutes=10)
+
+                end_timedate = time.clock()
+                tt_timedate += (end_timedate - str_timedate)
+
+                raw = DataRaw(time=time_value, data=values)
+
+                dataraw.append(raw)
+
+            print('time of date: ', tt_timedate, ' seconds')
+
+            end_time = time.clock()
+            total_time = (end_time - start_time)
+            total_time_operation += total_time
+            print(str(file), '\ntime of operation: ', total_time, ' seconds')
+
+            start_time = time.clock()
+
+            # To check if have a date and update the value, but takes so long!!!
+            # for raw in dataraw:
+            #     found = False
+            #     for raw2 in tower_data.raw_datas:
+            #         if str(raw2.time) == (str(raw.time)):
+            #             found = True
+            #             raw2.data = raw.data
+            #             break
+            #
+            #     if found is False:
+            #         tower_data.raw_datas.append(raw)
+
+            tower_data.raw_datas += dataraw
+            tower_data.save()
+
+            end_time = time.clock()
+            total_time = (end_time - start_time)
+            total_time_insertion += total_time
+            print('time to insert in database: ', total_time, ' seconds')
+
+    print('Total time of operation: ', total_time_operation, ' seconds')
+    print('Total time to insert in database: ', total_time_insertion, ' seconds')
+
+    return HttpResponseRedirect(reverse("show_towers_data_mongo"))
 
 
 def show_towers_data_influx(request):
-
-
-    result = myclient.query("select time, value from PORT1000")
+    result = myclient.query("select time, value from Port525")
 
     # print("Result: {0}".format(result))
 
@@ -365,47 +354,89 @@ def show_towers_data_influx(request):
 
 
 def add_raw_data_influx(request):
-    with open('files/2018_10_01_0000.row') as f:
-        first_line = f.readline()
+    total_time_operation = 0
+    total_time_insertion = 0
+    conta = 0
 
-    tower_code = first_line.split(',', 1)[0]
+    for file in request.FILES.getlist('document'):
+        conta = conta + 1
 
-    # MySeriesHelper(measurement='test', time=datetime.datetime.now(), value=111)
-    # MySeriesHelper(measurement='test', value=222)
-    # MySeriesHelper.commit()
+    if conta > 40:
+        messages.error(request, "Please select at max. 40 files")
+        return HttpResponseRedirect(reverse("show_towers_data_influx"))
 
-    f = open("files/2018_10_01_0000.row", "r")
-    points = []
-    for line in f:
-        print(line)
-        mylist = line.split(",", 3)
 
-        year = int(mylist[1][0:4])
-        month = int(mylist[1][4:6])
-        day = int(mylist[1][6:8])
-        hour = int(mylist[2][0:2])
-        minute = int(mylist[2][3:5])
-        second = 0
+    for file in request.FILES.getlist('document'):
+        decoded_file = file.read().decode('utf-8')
+        io_file = io.StringIO(decoded_file)
 
-        if hour is 24:
-            hour = 23
-            minute = 59
-            second = 59
+        file = re.findall('[0-9]{4}_[0-9]{2}.row', str(file))
 
-        time = datetime.datetime(year, month, day, hour, minute, second)
+        if file:
+            firstime = True
+            start_time = time.clock()
+            points = []
 
-        point = {
-            "measurement": tower_code,
-            "time": time,
-            "fields": {
-                "value": mylist[3][:-2]
-            }
-        }
-        points.append(point)
+            for line in io_file:
 
-    f.close()
-    # for p in points:
-    #     print(p)
-    myclient.write_points(points)
+                #remove the \n at the end
+                line = line.rstrip()
+
+                try:
+                    if line.strip()[-1] is ',':
+                        line = line.strip()[:-1]
+                except IndexError:
+                    messages.error(request, 'Error reading a line, check your file -> ' + str(
+                        file) + '. No values was entered on the DB')
+                    return HttpResponseRedirect(reverse("show_towers_data_influx"))
+
+                if firstime:
+                    firstime = False
+                    tower_code = line.split(',', 1)[0]
+                    tower_code = tower_code.lower()
+
+                mylist = line.split(",", 3)
+
+                year = int(mylist[1][0:4])
+                month = int(mylist[1][4:6])
+                day = int(mylist[1][6:8])
+                hour = int(mylist[2][0:2])
+                minute = int(mylist[2][3:5])
+                second = 0
+                values = mylist[3]
+
+                if hour is 24:
+                    hour = 23
+                    minute = 50
+                    time_value = datetime.datetime(year, month, day, hour, minute, second)
+                else:
+                    time_value = datetime.datetime(year, month, day, hour, minute, second) - datetime.timedelta(
+                        minutes=10)
+
+                point = {
+                        "measurement": tower_code,
+                        "time": time_value,
+                        "fields": {
+                            "value": values
+                            }
+                        }
+                points.append(point)
+
+            end_time = time.clock()
+            total_time = (end_time - start_time)
+            total_time_operation += total_time
+            print(str(file), '\ntime of operation: ', total_time, ' seconds')
+
+            start_time = time.clock()
+
+            myclient.write_points(points)
+
+            end_time = time.clock()
+            total_time = (end_time - start_time)
+            total_time_insertion += total_time
+            print('time to insert in database: ', total_time, ' seconds')
+
+    print('Total time of operation: ', total_time_operation, ' seconds')
+    print('Total time to insert in database: ', total_time_insertion, ' seconds')
 
     return HttpResponseRedirect(reverse("show_towers_data_influx"))
