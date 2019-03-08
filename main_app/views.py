@@ -4,12 +4,13 @@ from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
 from mongoengine.queryset.visitor import Q
-
-from .models import Tower, TowerData, DataRaw, MyUser, MySeriesHelper, DataSetMongo
+from .models import Tower, TowerData, DataRaw, MyUser, MySeriesHelper, DataSetMongo, DataSetPG
 from .forms import TowerForm, TowerViewForm, RegisterForm, LoginForm
 from influxdb import InfluxDBClient
+import pytz
 
-import datetime, time, re, io
+from datetime import *
+import time, re, io
 
 myclient = InfluxDBClient(host='localhost', port=8086, database='INEGI_INFLUX')
 
@@ -213,7 +214,7 @@ def show_towers_data_mongo(request):
 
     start_time = time.time()
 
-    towers = DataSetMongo.objects(Q(tower_code="port525") and Q(time_stamp__lte=datetime.datetime(2010, 12, 25)))
+    towers = DataSetMongo.objects(Q(tower_code="port525") and Q(time_stamp__lte=datetime(2010, 12, 25)))
 
     end = time.time()
     total_time = (end - start_time)
@@ -285,10 +286,9 @@ def add_raw_data_mongo(request):
                 if hour is 24:
                     hour = 23
                     minute = 50
-                    time_value = datetime.datetime(year, month, day, hour, minute, second)
+                    time_value = datetime(year, month, day, hour, minute, second, tzinfo=pytz.UTC)
                 else:
-                    time_value = datetime.datetime(year, month, day, hour, minute, second) - datetime.timedelta(
-                        minutes=10)
+                    time_value = datetime(year, month, day, hour, minute, second, tzinfo=pytz.UTC) - timedelta(minutes=10)
 
                 # Other way to split data, but takes more time
                 # values = mylist[3]
@@ -426,10 +426,9 @@ def add_raw_data_influx(request):
                 if hour is 24:
                     hour = 23
                     minute = 50
-                    time_value = datetime.datetime(year, month, day, hour, minute, second)
+                    time_value = datetime(year, month, day, hour, minute, second)
                 else:
-                    time_value = datetime.datetime(year, month, day, hour, minute, second) - datetime.timedelta(
-                        minutes=10)
+                    time_value = datetime(year, month, day, hour, minute, second) - timedelta(minutes=10)
 
                 # MySeriesHelper(measurement=tower_code, time=time_value, value=values)
 
@@ -460,3 +459,108 @@ def add_raw_data_influx(request):
     print('Total time to insert in database: ', total_time_insertion, ' seconds')
 
     return HttpResponseRedirect(reverse("show_towers_data_influx"))
+
+
+def show_towers_data_pg(request):
+    data = {}
+
+    start_time = time.time()
+    # towers = DataSetPG.objects.filter(Q(tower_code='port525'))
+
+    towers = DataSetPG.objects.filter(tower_code="port525")
+
+    # for t in towers:
+    #     print(t.tower_code, "---", t.time_stamp, "---", t.value)
+
+    end = time.time()
+    total_time = (end - start_time)
+    print('Query time: ', total_time, ' seconds -- size:', len(towers))
+    # DataSetPG.objects.all().delete()
+    data['towers'] = {}
+
+    return render(request, 'show_towers_data_pg.html', data)
+
+
+def add_raw_data_pg(request):
+    total_time_operation = 0
+    total_time_insertion = 0
+    conta = 0
+
+    for file in request.FILES.getlist('document'):
+        conta = conta + 1
+
+    if conta > 150:
+        messages.error(request, "Please select at max. 150 files")
+        return HttpResponseRedirect(reverse("show_towers_data_pg"))
+
+    for file in request.FILES.getlist('document'):
+        decoded_file = file.read().decode('utf-8')
+        io_file = io.StringIO(decoded_file)
+
+        file = re.findall('[0-9]{4}_[0-9]{2}.row', str(file))
+
+        if file:
+            start_time = time.time()
+            dataraw = []
+
+            for line in io_file:
+
+                # remove the \n at the end
+                line = line.rstrip()
+
+                try:
+                    if line.strip()[-1] is ',':
+                        line = line.strip()[:-1]
+                except IndexError:
+                    messages.error(request, 'Error reading a line, check your file -> ' + str(
+                        file) + '. No values was entered on the DB')
+                    return HttpResponseRedirect(reverse("show_towers_data_pg"))
+
+                mylist = line.split(",", 3)
+
+                year = int(mylist[1][0:4])
+                month = int(mylist[1][4:6])
+                day = int(mylist[1][6:8])
+                hour = int(mylist[2][0:2])
+                minute = int(mylist[2][3:5])
+                second = 0
+                values = mylist[3]
+
+                if hour is 24:
+                    hour = 23
+                    minute = 50
+                    time_value = datetime(year, month, day, hour, minute, second, tzinfo=pytz.UTC)
+                else:
+                    time_value = datetime(year, month, day, hour, minute, second, tzinfo=pytz.UTC) - timedelta(minutes=10)
+
+                tower_code = line.split(',', 1)[0]
+                tower_code = tower_code.lower()
+
+                # Check if have a tower_code and a time_stamp and replace the value
+                check_Replicated = DataSetPG.objects.filter(tower_code=tower_code, time_stamp=time_value)
+                if check_Replicated.count() >= 1:
+                    check_Replicated.update(value=values)
+                else:
+                    tower_data = DataSetPG(tower_code=tower_code, time_stamp=time_value, value=values)
+                    dataraw.append(tower_data)
+
+
+            end_time = time.time()
+            total_time = (end_time - start_time)
+            total_time_operation += total_time
+            print(str(file), '\ntime of operation: ', total_time, ' seconds')
+
+            start_time = time.time()
+
+            if dataraw:
+                DataSetPG.objects.bulk_create(dataraw)
+
+            end_time = time.time()
+            total_time = (end_time - start_time)
+            total_time_insertion += total_time
+            print('time to insert in database: ', total_time, ' seconds')
+
+    print('Total time of operation: ', total_time_operation, ' seconds')
+    print('Total time to insert in database: ', total_time_insertion, ' seconds')
+
+    return HttpResponseRedirect(reverse("show_towers_data_pg"))

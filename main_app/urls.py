@@ -28,4 +28,6 @@ urlpatterns =[
     url(r'^show_towers_data_influx/?$', views.show_towers_data_influx, name='show_towers_data_influx'),
     url(r'^add_raw_data_influx/?$', views.add_raw_data_influx, name='add_raw_data_influx'),
 
+    url(r'^show_towers_data_pg/?$', views.show_towers_data_pg, name='show_towers_data_pg'),
+    url(r'^add_raw_data_pg/?$', views.add_raw_data_pg, name='add_raw_data_pg'),
 ]

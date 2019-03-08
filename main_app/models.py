@@ -2,8 +2,7 @@ from django.db import models
 from mongoengine import *
 from django.contrib.auth.models import AbstractUser
 from influxdb import InfluxDBClient, SeriesHelper
-
-import datetime
+from datetime import datetime
 
 # Connection to MongoDB
 connect('INEGI')
@@ -21,14 +20,33 @@ class MyUser(AbstractUser):
     is_client = models.BooleanField(default=False)
     is_manager = models.BooleanField(default=False)
 
+    def __str__(self):
+        return "%s %s" % (self.id, self.full_name)
+
 
 class Tower(models.Model):
-    code = models.CharField(max_length=20, null=False)
+    code = models.CharField(primary_key=True, max_length=20, null=False)
     name = models.CharField(max_length=30, null=False)
+
+    def __str__(self):
+        return "%s" % self.code
+
+
+class DataSetPG(models.Model):
+    # tower_code = models.ForeignKey(Tower, on_delete=models.DO_NOTHING) # Need to test efficiency
+    tower_code = models.CharField(max_length=20, null=False)
+    time_stamp = models.DateTimeField(default=datetime.now, null=True, blank=True)
+    value = models.CharField(max_length=200)
+
+    class Meta:
+        ordering = ('tower_code',)
+
+    def __str__(self):
+        return "%s" % self.tower_code
 
 
 class DataRaw(EmbeddedDocument):
-    time = DateTimeField(default=datetime.datetime.utcnow)
+    time = DateTimeField(default=datetime.now)
     data = StringField(max_length=200)
 
 
@@ -40,9 +58,12 @@ class TowerData(DynamicDocument):
 
 class DataSetMongo(DynamicDocument):
     tower_code = StringField(max_length=20)
-    time_stamp = DateTimeField(default=datetime.datetime.utcnow)
+    time_stamp = DateTimeField(default=datetime.now)
     value = StringField(max_length=200)
     meta = {"indexes": ['tower_code', 'time_stamp']}
+
+    def __str__(self):
+        return "%s" % self.tower_code
 
 
 class MySeriesHelper(SeriesHelper):
