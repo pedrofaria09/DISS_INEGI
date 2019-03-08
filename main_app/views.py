@@ -3,18 +3,13 @@ from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
-import datetime
-import time
-import json
-import os
-import re
-import io
-import sys
+from mongoengine.queryset.visitor import Q
 
-from .models import Tower, TowerData, DataRaw, MyUser, InfluxData, Meta, InfluxDBClient, MySeriesHelper
+from .models import Tower, TowerData, DataRaw, MyUser, MySeriesHelper, DataSetMongo
 from .forms import TowerForm, TowerViewForm, RegisterForm, LoginForm
-from collections import namedtuple
-from django.core import serializers
+from influxdb import InfluxDBClient
+
+import datetime, time, re, io
 
 myclient = InfluxDBClient(host='localhost', port=8086, database='INEGI_INFLUX')
 
@@ -215,8 +210,16 @@ def create_tower_data(request, tower_id):
 
 def show_towers_data_mongo(request):
     data = {}
-    towers = TowerData.objects.all()
-    data['towers'] = towers
+
+    start_time = time.time()
+
+    towers = DataSetMongo.objects(Q(tower_code="port525") and Q(time_stamp__lte=datetime.datetime(2010, 12, 25)))
+
+    end = time.time()
+    total_time = (end - start_time)
+    print('Query time: ', total_time, ' seconds', towers.count())
+
+    data['towers'] = {}
 
     return render(request, 'show_towers_data_mongo.html', data)
 
@@ -224,12 +227,13 @@ def show_towers_data_mongo(request):
 def add_raw_data_mongo(request):
     total_time_operation = 0
     total_time_insertion = 0
+    conta = 0
 
     for file in request.FILES.getlist('document'):
         conta = conta + 1
 
-    if conta > 30:
-        messages.error(request, "Please select at max. 30 files")
+    if conta > 150:
+        messages.error(request, "Please select at max. 150 files")
         return HttpResponseRedirect(reverse("show_towers_data_mongo"))
 
     for file in request.FILES.getlist('document'):
@@ -239,11 +243,9 @@ def add_raw_data_mongo(request):
         file = re.findall('[0-9]{4}_[0-9]{2}.row', str(file))
 
         if file:
-            firstime = True
-            start_time = time.clock()
+            #firstime = True
+            start_time = time.time()
             dataraw = []
-
-            tt_timedate = 0
 
             for line in io_file:
 
@@ -258,18 +260,19 @@ def add_raw_data_mongo(request):
                         file) + '. No values was entered on the DB')
                     return HttpResponseRedirect(reverse("show_towers_data_mongo"))
 
-                if firstime:
-                    firstime = False
-                    tower_code = line.split(',', 1)[0]
-                    tower_code = tower_code.lower()
-                    try:
-                        tower_data = TowerData.objects.get(tower_code=tower_code)
-                    except TowerData.DoesNotExist:
-                        tower_data = TowerData(tower_code=tower_code, raw_datas=[])
+                # Isnt necessary as we will store each time serie per line in mongo - Array is inefficient
+                # if firstime:
+                #     firstime = False
+                #     tower_code = line.split(',', 1)[0]
+                #     tower_code = tower_code.lower()
+                #     try:
+                #         tower_data = TowerData.objects.get(tower_code=tower_code)
+                #     except TowerData.DoesNotExist:
+                #         tower_data = TowerData(tower_code=tower_code, raw_datas=[])
 
                 mylist = line.split(",", 3)
 
-                str_timedate = time.clock()
+                str_timedate = time.time()
                 # 3 to 4 times faster than using strptime
                 year = int(mylist[1][0:4])
                 month = int(mylist[1][4:6])
@@ -287,6 +290,7 @@ def add_raw_data_mongo(request):
                     time_value = datetime.datetime(year, month, day, hour, minute, second) - datetime.timedelta(
                         minutes=10)
 
+                # Other way to split data, but takes more time
                 # values = mylist[3]
                 # if int(mylist[2][0:2]) is 24:
                 #     mydate = str(mylist[1]) + " 23:50"
@@ -295,21 +299,24 @@ def add_raw_data_mongo(request):
                 #     mydate = str(mylist[1]) + " " + str(mylist[2])
                 #     time_value = datetime.datetime.strptime(mydate, '%Y%m%d %H:%M') - datetime.timedelta(minutes=10)
 
-                end_timedate = time.clock()
-                tt_timedate += (end_timedate - str_timedate)
+                tower_code = line.split(',', 1)[0]
+                tower_code = tower_code.lower()
 
-                raw = DataRaw(time=time_value, data=values)
+                # Check if have a tower_code and a time_stamp and replace the value
+                check_Replicated = DataSetMongo.objects(Q(tower_code=tower_code) and Q(time_stamp=time_value))
+                if check_Replicated.count() >= 1:
+                    check_Replicated.update(value=values)
+                else:
+                    tower_data = DataSetMongo(tower_code=tower_code, time_stamp=time_value, value=values)
+                    dataraw.append(tower_data)
 
-                dataraw.append(raw)
+                # raw = DataRaw(time=time_value, data=values)
+                # dataraw.append(raw)
 
-            print('time of date: ', tt_timedate, ' seconds')
-
-            end_time = time.clock()
+            end_time = time.time()
             total_time = (end_time - start_time)
             total_time_operation += total_time
             print(str(file), '\ntime of operation: ', total_time, ' seconds')
-
-            start_time = time.clock()
 
             # To check if have a date and update the value, but takes so long!!!
             # for raw in dataraw:
@@ -323,10 +330,15 @@ def add_raw_data_mongo(request):
             #     if found is False:
             #         tower_data.raw_datas.append(raw)
 
-            tower_data.raw_datas += dataraw
-            tower_data.save()
+            start_time = time.time()
 
-            end_time = time.clock()
+            # tower_data.raw_datas +=(dataraw)
+            # tower_data.save()
+
+            if dataraw:
+                DataSetMongo.objects.insert(dataraw)
+
+            end_time = time.time()
             total_time = (end_time - start_time)
             total_time_insertion += total_time
             print('time to insert in database: ', total_time, ' seconds')
@@ -338,7 +350,13 @@ def add_raw_data_mongo(request):
 
 
 def show_towers_data_influx(request):
-    result = myclient.query("select time, value from Port525")
+    start_time = time.time()
+
+    result = myclient.query("select time, value from port525")
+
+    end = time.time()
+    total_time = (end - start_time)
+    print('Query time: ', total_time, ' seconds')
 
     # print("Result: {0}".format(result))
 
@@ -348,7 +366,7 @@ def show_towers_data_influx(request):
     #     print(obj)
     if result:
         result = list(result)[0]
-
+    result = {}
     # print(result)
     return render(request, "show_towers_data_influx.html", {'data': result}, content_type="text/html")
 
@@ -361,8 +379,8 @@ def add_raw_data_influx(request):
     for file in request.FILES.getlist('document'):
         conta = conta + 1
 
-    if conta > 40:
-        messages.error(request, "Please select at max. 40 files")
+    if conta > 150:
+        messages.error(request, "Please select at max. 150 files")
         return HttpResponseRedirect(reverse("show_towers_data_influx"))
 
 
@@ -374,7 +392,7 @@ def add_raw_data_influx(request):
 
         if file:
             firstime = True
-            start_time = time.clock()
+            start_time = time.time()
             points = []
 
             for line in io_file:
@@ -413,6 +431,8 @@ def add_raw_data_influx(request):
                     time_value = datetime.datetime(year, month, day, hour, minute, second) - datetime.timedelta(
                         minutes=10)
 
+                # MySeriesHelper(measurement=tower_code, time=time_value, value=values)
+
                 point = {
                         "measurement": tower_code,
                         "time": time_value,
@@ -422,16 +442,16 @@ def add_raw_data_influx(request):
                         }
                 points.append(point)
 
-            end_time = time.clock()
+            end_time = time.time()
             total_time = (end_time - start_time)
             total_time_operation += total_time
             print(str(file), '\ntime of operation: ', total_time, ' seconds')
 
-            start_time = time.clock()
+            start_time = time.time()
+            # MySeriesHelper.commit()
+            myclient.write_points(points, batch_size=5000)
 
-            myclient.write_points(points)
-
-            end_time = time.clock()
+            end_time = time.time()
             total_time = (end_time - start_time)
             total_time_insertion += total_time
             print('time to insert in database: ', total_time, ' seconds')

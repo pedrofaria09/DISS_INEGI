@@ -7,9 +7,10 @@ import datetime
 
 # Connection to MongoDB
 connect('INEGI')
+# connect(host="mongodb+srv://pedro:pedrofaria@cluster0-rparn.mongodb.net/test?retryWrites=true")
 
 # Connection to InfluxDB
-myclient = InfluxDBClient(host='localhost', port=8086, database='INEGI_INFLUX')
+myclient = InfluxDBClient(host='localhost', port=8086, database='mydb')
 
 # Create your models here.
 
@@ -31,19 +32,17 @@ class DataRaw(EmbeddedDocument):
     data = StringField(max_length=200)
 
 
-class TowerData(Document):
+class TowerData(DynamicDocument):
     tower_code = StringField(max_length=20)
     raw_datas = ListField(EmbeddedDocumentField(DataRaw))
+    meta = {"indexes": ['raw_datas', 'tower_code']}
 
 
-class InfluxData(models.Model):
-    time = models.DateTimeField(db_column="time", primary_key=True)
-    value = models.CharField(max_length=100, null=False, db_column="value")
-
-
-class Meta:
-    managed = False
-    db_table = 'test'
+class DataSetMongo(DynamicDocument):
+    tower_code = StringField(max_length=20)
+    time_stamp = DateTimeField(default=datetime.datetime.utcnow)
+    value = StringField(max_length=200)
+    meta = {"indexes": ['tower_code', 'time_stamp']}
 
 
 class MySeriesHelper(SeriesHelper):
@@ -67,7 +66,7 @@ class MySeriesHelper(SeriesHelper):
 
         # Defines the number of data points to store prior to writing
         # on the wire.
-        bulk_size = 5
+        bulk_size = 2000
 
         # autocommit must be set to True when using bulk_size
         autocommit = True
