@@ -3,7 +3,8 @@ from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
-from mongoengine.queryset.visitor import Q
+from mongoengine.queryset.visitor import Q as QM
+from django.db.models import Q as QD
 from .models import Tower, TowerData, DataRaw, MyUser, MySeriesHelper, DataSetMongo, DataSetPG
 from .forms import TowerForm, TowerViewForm, RegisterForm, LoginForm
 from influxdb import InfluxDBClient
@@ -214,7 +215,7 @@ def show_towers_data_mongo(request):
 
     start_time = time.time()
 
-    towers = DataSetMongo.objects(Q(tower_code="port525") and Q(time_stamp__lte=datetime(2010, 12, 25)))
+    towers = DataSetMongo.objects(QM(tower_code="port525") and QM(time_stamp__lte=datetime(2010, 12, 25)))
 
     end = time.time()
     total_time = (end - start_time)
@@ -303,7 +304,7 @@ def add_raw_data_mongo(request):
                 tower_code = tower_code.lower()
 
                 # Check if have a tower_code and a time_stamp and replace the value
-                check_Replicated = DataSetMongo.objects(Q(tower_code=tower_code) and Q(time_stamp=time_value))
+                check_Replicated = DataSetMongo.objects(QM(tower_code=tower_code) and QM(time_stamp=time_value))
                 if check_Replicated.count() >= 1:
                     check_Replicated.update(value=values)
                 else:
@@ -465,9 +466,7 @@ def show_towers_data_pg(request):
     data = {}
 
     start_time = time.time()
-    # towers = DataSetPG.objects.filter(Q(tower_code='port525'))
-
-    towers = DataSetPG.objects.filter(tower_code="port525")
+    towers = DataSetPG.objects.filter(QD(tower_code='port525'))
 
     # for t in towers:
     #     print(t.tower_code, "---", t.time_stamp, "---", t.value)
@@ -537,9 +536,10 @@ def add_raw_data_pg(request):
                 tower_code = tower_code.lower()
 
                 # Check if have a tower_code and a time_stamp and replace the value
-                check_Replicated = DataSetPG.objects.filter(tower_code=tower_code, time_stamp=time_value)
-                if check_Replicated.count() >= 1:
-                    check_Replicated.update(value=values)
+                check_Replicated = DataSetPG.objects.get(QD(tower_code=tower_code) and QD(time_stamp=time_value))
+                if check_Replicated:
+                    check_Replicated.value = values
+                    check_Replicated.save()
                 else:
                     tower_data = DataSetPG(tower_code=tower_code, time_stamp=time_value, value=values)
                     dataraw.append(tower_data)

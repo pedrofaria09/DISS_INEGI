@@ -38,9 +38,6 @@ class DataSetPG(models.Model):
     time_stamp = models.DateTimeField(default=datetime.now, null=True, blank=True)
     value = models.CharField(max_length=200)
 
-    class Meta:
-        ordering = ('tower_code',)
-
     def __str__(self):
         return "%s" % self.tower_code
 
