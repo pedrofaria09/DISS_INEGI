@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
 from mongoengine.queryset.visitor import Q as QM
 from django.db.models import Q as QD
-from .models import Tower, TowerData, DataRaw, MyUser, MySeriesHelper, DataSetMongo, DataSetPG
+from .models import Tower, TowerData, MyUser, DataSetMongo, DataSetPG
 from .forms import TowerForm, TowerViewForm, RegisterForm, LoginForm
 from influxdb import InfluxDBClient
 import pytz
@@ -165,7 +165,7 @@ def list_towers(request):
 
 def view_tower(request, tower_id):
     try:
-        tower = Tower.objects.get(id=tower_id)
+        tower = Tower.objects.get(pk=tower_id)
     except Tower.DoesNotExist:
         return HttpResponseRedirect(reverse("list_towers"))
 
@@ -185,7 +185,7 @@ def view_tower(request, tower_id):
 
 def delete_tower(request):
     if request.is_ajax and request.method == 'POST':
-        tower = Tower.objects.get(id=request.POST["id"])
+        tower = Tower.objects.get(pk=request.POST["id"])
         tower.delete()
         messages.success(request, 'A Torre foi removida com sucesso!')
         return HttpResponse('ok')
