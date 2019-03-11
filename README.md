@@ -14,17 +14,9 @@ Applications necessary to make instalation possible:
 
 A step by step series of examples that tell you how to get a development env running
 
-1st - Change DATABASES in settings.py to:
+1st - Change 'HOST' from DATABASES in settings.py to:
 ```
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'USER': 'postgres',
-        'NAME': 'postgres',
-        'HOST': 'db_pg',
-        'PORT': '5432',
-    }
-}
+'HOST': 'db_pg',
 ```
 
 2nd - Install dependencies:
