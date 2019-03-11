@@ -3,6 +3,13 @@ version: '3'
 services:
   db_pg:
     image: postgres
+    environment: 
+        - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=pedrofaria
+        - POSTGRES_DB=pedrofaria
+        - PGDATA=/tmp
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
   web:
     build: .
     command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
