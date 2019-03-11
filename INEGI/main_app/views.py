@@ -304,7 +304,11 @@ def add_raw_data_mongo(request):
                 tower_code = tower_code.lower()
 
                 # Check if have a tower_code and a time_stamp and replace the value
-                check_Replicated = DataSetMongo.objects(QM(tower_code=tower_code) and QM(time_stamp=time_value))
+                try:
+                    check_Replicated = DataSetMongo.objects(QM(tower_code=tower_code) and QM(time_stamp=time_value))
+                except DataSetMongo.DoesNotExist:
+                    check_Replicated = None
+
                 if check_Replicated.count() >= 1:
                     check_Replicated.update(value=values)
                 else:
@@ -536,7 +540,11 @@ def add_raw_data_pg(request):
                 tower_code = tower_code.lower()
 
                 # Check if have a tower_code and a time_stamp and replace the value
-                check_Replicated = DataSetPG.objects.get(QD(tower_code=tower_code) and QD(time_stamp=time_value))
+                try:
+                    check_Replicated = DataSetPG.objects.get(QD(tower_code=tower_code) and QD(time_stamp=time_value))
+                except DataSetPG.DoesNotExist:
+                    check_Replicated = None
+
                 if check_Replicated:
                     check_Replicated.value = values
                     check_Replicated.save()
