@@ -37,11 +37,6 @@ docker build .
 docker-compose up
 ```
 
-Turn off docker:
-```
-docker-compose down
-```
-
 If need to create superuser (To do login):
 ```
 docker-compose run web python manage.py createsuperuser
