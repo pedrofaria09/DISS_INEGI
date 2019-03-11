@@ -5,13 +5,13 @@ from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
 from mongoengine.queryset.visitor import Q as QM
 from django.db.models import Q as QD
-from .models import Tower, TowerData, MyUser, DataSetMongo, DataSetPG
-from .forms import TowerForm, TowerViewForm, RegisterForm, LoginForm
+from .models import *
+from .forms import *
 from influxdb import InfluxDBClient
-import pytz
-
 from datetime import *
-import time, re, io
+from .aux_functions import *
+
+import time, re, io, json
 
 myclient = InfluxDBClient(host='localhost', port=8086, database='INEGI_INFLUX')
 
@@ -193,30 +193,13 @@ def delete_tower(request):
     return HttpResponse("not ok")
 
 
-def create_tower_data(request, tower_id):
-    get_object_or_404(Tower, pk=tower_id)
-
-    try:
-        tower = TowerData.objects.get(tower_code=tower_id)
-    except TowerData.DoesNotExist:
-        tower = None
-
-    if tower is None:
-        print("ALOOOO")
-
-    tower_data = TowerData(tower_code=tower_id, raw_datas=[])
-    tower_data.save()
-
-    return redirect('/')
-
-
 def show_towers_data_mongo(request):
     data = {}
 
+    DataSetMongo.objects.all().delete()
+
     start_time = time.time()
-
     towers = DataSetMongo.objects(QM(tower_code="port525") and QM(time_stamp__lte=datetime(2010, 12, 25)))
-
     end = time.time()
     total_time = (end - start_time)
     print('Query time: ', total_time, ' seconds', towers.count())
@@ -230,6 +213,7 @@ def add_raw_data_mongo(request):
     total_time_operation = 0
     total_time_insertion = 0
     conta = 0
+    flag_problem = False
 
     for file in request.FILES.getlist('document'):
         conta = conta + 1
@@ -245,11 +229,12 @@ def add_raw_data_mongo(request):
         file = re.findall('[0-9]{4}_[0-9]{2}.row', str(file))
 
         if file:
-            #firstime = True
-            start_time = time.time()
+            print(str(file))
+            firstime = True
+            op_time = time.time()
             dataraw = []
 
-            for line in io_file:
+            for i, line in enumerate(io_file):
 
                 # remove the \n at the end
                 line = line.rstrip()
@@ -258,98 +243,64 @@ def add_raw_data_mongo(request):
                     if line.strip()[-1] is ',':
                         line = line.strip()[:-1]
                 except IndexError:
+                    flag_problem = True
                     messages.error(request, 'Error reading a line, check your file -> ' + str(
-                        file) + '. No values was entered on the DB')
+                        file) + '. No values was entered on the DB for this file')
                     return HttpResponseRedirect(reverse("show_towers_data_mongo"))
-
-                # Isnt necessary as we will store each time serie per line in mongo - Array is inefficient
-                # if firstime:
-                #     firstime = False
-                #     tower_code = line.split(',', 1)[0]
-                #     tower_code = tower_code.lower()
-                #     try:
-                #         tower_data = TowerData.objects.get(tower_code=tower_code)
-                #     except TowerData.DoesNotExist:
-                #         tower_data = TowerData(tower_code=tower_code, raw_datas=[])
 
                 mylist = line.split(",", 3)
 
-                str_timedate = time.time()
-                # 3 to 4 times faster than using strptime
-                year = int(mylist[1][0:4])
-                month = int(mylist[1][4:6])
-                day = int(mylist[1][6:8])
-                hour = int(mylist[2][0:2])
-                minute = int(mylist[2][3:5])
-                second = 0
+                time_value, flag_date = parsedate(request, file, mylist, i)
+
+                if flag_date:
+                    return HttpResponseRedirect(reverse("show_towers_data_mongo"))
+
+                try:
+                    mylist[3]
+                except IndexError:
+                    flag_problem = True
+                    messages.warning(request, 'Warning!!! reading a line, check your file -> ' + str(
+                        file) + ' at line: ' + str(i + 1) + '. No values was entered on the DB for time stamp: ' + str(
+                        time_value))
+                    continue
+
                 values = mylist[3]
-
-                if hour is 24:
-                    hour = 23
-                    minute = 50
-                    time_value = datetime(year, month, day, hour, minute, second, tzinfo=pytz.UTC)
-                else:
-                    time_value = datetime(year, month, day, hour, minute, second, tzinfo=pytz.UTC) - timedelta(minutes=10)
-
-                # Other way to split data, but takes more time
-                # values = mylist[3]
-                # if int(mylist[2][0:2]) is 24:
-                #     mydate = str(mylist[1]) + " 23:50"
-                #     time_value = datetime.datetime.strptime(mydate, '%Y%m%d %H:%M')
-                # else:
-                #     mydate = str(mylist[1]) + " " + str(mylist[2])
-                #     time_value = datetime.datetime.strptime(mydate, '%Y%m%d %H:%M') - datetime.timedelta(minutes=10)
-
-                tower_code = line.split(',', 1)[0]
+                tower_code = mylist[0]
                 tower_code = tower_code.lower()
 
-                # Check if have a tower_code and a time_stamp and replace the value
-                try:
-                    check_Replicated = DataSetMongo.objects(QM(tower_code=tower_code) and QM(time_stamp=time_value))
-                except DataSetMongo.DoesNotExist:
-                    check_Replicated = None
+                # Check for if tower exists or not, if not create.
+                if firstime:
+                    create_tower_if_doesnt_exists(request, tower_code)
+                    firstime = False
 
-                if check_Replicated.count() >= 1:
-                    check_Replicated.update(value=values)
+                # Check if have a tower_code and a time_stamp and replace the value - Heavy Operation
+                try:
+                    check_replicated = DataSetMongo.objects(QM(tower_code=tower_code) and QM(time_stamp=time_value))
+                except DataSetMongo.DoesNotExist:
+                    check_replicated = None
+
+                if check_replicated.count() >= 1:
+                    check_replicated.update(value=values)
                 else:
                     tower_data = DataSetMongo(tower_code=tower_code, time_stamp=time_value, value=values)
                     dataraw.append(tower_data)
 
-                # raw = DataRaw(time=time_value, data=values)
-                # dataraw.append(raw)
-
-            end_time = time.time()
-            total_time = (end_time - start_time)
+            total_time = (time.time() - op_time)
             total_time_operation += total_time
-            print(str(file), '\ntime of operation: ', total_time, ' seconds')
+            print('time of operation: ', total_time, ' seconds')
 
-            # To check if have a date and update the value, but takes so long!!!
-            # for raw in dataraw:
-            #     found = False
-            #     for raw2 in tower_data.raw_datas:
-            #         if str(raw2.time) == (str(raw.time)):
-            #             found = True
-            #             raw2.data = raw.data
-            #             break
-            #
-            #     if found is False:
-            #         tower_data.raw_datas.append(raw)
-
-            start_time = time.time()
-
-            # tower_data.raw_datas +=(dataraw)
-            # tower_data.save()
-
+            db_time = time.time()
             if dataraw:
                 DataSetMongo.objects.insert(dataraw)
-
-            end_time = time.time()
-            total_time = (end_time - start_time)
+            total_time = (time.time() - db_time)
             total_time_insertion += total_time
             print('time to insert in database: ', total_time, ' seconds')
 
     print('Total time of operation: ', total_time_operation, ' seconds')
     print('Total time to insert in database: ', total_time_insertion, ' seconds')
+
+    if not flag_problem:
+        messages.success(request, "All files was entered successfully")
 
     return HttpResponseRedirect(reverse("show_towers_data_mongo"))
 
@@ -357,7 +308,8 @@ def add_raw_data_mongo(request):
 def show_towers_data_influx(request):
     start_time = time.time()
 
-    result = myclient.query("select time, value from port525")
+    result = myclient.query("select time, value from ort542")
+    result2 = myclient.query("select time, value from ort542_b")
 
     end = time.time()
     total_time = (end - start_time)
@@ -369,10 +321,14 @@ def show_towers_data_influx(request):
 
     # for obj in list(result)[0]:
     #     print(obj)
+
     if result:
         result = list(result)[0]
+    if result2:
+        result += list(result2)[0]
+
     result = {}
-    # print(result)
+    # print(len(result))
     return render(request, "show_towers_data_influx.html", {'data': result}, content_type="text/html")
 
 
@@ -380,6 +336,7 @@ def add_raw_data_influx(request):
     total_time_operation = 0
     total_time_insertion = 0
     conta = 0
+    flag_problem = False
 
     for file in request.FILES.getlist('document'):
         conta = conta + 1
@@ -388,7 +345,6 @@ def add_raw_data_influx(request):
         messages.error(request, "Please select at max. 150 files")
         return HttpResponseRedirect(reverse("show_towers_data_influx"))
 
-
     for file in request.FILES.getlist('document'):
         decoded_file = file.read().decode('utf-8')
         io_file = io.StringIO(decoded_file)
@@ -396,12 +352,13 @@ def add_raw_data_influx(request):
         file = re.findall('[0-9]{4}_[0-9]{2}.row', str(file))
 
         if file:
+            print(str(file))
             firstime = True
-            start_time = time.time()
+            op_time = time.time()
             points = []
+            tt_date = 0
 
-            for line in io_file:
-
+            for i, line in enumerate(io_file):
                 #remove the \n at the end
                 line = line.rstrip()
 
@@ -409,34 +366,38 @@ def add_raw_data_influx(request):
                     if line.strip()[-1] is ',':
                         line = line.strip()[:-1]
                 except IndexError:
-                    messages.error(request, 'Error reading a line, check your file -> ' + str(
-                        file) + '. No values was entered on the DB')
+                    flag_problem = True
+                    messages.error(request, 'Error!!! Reading a line, check your file -> ' + str(
+                        file) + '. No values was entered on the DB for this file')
                     return HttpResponseRedirect(reverse("show_towers_data_influx"))
-
-                if firstime:
-                    firstime = False
-                    tower_code = line.split(',', 1)[0]
-                    tower_code = tower_code.lower()
 
                 mylist = line.split(",", 3)
 
-                year = int(mylist[1][0:4])
-                month = int(mylist[1][4:6])
-                day = int(mylist[1][6:8])
-                hour = int(mylist[2][0:2])
-                minute = int(mylist[2][3:5])
-                second = 0
-                values = mylist[3]
+                timefordate = time.time()
+                time_value, flag_date = parsedate(request, file, mylist, i)
+                tt_date += time.time() - timefordate
 
-                if hour is 24:
-                    hour = 23
-                    minute = 50
-                    time_value = datetime(year, month, day, hour, minute, second)
-                else:
-                    time_value = datetime(year, month, day, hour, minute, second) - timedelta(minutes=10)
+                if flag_date:
+                    return HttpResponseRedirect(reverse("show_towers_data_influx"))
+
+                try:
+                    mylist[3]
+                except IndexError:
+                    flag_problem = True
+                    messages.warning(request, 'Warning!!! reading a line, check your file -> ' + str(
+                        file) + ' at line: ' + str(i+1) + '. No values was entered on the DB for time stamp: ' + str(time_value))
+                    continue
+
+                values = mylist[3]
+                tower_code = mylist[0]
+                tower_code = tower_code.lower()
+
+                # Check for if tower exists or not, if not create.
+                if firstime:
+                    create_tower_if_doesnt_exists(request, tower_code)
+                    firstime = False
 
                 # MySeriesHelper(measurement=tower_code, time=time_value, value=values)
-
                 point = {
                         "measurement": tower_code,
                         "time": time_value,
@@ -446,22 +407,25 @@ def add_raw_data_influx(request):
                         }
                 points.append(point)
 
-            end_time = time.time()
-            total_time = (end_time - start_time)
+            print('time of parse time: ', tt_date, ' seconds')
+
+            total_time = (time.time() - op_time)
             total_time_operation += total_time
-            print(str(file), '\ntime of operation: ', total_time, ' seconds')
+            print('time of operation: ', total_time, ' seconds')
 
-            start_time = time.time()
+            db_time = time.time()
             # MySeriesHelper.commit()
-            myclient.write_points(points, batch_size=5000)
-
-            end_time = time.time()
-            total_time = (end_time - start_time)
+            if points:
+                myclient.write_points(points, batch_size=5000)
+            total_time = (time.time() - db_time)
             total_time_insertion += total_time
             print('time to insert in database: ', total_time, ' seconds')
 
     print('Total time of operation: ', total_time_operation, ' seconds')
     print('Total time to insert in database: ', total_time_insertion, ' seconds')
+
+    if not flag_problem:
+        messages.success(request, "All files was entered successfully")
 
     return HttpResponseRedirect(reverse("show_towers_data_influx"))
 
@@ -469,16 +433,17 @@ def add_raw_data_influx(request):
 def show_towers_data_pg(request):
     data = {}
 
-    start_time = time.time()
-    towers = DataSetPG.objects.filter(QD(tower_code='port525'))
+    DataSetPG.objects.all().delete()
 
-    # for t in towers:
+    start_time = time.time()
+    dataset = DataSetPG.objects.filter(QD(tower_code='port525'))
+
+    # for t in dataset:
     #     print(t.tower_code, "---", t.time_stamp, "---", t.value)
 
     end = time.time()
     total_time = (end - start_time)
-    print('Query time: ', total_time, ' seconds -- size:', len(towers))
-    # DataSetPG.objects.all().delete()
+    print('Query time: ', total_time, ' seconds -- size:', len(dataset))
     data['towers'] = {}
 
     return render(request, 'show_towers_data_pg.html', data)
@@ -488,6 +453,7 @@ def add_raw_data_pg(request):
     total_time_operation = 0
     total_time_insertion = 0
     conta = 0
+    flag_problem = False
 
     for file in request.FILES.getlist('document'):
         conta = conta + 1
@@ -503,11 +469,12 @@ def add_raw_data_pg(request):
         file = re.findall('[0-9]{4}_[0-9]{2}.row', str(file))
 
         if file:
-            start_time = time.time()
+            print(str(file))
+            op_time = time.time()
             dataraw = []
+            firstime = True
 
-            for line in io_file:
-
+            for i, line in enumerate(io_file):
                 # remove the \n at the end
                 line = line.rstrip()
 
@@ -515,60 +482,64 @@ def add_raw_data_pg(request):
                     if line.strip()[-1] is ',':
                         line = line.strip()[:-1]
                 except IndexError:
+                    flag_problem = True
                     messages.error(request, 'Error reading a line, check your file -> ' + str(
                         file) + '. No values was entered on the DB')
                     return HttpResponseRedirect(reverse("show_towers_data_pg"))
 
                 mylist = line.split(",", 3)
 
-                year = int(mylist[1][0:4])
-                month = int(mylist[1][4:6])
-                day = int(mylist[1][6:8])
-                hour = int(mylist[2][0:2])
-                minute = int(mylist[2][3:5])
-                second = 0
+                time_value, flag_date = parsedate(request, file, mylist, i)
+
+                if flag_date:
+                    return HttpResponseRedirect(reverse("show_towers_data_pg"))
+
+                try:
+                    mylist[3]
+                except IndexError:
+                    flag_problem = True
+                    messages.warning(request, 'Warning!!! reading a line, check your file -> ' + str(
+                        file) + ' at line: ' + str(i + 1) + '. No values was entered on the DB for time stamp: ' + str(
+                        time_value))
+                    continue
+
                 values = mylist[3]
-
-                if hour is 24:
-                    hour = 23
-                    minute = 50
-                    time_value = datetime(year, month, day, hour, minute, second, tzinfo=pytz.UTC)
-                else:
-                    time_value = datetime(year, month, day, hour, minute, second, tzinfo=pytz.UTC) - timedelta(minutes=10)
-
-                tower_code = line.split(',', 1)[0]
+                tower_code = mylist[0]
                 tower_code = tower_code.lower()
 
-                # Check if have a tower_code and a time_stamp and replace the value
-                try:
-                    check_Replicated = DataSetPG.objects.get(QD(tower_code=tower_code) and QD(time_stamp=time_value))
-                except DataSetPG.DoesNotExist:
-                    check_Replicated = None
+                # Check for if tower exists or not, if not create.
+                if firstime:
+                    create_tower_if_doesnt_exists(request, tower_code)
+                    firstime = False
 
-                if check_Replicated:
-                    check_Replicated.value = values
-                    check_Replicated.save()
+                # Check if have a tower_code and a time_stamp and replace the value - VERY Heavy operation
+                try:
+                    check_replicated = DataSetPG.objects.get(QD(tower_code=tower_code) and QD(time_stamp=time_value))
+                except DataSetPG.DoesNotExist:
+                    check_replicated = None
+
+                if check_replicated:
+                    check_replicated.value = values
+                    check_replicated.save()
                 else:
                     tower_data = DataSetPG(tower_code=tower_code, time_stamp=time_value, value=values)
                     dataraw.append(tower_data)
 
-
-            end_time = time.time()
-            total_time = (end_time - start_time)
+            total_time = (time.time() - op_time)
             total_time_operation += total_time
-            print(str(file), '\ntime of operation: ', total_time, ' seconds')
+            print('time of operation: ', total_time, ' seconds')
 
-            start_time = time.time()
-
+            db_time = time.time()
             if dataraw:
                 DataSetPG.objects.bulk_create(dataraw)
-
-            end_time = time.time()
-            total_time = (end_time - start_time)
+            total_time = (time.time() - db_time)
             total_time_insertion += total_time
             print('time to insert in database: ', total_time, ' seconds')
 
     print('Total time of operation: ', total_time_operation, ' seconds')
     print('Total time to insert in database: ', total_time_insertion, ' seconds')
+
+    if not flag_problem:
+        messages.success(request, "All files was entered successfully")
 
     return HttpResponseRedirect(reverse("show_towers_data_pg"))

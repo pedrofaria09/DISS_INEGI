@@ -33,24 +33,13 @@ class Tower(models.Model):
 
 
 class DataSetPG(models.Model):
-    # tower_code = models.ForeignKey(Tower, on_delete=models.DO_NOTHING) # Need to test efficiency
+    # tower_code = models.ForeignKey(Tower, on_delete=models.SET_NULL, blank=True, null=True) # Cant use, because we can have datasets without towers
     tower_code = models.CharField(max_length=20, null=False)
     time_stamp = models.DateTimeField(default=datetime.now, null=True, blank=True)
     value = models.CharField(max_length=200)
 
     def __str__(self):
         return "%s" % self.tower_code
-
-
-class DataRaw(EmbeddedDocument):
-    time = DateTimeField(default=datetime.now)
-    data = StringField(max_length=200)
-
-
-class TowerData(DynamicDocument):
-    tower_code = StringField(max_length=20)
-    raw_datas = ListField(EmbeddedDocumentField(DataRaw))
-    meta = {"indexes": ['raw_datas', 'tower_code']}
 
 
 class DataSetMongo(DynamicDocument):
