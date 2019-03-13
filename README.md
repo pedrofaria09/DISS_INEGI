@@ -14,17 +14,21 @@ Applications necessary to make instalation possible:
 
 A step by step series of examples that tell you how to get a development env running
 
-1st - Change 'HOST' from DATABASES in settings.py to:
+Change 'HOST' from DATABASES in settings.py to:
 ```
 'HOST': 'db_pg',
 ```
+Change INFLUX connection in models.py to:
+```
+myclient = InfluxDBClient(host='db_in', port=8086, database='INEGI_INFLUX')
+```
 
-2nd - Install dependencies:
+Install dependencies:
 ```
 docker build .
 ```
 
-3rd - Run docker:
+Run docker:
 ```
 docker-compose up
 ```
