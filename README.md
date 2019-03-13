@@ -14,17 +14,27 @@ Applications necessary to make instalation possible:
 
 A step by step series of examples that tell you how to get a development env running
 
-1st - Change 'HOST' from DATABASES in settings.py to:
+Change 'HOST' from DATABASES in settings.py to:
 ```
-'HOST': 'db_pg',
+'HOST': 'postgres',
 ```
 
-2nd - Install dependencies:
+Change InfluxDB connection in views.py to:
+```
+myclient = InfluxDBClient(host='influx', port=8086, database='INEGI_INFLUX')
+```
+
+Change MongoDB connection in models.py to:
+```
+connect(db='INEGI', host='mongo')
+```
+
+Install dependencies:
 ```
 docker build .
 ```
 
-3rd - Run docker:
+Run docker:
 ```
 docker-compose up
 ```
