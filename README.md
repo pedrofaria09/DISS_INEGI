@@ -16,17 +16,17 @@ A step by step series of examples that tell you how to get a development env run
 
 Change 'HOST' from DATABASES in settings.py to:
 ```
-'HOST': 'db_pg',
+'HOST': 'postgres',
 ```
 
 Change InfluxDB connection in views.py to:
 ```
-myclient = InfluxDBClient(host='db_in', port=8086, database='INEGI_INFLUX')
+myclient = InfluxDBClient(host='influx', port=8086, database='INEGI_INFLUX')
 ```
 
 Change MongoDB connection in models.py to:
 ```
-connect(db='INEGI', host='db_mn')
+connect(db='INEGI', host='mongo')
 ```
 
 Install dependencies:
