@@ -10,7 +10,7 @@ Applications necessary to make instalation possible:
 
 * [Docker](https://www.docker.com/) - A container software
 
-### Installing
+### Installing and Running
 
 A step by step series of examples that tell you how to get a development env running
 
@@ -34,12 +34,17 @@ Install dependencies:
 docker build .
 ```
 
+Create a superuser (necessary to do a login in the web app):
+```
+docker-compose run web python manage.py createsuperuser
+```
+
 Run docker:
 ```
 docker-compose up
 ```
 
-If need to create superuser (To do login):
+Access at:
 ```
-docker-compose run web python manage.py createsuperuser
+http://localhost:8000/
 ```
