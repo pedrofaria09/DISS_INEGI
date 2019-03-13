@@ -3,19 +3,40 @@ version: '3'
 services:
   db_pg:
     image: postgres
+    container_name: postgres
     environment: 
         - POSTGRES_USER=postgres
         - POSTGRES_PASSWORD=pedrofaria
         - POSTGRES_DB=pedrofaria
-        - PGDATA=/tmp
     volumes:
-      - ./db_data:/var/lib/postgresql/data
+      - ./db_data/pg:/data/postgresql
+
+  db_in:
+    image: influxdb
+    container_name: influxdb
+    environment:
+      - INFLUXDB_DB=INEGI_INFLUX
+    volumes: 
+      - ./db_data/in:/data/influxdb
+
+  db_mn:
+    image: mongo
+    container_name: mongodb
+    volumes:
+      - ./db_data/mn:/data/mongodb
+    ports:
+      - 27017:27017
+    command: mongod --smallfiles
+
   web:
+    depends_on:
+      - db_pg
+      - db_in
+      - db_mn
     build: .
+    container_name: django_server
     command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./INEGI:/code
     ports:
       - "8000:8000"
-    depends_on:
-      - db_pg
