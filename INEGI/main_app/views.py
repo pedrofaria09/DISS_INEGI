@@ -157,6 +157,16 @@ def add_tower(request):
     return render(request, 'add_tower.html', {'form': form})
 
 
+def create_tower_if_doesnt_exists(request, tower_code):
+    try:
+        Tower.objects.get(pk=tower_code)
+    except Tower.DoesNotExist:
+        tower = Tower(pk=tower_code, name=tower_code)
+        tower.save()
+        message = "Tower with code: " + tower.code + " created. Please update the meta-information on the Towers page"
+        messages.warning(request, message)
+
+
 def list_towers(request):
     towers = Tower.objects.all()
 

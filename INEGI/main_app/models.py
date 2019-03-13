@@ -5,7 +5,7 @@ from influxdb import InfluxDBClient, SeriesHelper
 from datetime import datetime
 
 # Connection to MongoDB
-connect('INEGI')
+connect(db='INEGI', host='localhost')
 # connect(host="mongodb+srv://pedro:pedrofaria@cluster0-rparn.mongodb.net/test?retryWrites=true")
 
 # Connection to InfluxDB

@@ -1,7 +1,7 @@
 import re, pytz
 from django.contrib import messages
 from datetime import *
-from .models import *
+
 
 def parsedate(request, file, mylist, i):
 
@@ -73,13 +73,3 @@ def parsedate(request, file, mylist, i):
     #     time_value = datetime.datetime.strptime(mydate, '%Y%m%d %H:%M') - datetime.timedelta(minutes=10)
 
     return time_value, flag
-
-
-def create_tower_if_doesnt_exists(request, tower_code):
-    try:
-        Tower.objects.get(pk=tower_code)
-    except Tower.DoesNotExist:
-        tower = Tower(pk=tower_code, name=tower_code)
-        tower.save()
-        message = "Tower with code: " + tower.code + " created. Please update the meta-information on the Towers page"
-        messages.warning(request, message)
