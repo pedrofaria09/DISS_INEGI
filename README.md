@@ -12,21 +12,11 @@ Applications necessary to make instalation possible:
 
 ### Installing and Running
 
-A step by step series of examples that tell you how to get a development env running
+A step by step on how to get a development env running
 
-Change 'HOST' from DATABASES in settings.py to:
+Change flag DOCKER from False to True in settings.py (Line 31):
 ```
-'HOST': 'postgres',
-```
-
-Change InfluxDB connection in views.py to:
-```
-myclient = InfluxDBClient(host='influx', port=8086, database='INEGI_INFLUX')
-```
-
-Change MongoDB connection in models.py to:
-```
-connect(db='INEGI', host='mongo')
+DOCKER = True
 ```
 
 Install dependencies:
@@ -34,14 +24,14 @@ Install dependencies:
 docker build .
 ```
 
-Create a superuser (necessary to do a login in the web app):
-```
-docker-compose run web python manage.py createsuperuser
-```
-
 Run docker:
 ```
 docker-compose up
+```
+
+If 1st time, need to create a superuser:
+```
+docker-compose run web python manage.py createsuperuser
 ```
 
 Access at:
