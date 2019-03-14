@@ -10,13 +10,13 @@
 
         <!-- DataTales Example -->
         <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Users Table</h6>
+            <div class="card-header py-2">
+                <h6 class="m-0 font-weight-bold text-primary text-center">Users Table</h6>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                        <thead>
+                    <table class="table table-bordered table-hover table-sm" id="dataTable" width="100%" cellspacing="0">
+                        <thead class="thead-light">
                         <tr>
                             <th>Code</th>
                             <th>Name</th>
@@ -34,10 +34,10 @@
 
                         {% for user in users %}
                             <tr>
-                                <td><a href="{% url "view_user" user.id %}">{{ user.id }}</a></td>
-                                <td><a href="{% url "view_user" user.id %}">{{ user.username }}</a></td>
+                                <td class="align-middle p-2"><a href="{% url "view_user" user.id %}">{{ user.id }}</a></td>
+                                <td class="align-middle p-2"><a href="{% url "view_user" user.id %}">{{ user.username }}</a></td>
                                 <td>
-                                    <a href="{% url "view_user" user.id %}" class="btn btn-sm btn-info">Ver - Editar</a>
+                                    <a href="{% url "view_user" user.id %}" class="btn btn-sm btn-info">View - Edit</a>
                                 </td>
                             </tr>
                         {% endfor %}
