@@ -7,17 +7,12 @@ from mongoengine.queryset.visitor import Q as QM
 from django.db.models import Q as QD
 from .models import *
 from .forms import *
-from influxdb import InfluxDBClient
 from datetime import *
 from .aux_functions import *
 
 import time, re, io, json
 
-myclient = InfluxDBClient(host='localhost', port=8086, database='INEGI_INFLUX')
-
-
 # Create your views here.
-
 
 def get_obj_or_404_2(klass, *args, **kwargs):
     try:
@@ -318,8 +313,8 @@ def add_raw_data_mongo(request):
 def show_towers_data_influx(request):
     start_time = time.time()
 
-    result = myclient.query("select time, value from ort542")
-    result2 = myclient.query("select time, value from ort542_b")
+    result = INFLUXCLIENT.query("select time, value from ort542")
+    result2 = INFLUXCLIENT.query("select time, value from ort542_b")
 
     end = time.time()
     total_time = (end - start_time)
@@ -426,7 +421,7 @@ def add_raw_data_influx(request):
             db_time = time.time()
             # MySeriesHelper.commit()
             if points:
-                myclient.write_points(points, batch_size=5000)
+                INFLUXCLIENT.write_points(points, batch_size=5000)
             total_time = (time.time() - db_time)
             total_time_insertion += total_time
             print('time to insert in database: ', total_time, ' seconds')
@@ -443,7 +438,7 @@ def add_raw_data_influx(request):
 def show_towers_data_pg(request):
     data = {}
 
-    DataSetPG.objects.all().delete()
+    # DataSetPG.objects.all().delete()
 
     start_time = time.time()
     dataset = DataSetPG.objects.filter(QD(tower_code='port525'))
@@ -453,7 +448,7 @@ def show_towers_data_pg(request):
 
     end = time.time()
     total_time = (end - start_time)
-    print('Query time: ', total_time, ' seconds -- size:', len(dataset))
+    print('\nQuery time: ', total_time, ' seconds -- size:', len(dataset))
     data['towers'] = {}
 
     return render(request, 'show_towers_data_pg.html', data)
@@ -481,6 +476,7 @@ def add_raw_data_pg(request):
         if file:
             print(str(file))
             op_time = time.time()
+            db_time = 0
             dataraw = []
             firstime = True
 
@@ -523,6 +519,7 @@ def add_raw_data_pg(request):
                     firstime = False
 
                 # Check if have a tower_code and a time_stamp and replace the value - VERY Heavy operation
+                db_time_start = time.time()
                 try:
                     check_replicated = DataSetPG.objects.get(QD(tower_code=tower_code) and QD(time_stamp=time_value))
                 except DataSetPG.DoesNotExist:
@@ -534,20 +531,29 @@ def add_raw_data_pg(request):
                 else:
                     tower_data = DataSetPG(tower_code=tower_code, time_stamp=time_value, value=values)
                     dataraw.append(tower_data)
+                db_time += (time.time() - db_time_start)
 
-            total_time = (time.time() - op_time)
-            total_time_operation += total_time
-            print('time of operation: ', total_time, ' seconds')
+                # Heavier!!!!! - Maybe because takes care one by one! - Takes 1 to 2 seconds more in 6000 lines
+                # db_time_start = time.time()
+                # DataSetPG.objects.update_or_create(tower_code=tower_code, time_stamp=time_value, defaults={'value': values})
+                # db_time += (time.time() - db_time_start)
 
-            db_time = time.time()
+            total_time_insertion += db_time
+            print('Database time inside: ', db_time, ' seconds')
+
+            op_time = (time.time() - op_time)
+            total_time_operation += op_time
+            print('Operation time: ', op_time, ' seconds')
+
+            # Takes normally 0.3 secs
+            db_time2 = time.time()
             if dataraw:
                 DataSetPG.objects.bulk_create(dataraw)
-            total_time = (time.time() - db_time)
-            total_time_insertion += total_time
-            print('time to insert in database: ', total_time, ' seconds')
+            db_time2 = (time.time() - db_time2)
+            total_time_insertion += db_time2
 
-    print('Total time of operation: ', total_time_operation, ' seconds')
     print('Total time to insert in database: ', total_time_insertion, ' seconds')
+    print('Total time of operation: ', total_time_operation, ' seconds')
 
     if not flag_problem:
         messages.success(request, "All files was entered successfully")

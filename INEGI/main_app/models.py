@@ -3,16 +3,24 @@ from mongoengine import *
 from django.contrib.auth.models import AbstractUser
 from influxdb import InfluxDBClient, SeriesHelper
 from datetime import datetime
+from django.conf import settings
 
 # Connection to MongoDB
-connect(db='INEGI', host='localhost')
+if settings.DOCKER:
+    connect(db='INEGI', host='mongo')
+else:
+    connect(db='INEGI', host='localhost')
+
+# Connection test for mongo in the server
 # connect(host="mongodb+srv://pedro:pedrofaria@cluster0-rparn.mongodb.net/test?retryWrites=true")
 
 # Connection to InfluxDB
-myclient = InfluxDBClient(host='localhost', port=8086, database='mydb')
+if settings.DOCKER:
+    INFLUXCLIENT = InfluxDBClient(host='influx', port=8086, database='INEGI_INFLUX')
+else:
+    INFLUXCLIENT = InfluxDBClient(host='localhost', port=8086, database='INEGI_INFLUX')
 
 # Create your models here.
-
 
 class MyUser(AbstractUser):
     full_name = models.CharField(max_length=100)
@@ -34,8 +42,8 @@ class Tower(models.Model):
 
 class DataSetPG(models.Model):
     # tower_code = models.ForeignKey(Tower, on_delete=models.SET_NULL, blank=True, null=True) # Cant use, because we can have datasets without towers
-    tower_code = models.CharField(max_length=20, null=False)
-    time_stamp = models.DateTimeField(default=datetime.now, null=True, blank=True)
+    tower_code = models.CharField(db_index=True, max_length=20, null=False)
+    time_stamp = models.DateTimeField(db_index=True, default=datetime.now, null=True, blank=True)
     value = models.CharField(max_length=200)
 
     def __str__(self):
@@ -59,7 +67,7 @@ class MySeriesHelper(SeriesHelper):
         """Meta class stores time series helper configuration."""
 
         # The client should be an instance of InfluxDBClient.
-        client = myclient
+        client = INFLUXCLIENT
 
         # The series name must be a string. Add dependent fields/tags
         # in curly brackets.
