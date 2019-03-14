@@ -22,11 +22,21 @@ else:
 
 # Create your models here.
 
+
+GROUP_TYPE = (
+    ("NA", "None"),
+    ("FT", "Field Team"),
+    ("PD", "Project Developer"),
+    ("PF", "Performance FollowUp"),
+)
+
+
 class MyUser(AbstractUser):
     full_name = models.CharField(max_length=100)
     birthdate = models.DateField(null=True)
     is_client = models.BooleanField(default=False)
     is_manager = models.BooleanField(default=False)
+    group_type = models.CharField(max_length=30, choices=GROUP_TYPE, default="NA")
 
     def __str__(self):
         return "%s %s" % (self.id, self.full_name)
@@ -85,4 +95,3 @@ class MySeriesHelper(SeriesHelper):
 
         # autocommit must be set to True when using bulk_size
         autocommit = True
-

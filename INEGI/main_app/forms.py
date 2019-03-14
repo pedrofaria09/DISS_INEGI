@@ -19,7 +19,7 @@ class LoginForm(forms.Form):
 class RegisterForm(UserCreationForm):
     class Meta:
         model = MyUser
-        fields = ('username', 'password1', 'password2', 'full_name', 'birthdate', 'is_client', 'is_manager', 'is_staff')
+        fields = ('username', 'password1', 'password2', 'full_name', 'birthdate', 'is_client', 'is_manager', 'is_staff', 'group_type')
 
         widgets = {
             'birthdate': DatePickerInput(format='%d/%m/%Y'),
@@ -42,6 +42,8 @@ class RegisterForm(UserCreationForm):
         self.fields['is_client'].label = "Is this a Client?"
         self.fields['is_manager'].label = "Is this a Manager?"
         self.fields['is_staff'].label = "Is this a Administrator?"
+
+        self.fields['group_type'].label = "Type of Group"
 
         self.fields['username'].widget.attrs.update({'class': 'form-control mandatory'})
         self.fields['password1'].widget.attrs.update({'class': 'form-control mandatory'})
