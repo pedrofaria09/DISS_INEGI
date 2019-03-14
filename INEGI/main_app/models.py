@@ -50,6 +50,14 @@ class Tower(models.Model):
         return "%s" % self.code
 
 
+class Cluster(models.Model):
+    name = models.CharField(max_length=100)
+    towers = models.ManyToManyField(Tower, verbose_name="list of towers")
+
+    def __str__(self):
+        return "%s" % self.name
+
+
 class DataSetPG(models.Model):
     # tower_code = models.ForeignKey(Tower, on_delete=models.SET_NULL, blank=True, null=True) # Cant use, because we can have datasets without towers
     tower_code = models.CharField(db_index=True, max_length=20, null=False)

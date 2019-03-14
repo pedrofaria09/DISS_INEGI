@@ -22,6 +22,12 @@ def get_obj_or_404_2(klass, *args, **kwargs):
 
 
 def index(request):
+    clu = Cluster.objects.all()
+    for c in clu:
+        print(c)
+        for ob in c.towers.all():
+            print(ob)
+
     if request.user.id is None:
         form = LoginForm()
         return render(request, 'home.html', {'form': form})
