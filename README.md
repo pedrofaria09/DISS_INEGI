@@ -12,21 +12,11 @@ Applications necessary to make instalation possible:
 
 ### Installing and Running
 
-A step by step series of examples that tell you how to get a development env running
+A step by step on how to get a development env running
 
-Change 'HOST' from DATABASES in settings.py to:
+Change flag DOCKER to True in settings.py (Line 31) to:
 ```
-'HOST': 'postgres',
-```
-
-Change InfluxDB connection in views.py to:
-```
-myclient = InfluxDBClient(host='influx', port=8086, database='INEGI_INFLUX')
-```
-
-Change MongoDB connection in models.py to:
-```
-connect(db='INEGI', host='mongo')
+DOCKER = True
 ```
 
 Install dependencies:
