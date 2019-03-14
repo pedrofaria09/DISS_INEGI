@@ -24,14 +24,14 @@ Install dependencies:
 docker build .
 ```
 
-Create a superuser (necessary to do a login in the web app):
-```
-docker-compose run web python manage.py createsuperuser
-```
-
 Run docker:
 ```
 docker-compose up
+```
+
+If 1st time, need to create a superuser:
+```
+docker-compose run web python manage.py createsuperuser
 ```
 
 Access at:
