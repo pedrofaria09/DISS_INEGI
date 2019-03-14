@@ -14,7 +14,7 @@ Applications necessary to make instalation possible:
 
 A step by step on how to get a development env running
 
-Change flag DOCKER to True in settings.py (Line 31) to:
+Change flag DOCKER from False to True in settings.py (Line 31):
 ```
 DOCKER = True
 ```
