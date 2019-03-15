@@ -46,6 +46,9 @@ class Tower(models.Model):
     code = models.CharField(primary_key=True, max_length=20, null=False)
     name = models.CharField(max_length=30, null=False)
 
+    class Meta:
+        ordering = ["code"]
+
     def __str__(self):
         return "%s" % self.code
 

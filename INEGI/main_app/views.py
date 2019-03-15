@@ -22,12 +22,6 @@ def get_obj_or_404_2(klass, *args, **kwargs):
 
 
 def index(request):
-    clu = Cluster.objects.all()
-    for c in clu:
-        print(c)
-        for ob in c.towers.all():
-            print(ob)
-
     if request.user.id is None:
         form = LoginForm()
         return render(request, 'home.html', {'form': form})
@@ -201,6 +195,58 @@ def delete_tower(request):
         messages.success(request, 'A Torre foi removida com sucesso!')
         return HttpResponse('ok')
     messages.error(request, 'Aconteceu um problema na remoção da Torre!')
+    return HttpResponse("not ok")
+
+
+def add_cluster(request):
+    if request.method == 'POST':
+        form = ClusterForm(request.POST)
+        if form.is_valid():
+            form.save()
+
+            messages.success(request, 'Cluster created successfully!')
+            return HttpResponseRedirect(reverse("list_towers"))
+        else:
+            messages.warning(request, 'Cluster not added!!!')
+    else:
+        form = ClusterForm()
+
+    return render(request, 'add_cluster.html', {'form': form})
+
+
+def list_clusters(request):
+    clusters = Cluster.objects.all()
+
+    return render(request, 'list_clusters.html', {'clusters': clusters})
+
+
+def view_cluster(request, cluster_id):
+    try:
+        cluster = Cluster.objects.get(id=cluster_id)
+    except Cluster.DoesNotExist:
+        return HttpResponseRedirect(reverse("list_clusters"))
+
+    if request.method == 'GET':
+        form = ClusterForm(instance=cluster)
+    elif request.method == 'POST':
+        form = ClusterForm(request.POST, instance=cluster)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Cluster was edited with success')
+            return HttpResponseRedirect(reverse("list_clusters"))
+        else:
+            messages.warning(request, "Cluster wasn't edited!!!")
+
+    return render(request, 'view_cluster.html', {'form': form, 'cluster_id': cluster_id})
+
+
+def delete_cluster(request):
+    if request.is_ajax and request.method == 'POST':
+        cluster = Cluster.objects.get(id=request.POST["id"])
+        cluster.delete()
+        messages.success(request, 'Cluster was deleted successfully!')
+        return HttpResponse('ok')
+    messages.error(request, 'An error occurred when deleting the cluster!')
     return HttpResponse("not ok")
 
 

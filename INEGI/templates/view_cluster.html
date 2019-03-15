@@ -7,12 +7,12 @@
     <div class="container-fluid">
         <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Add a new tower</h1>
+            <h1 class="h3 mb-0 text-gray-800">View/Edit Cluster ID: {{ cluster_id }}</h1>
         </div>
 
         <div class="row">
             <div class="col-12">
-                <form action="{% url "add_tower" %}" method="POST">
+                <form action="{% url "view_cluster" cluster_id %}" method="POST">
 
                     {% csrf_token %}
 
@@ -36,10 +36,10 @@
                     <div class="form-group">
                         <div class="form-row">
                             <div class="col-md-6">
-                                <input type="submit" class="btn btn-primary btn-block" value="Create">
+                                <input type="submit" class="btn btn-primary btn-block" value="Edit">
                             </div>
                             <div class="col-md-6">
-                                <button id="reset" type="reset" class="btn btn-warning btn-block"> Clean</button>
+                                <a href="#" name="delete_cluster" data-id="{{ cluster_id }}" class="btn btn-danger btn-block">DELETE</a>
                             </div>
                         </div>
                     </div>

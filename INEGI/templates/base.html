@@ -76,7 +76,7 @@
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
                    aria-expanded="true" aria-controls="collapseTwo">
                     <i class="fas fa-fw fa-cog"></i>
-                    <span>Torres</span>
+                    <span>Towers</span>
                 </a>
                 <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
@@ -84,6 +84,13 @@
                         <a class="collapse-item" href="{% url "list_towers" %}">View all Towers</a>
                     </div>
                 </div>
+            </li>
+
+            <!-- Nav Item - Clusters -->
+            <li class="nav-item">
+                <a class="nav-link" href="{% url "list_clusters" %}">
+                    <i class="fas fa-fw fa-server"></i>
+                    <span>Clusters</span></a>
             </li>
 
             <!-- Divider -->
@@ -248,6 +255,8 @@
     <!-- Delets -->
     <script src="{% static 'js/deletes.js' %}"></script>
 
+    <!-- Tables sort and searc -->
+    <script src="{% static 'js/tables-aux.js' %}"></script>
 
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
             integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"

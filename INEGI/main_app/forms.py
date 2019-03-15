@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm
-from .models import Tower, MyUser
+from .models import Tower, MyUser, Cluster
 from django.contrib.auth.forms import UserCreationForm
 from bootstrap_datepicker_plus import DatePickerInput
 
@@ -66,6 +66,18 @@ class TowerForm(ModelForm):
         super(TowerForm, self).__init__(*args, **kwargs)
         self.fields['code'].label = "Codigo"
         self.fields['name'].label = "Nome"
+
+
+class ClusterForm(ModelForm):
+    class Meta:
+        model = Cluster
+        fields = ('name', 'towers')
+        tower = forms.ModelMultipleChoiceField(widget=forms.CheckboxSelectMultiple(), queryset=Tower.objects.all())
+
+    def __init__(self, *args, **kwargs):
+        super(ClusterForm, self).__init__(*args, **kwargs)
+        self.fields['name'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['towers'].widget.attrs['size'] = 20
 
 
 class TowerViewForm(ModelForm):
