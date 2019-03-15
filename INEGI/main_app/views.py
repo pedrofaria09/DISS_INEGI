@@ -205,7 +205,7 @@ def add_cluster(request):
             form.save()
 
             messages.success(request, 'Cluster created successfully!')
-            return HttpResponseRedirect(reverse("list_towers"))
+            return HttpResponseRedirect(reverse("list_clusters"))
         else:
             messages.warning(request, 'Cluster not added!!!')
     else:
@@ -222,7 +222,7 @@ def list_clusters(request):
 
 def view_cluster(request, cluster_id):
     try:
-        cluster = Cluster.objects.get(id=cluster_id)
+        cluster = Cluster.objects.get(pk=cluster_id)
     except Cluster.DoesNotExist:
         return HttpResponseRedirect(reverse("list_clusters"))
 
@@ -242,7 +242,7 @@ def view_cluster(request, cluster_id):
 
 def delete_cluster(request):
     if request.is_ajax and request.method == 'POST':
-        cluster = Cluster.objects.get(id=request.POST["id"])
+        cluster = Cluster.objects.get(pk=request.POST["id"])
         cluster.delete()
         messages.success(request, 'Cluster was deleted successfully!')
         return HttpResponse('ok')

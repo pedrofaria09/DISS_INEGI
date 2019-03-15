@@ -54,7 +54,7 @@ class Tower(models.Model):
 
 
 class Cluster(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(primary_key=True, max_length=100)
     towers = models.ManyToManyField(Tower, verbose_name="list of towers")
 
     def __str__(self):
