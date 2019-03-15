@@ -2,7 +2,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.urls import reverse
 from django.contrib import messages
-from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth import login, authenticate, logout, update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
 from mongoengine.queryset.visitor import Q as QM
 from django.db.models import Q as QD
 from .models import *
@@ -98,18 +99,45 @@ def view_user(request, user_id):
     except MyUser.DoesNotExist:
         return HttpResponseRedirect(reverse("list_users"))
 
+    print(request.user.full_name)
     if request.method == 'GET':
-        form = RegisterForm(instance=user)
+        if str(request.user.id) == str(user_id):
+            password_form = PasswordChangeForm(request.user)
+        form = UserForm(instance=user)
     elif request.method == 'POST':
-        form = RegisterForm(request.POST, instance=user)
+        if str(request.user.id) == str(user_id):
+            password_form = PasswordChangeForm(request.user, request.POST)
+        form = UserForm(request.POST, instance=user)
+
         if form.is_valid():
             form.save()
-            messages.success(request, 'User was edited successfully')
+            messages.success(request, 'User information updated successfully')
             return HttpResponseRedirect(reverse("list_users"))
         else:
-            messages.warning(request, 'User was not edited!!!')
+            user_invalid = True
 
-    return render(request, 'view_user.html', {'form': form, 'user': user})
+        if str(request.user.id) == str(user_id) and password_form.is_valid():
+            user = password_form.save()
+            update_session_auth_hash(request, user)
+            messages.success(request, 'Password updated successfully!')
+            return HttpResponseRedirect(reverse("list_users"))
+        else:
+            password_invalid = True
+
+        if password_invalid and not user_invalid:
+            messages.error(request, "Password wasn't updated!")
+        elif user_invalid:
+            messages.error(request, "User information wasn't updated!")
+
+    if str(request.user.id) == str(user_id):
+        password_form.fields['old_password'].widget.attrs = {'class': 'form-control'}
+        password_form.fields['new_password1'].widget.attrs = {'class': 'form-control'}
+        password_form.fields['new_password2'].widget.attrs = {'class': 'form-control'}
+
+        return render(request, 'view_user.html', {'password_form': password_form, 'form': form, 'user': user})
+
+    else:
+        return render(request, 'view_user.html', {'form': form, 'user': user})
 
 
 def delete_user(request):

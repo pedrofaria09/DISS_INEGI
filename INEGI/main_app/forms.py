@@ -53,6 +53,33 @@ class RegisterForm(UserCreationForm):
         #self.fields['is_manager'].widget.attrs.update({'class': 'form-check-input'})
 
 
+class UserForm(ModelForm):
+    class Meta:
+        model = MyUser
+        fields = ('username', 'full_name', 'birthdate', 'is_client', 'is_manager', 'is_staff', 'group_type')
+
+        widgets = {
+            'birthdate': DatePickerInput(format='%d/%m/%Y'),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(UserForm, self).__init__(*args, **kwargs)
+        self.fields['username'].label = "Username"
+        self.fields['full_name'].label = "Full name"
+        self.fields['birthdate'].label = "Date of birth"
+
+        self.fields['is_client'].label = "Is this a Client?"
+        self.fields['is_manager'].label = "Is this a Manager?"
+        self.fields['is_staff'].label = "Is this a Administrator?"
+
+        self.fields['group_type'].label = "Type of Group"
+
+        self.fields['username'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['full_name'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['group_type'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['birthdate'].disabled = True
+
+
 class TowerForm(ModelForm):
     class Meta:
         model = Tower
@@ -72,11 +99,14 @@ class ClusterForm(ModelForm):
     class Meta:
         model = Cluster
         fields = ('name', 'towers')
-        tower = forms.ModelMultipleChoiceField(widget=forms.CheckboxSelectMultiple(), queryset=Tower.objects.all())
+        # tower = forms.ModelMultipleChoiceField(widget=forms.CheckboxSelectMultiple(), queryset=Tower.objects.all())
 
     def __init__(self, *args, **kwargs):
         super(ClusterForm, self).__init__(*args, **kwargs)
         self.fields['name'].widget.attrs.update({'class': 'form-control mandatory'})
+
+        self.fields["towers"].widget = forms.CheckboxSelectMultiple()
+        self.fields["towers"].queryset = Tower.objects.all()
         self.fields['towers'].widget.attrs['size'] = 20
 
 

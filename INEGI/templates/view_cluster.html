@@ -27,10 +27,22 @@
                     {% endif %}
 
                     {% for field in form %}
+{#                        <div class="form-group">#}
+{#                            {{ field.label_tag }}#}
+{#                            {% render_field field class="form-control" %}#}
+{#                        </div>#}
+
                         <div class="form-group">
-                            {{ field.label_tag }}
-                            {% render_field field class="form-control" %}
+                            {% if field.field.is_checkbox %}
+                                <div class="form-check">
+                                    {{ field }}{{ field.label_tag }}
+                                </div>
+                            {% else %}
+                                {{ field.label_tag }}
+                                {% render_field  field placeholder=field.label %}
+                            {% endif %}
                         </div>
+
                     {% endfor %}
 
                     <div class="form-group">
