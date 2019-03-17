@@ -99,7 +99,6 @@ def view_user(request, user_id):
     except MyUser.DoesNotExist:
         return HttpResponseRedirect(reverse("list_users"))
 
-    print(request.user.full_name)
     if request.method == 'GET':
         if str(request.user.id) == str(user_id):
             password_form = PasswordChangeForm(request.user)

@@ -107,7 +107,7 @@ class ClusterForm(ModelForm):
 
         self.fields["towers"].widget = forms.CheckboxSelectMultiple()
         self.fields["towers"].queryset = Tower.objects.all()
-        self.fields['towers'].widget.attrs['size'] = 20
+        # self.fields['towers'].widget.attrs['size'] = 20
 
 
 class TowerViewForm(ModelForm):

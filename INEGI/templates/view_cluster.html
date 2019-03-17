@@ -27,23 +27,81 @@
                     {% endif %}
 
                     {% for field in form %}
-{#                        <div class="form-group">#}
-{#                            {{ field.label_tag }}#}
-{#                            {% render_field field class="form-control" %}#}
-{#                        </div>#}
+{#                        {% if field.name == "name" %}#}
+{#                            <div class="form-group">#}
+{#                                {{ field.label_tag }}#}
+{#                                {% render_field field class="form-control" %}#}
+{#                            </div>#}
+{#                        {% endif %}#}
 
-                        <div class="form-group">
-                            {% if field.field.is_checkbox %}
-                                <div class="form-check">
-                                    {{ field }}{{ field.label_tag }}
-                                </div>
-                            {% else %}
-                                {{ field.label_tag }}
-                                {% render_field  field placeholder=field.label %}
-                            {% endif %}
-                        </div>
+                        {% if field.name == "name" %}
+                            <div class="form-group">
+                                {% if field.field.is_checkbox %}
+                                    <div class="form-check">
+                                        {{ field }}{{ field.label_tag }}
+                                    </div>
+                                {% else %}
+                                    {{ field.label_tag }}
+                                    {% render_field  field placeholder=field.label %}
+                                {% endif %}
+                            </div>
+                        {% endif %}
 
                     {% endfor %}
+
+                <div style="height:500px;width:100%;border:1px solid #ccc;overflow:auto;">
+                    {% for field in form %}
+
+                        {% if field.name == "towers" %}
+                            <div class="form-group">
+                                {% if field.field.is_checkbox %}
+                                    <div class="form-check">
+                                        {{ field }}{{ field.label_tag }}
+                                    </div>
+                                {% else %}
+                                    {{ field.label_tag }}
+                                    {% render_field  field placeholder=field.label %}
+                                {% endif %}
+                            </div>
+                        {% endif %}
+
+                    {% endfor %}
+                </div>
+                <br>
+
+                    <!-- DataTales Example -->
+{#                    <div class="card shadow mb-4">#}
+{#                        <div class="card-header py-2">#}
+{#                            <h6 class="m-0 font-weight-bold text-primary text-center">Towers in clusters</h6>#}
+{#                        </div>#}
+{#                        <div class="card-body">#}
+{#                            <div class="table">#}
+{#                                <table class="table table-bordered table-hover table-sm" id="dataTable" width="100%" cellspacing="0">#}
+{#                                    <thead class="thead-light">#}
+{#                                        <tr>#}
+{#                                            <th>Code</th>#}
+{#                                        </tr>#}
+{#                                    </thead>#}
+{#                                    <tfoot>#}
+{#                                        <tr>#}
+{#                                            <th>Code</th>#}
+{#                                        </tr>#}
+{#                                    </tfoot>#}
+{#                                    <tbody>#}
+{#                                        {% for field in form.towers %}#}
+{#                                            <tr>#}
+{#                                                <td>#}
+{#                                                <div class="form-check">#}
+{#                                                   {{ field }}{{ field.label_tag }}#}
+{#                                                </div>#}
+{#                                                </td>#}
+{#                                            </tr>#}
+{#                                        {% endfor %}#}
+{#                                    </tbody>#}
+{#                                </table>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
 
                     <div class="form-group">
                         <div class="form-row">

@@ -23,12 +23,12 @@ else:
 # Create your models here.
 
 
-GROUP_TYPE = (
+GROUP_TYPE = [
     ("NA", "None"),
     ("FT", "Field Team"),
     ("PD", "Project Developer"),
     ("PF", "Performance FollowUp"),
-)
+]
 
 
 class MyUser(AbstractUser):
@@ -40,6 +40,12 @@ class MyUser(AbstractUser):
 
     def __str__(self):
         return "%s %s" % (self.id, self.full_name)
+
+
+class Test(models.Model):
+    a = models.CharField(primary_key=True, max_length=20, null=False)
+    b = models.CharField(primary_key=True, max_length=20, null=False)
+    c = models.CharField(max_length=300)
 
 
 class Tower(models.Model):
