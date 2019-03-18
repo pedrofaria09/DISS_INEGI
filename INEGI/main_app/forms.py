@@ -19,11 +19,9 @@ class LoginForm(forms.Form):
 class RegisterForm(UserCreationForm):
     class Meta:
         model = MyUser
-        fields = ('username', 'password1', 'password2', 'full_name', 'birthdate', 'is_client', 'is_manager', 'is_staff', 'group_type')
+        fields = ('username', 'password1', 'password2', 'full_name', 'is_client', 'is_manager', 'is_staff', 'group_type')
 
-        widgets = {
-            'birthdate': DatePickerInput(format='%d/%m/%Y'),
-        }
+        # widgets = {'birthdate': DatePickerInput(format='%d/%m/%Y'),}
 
     def clean_username(self):
         username = self.cleaned_data.get('username')
@@ -37,7 +35,7 @@ class RegisterForm(UserCreationForm):
         self.fields['password1'].label = "Password"
         self.fields['password2'].label = "Confirm password"
         self.fields['full_name'].label = "Full name"
-        self.fields['birthdate'].label = "Date of birth"
+        # self.fields['birthdate'].label = "Date of birth"
 
         self.fields['is_client'].label = "Is this a Client?"
         self.fields['is_manager'].label = "Is this a Manager?"
@@ -57,17 +55,15 @@ class RegisterForm(UserCreationForm):
 class UserForm(ModelForm):
     class Meta:
         model = MyUser
-        fields = ('username', 'full_name', 'birthdate', 'is_client', 'is_manager', 'is_staff', 'group_type')
+        fields = ('username', 'full_name', 'is_client', 'is_manager', 'is_staff', 'group_type')
 
-        widgets = {
-            'birthdate': DatePickerInput(format='%d/%m/%Y'),
-        }
+        # widgets = {'birthdate': DatePickerInput(format='%d/%m/%Y'),}
 
     def __init__(self, *args, **kwargs):
         super(UserForm, self).__init__(*args, **kwargs)
         self.fields['username'].label = "Username"
         self.fields['full_name'].label = "Full name"
-        self.fields['birthdate'].label = "Date of birth"
+        # self.fields['birthdate'].label = "Date of birth"
 
         self.fields['is_client'].label = "Is this a Client?"
         self.fields['is_manager'].label = "Is this a Manager?"
@@ -78,7 +74,7 @@ class UserForm(ModelForm):
         self.fields['username'].widget.attrs.update({'class': 'form-control mandatory'})
         self.fields['full_name'].widget.attrs.update({'class': 'form-control mandatory'})
         self.fields['group_type'].widget.attrs.update({'class': 'form-control mandatory'})
-        self.fields['birthdate'].disabled = True
+        # self.fields['birthdate'].disabled = True
 
 
 class UserTowersFrom(ModelForm):

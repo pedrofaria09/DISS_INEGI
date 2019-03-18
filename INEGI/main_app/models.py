@@ -44,7 +44,7 @@ class Tower(models.Model):
 
 class MyUser(AbstractUser):
     full_name = models.CharField(max_length=100)
-    birthdate = models.DateField(null=True)
+    # birthdate = models.DateField(null=True)
     is_client = models.BooleanField(default=False)
     is_manager = models.BooleanField(default=False)
     group_type = models.CharField(max_length=30, choices=GROUP_TYPE, default="NA")

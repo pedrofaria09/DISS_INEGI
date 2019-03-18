@@ -200,7 +200,7 @@ def add_tower(request):
 
             # Associate the tower created to the user (that isn't an admin?)
             # if not request.user.is_staff:
-            MyUser.objects.get(id=request.user.id).towers.add(tower)
+            # MyUser.objects.get(id=request.user.id).towers.add(tower)
 
             messages.success(request, 'Tower created successfully!')
             return HttpResponseRedirect(reverse("list_towers"))
