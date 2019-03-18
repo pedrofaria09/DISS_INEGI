@@ -18,3 +18,10 @@ $('#dataTableUsers').DataTable( {
     { 'searchable' : false, 'targets' : [2] },
   ]
 });
+
+$('#dataTableEquipments').DataTable( {
+"columnDefs": [
+    { "orderable": false, "targets": [2] },
+    { 'searchable' : false, 'targets' : [2] },
+  ]
+});

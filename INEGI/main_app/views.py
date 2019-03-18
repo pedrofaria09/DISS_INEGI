@@ -108,10 +108,12 @@ def view_user(request, user_id):
         if str(request.user.id) == str(user_id):
             password_form = PasswordChangeForm(request.user)
         form = UserForm(instance=user)
+        form.fields['username'].disabled = True
     elif request.method == 'POST':
         if str(request.user.id) == str(user_id):
             password_form = PasswordChangeForm(request.user, request.POST)
         form = UserForm(request.POST, instance=user)
+        form.fields['username'].disabled = True
 
         if form.is_valid():
             form.save()
@@ -235,9 +237,11 @@ def view_tower(request, tower_id):
         return HttpResponseRedirect(reverse("list_towers"))
 
     if request.method == 'GET':
-        form = TowerViewForm(instance=tower)
+        form = TowerForm(instance=tower)
+        form.fields['code'].disabled = True
     elif request.method == 'POST':
-        form = TowerViewForm(request.POST, instance=tower)
+        form = TowerForm(request.POST, instance=tower)
+        form.fields['code'].disabled = True
         if form.is_valid():
             form.save()
             messages.success(request, 'A torre foi editada com sucesso')
@@ -310,17 +314,58 @@ def delete_cluster(request):
     return HttpResponse("not ok")
 
 
-
 def list_equipments(request):
     equipments = Equipment.objects.all()
 
     return render(request, 'list_esquipments.html', {'equipments': equipments})
 
 
+def add_equipment(request):
+    if request.method == 'POST':
+        form = EquipmentForm(request.POST)
+        if form.is_valid():
+            form.save()
+
+            messages.success(request, 'Equipment created successfully!')
+            return HttpResponseRedirect(reverse("list_equipments"))
+        else:
+            messages.warning(request, 'Equipment not added!!!')
+    else:
+        form = EquipmentForm()
+
+    return render(request, 'add_equipment.html', {'form': form})
 
 
+def view_equipment(request, equipment_id):
+    try:
+        equipment = Equipment.objects.get(pk=equipment_id)
+    except Equipment.DoesNotExist:
+        return HttpResponseRedirect(reverse("list_equipments"))
+
+    if request.method == 'GET':
+        form = EquipmentForm(instance=equipment)
+        form.fields['sn'].disabled = True
+    elif request.method == 'POST':
+        form = EquipmentForm(request.POST, instance=equipment)
+        form.fields['sn'].disabled = True
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Equipment was edited with success')
+            return HttpResponseRedirect(reverse("list_equipments"))
+        else:
+            messages.warning(request, "Equipment wasn't edited!!!")
+
+    return render(request, 'view_equipment.html', {'form': form, 'equipment_id': equipment_id})
 
 
+def delete_equipment(request):
+    if request.is_ajax and request.method == 'POST':
+        equipment = Equipment.objects.get(pk=request.POST["id"])
+        equipment.delete()
+        messages.success(request, 'Equipment was deleted successfully!')
+        return HttpResponse('ok')
+    messages.error(request, 'An error occurred when deleting the equipment!')
+    return HttpResponse("not ok")
 
 
 def show_towers_data_mongo(request):

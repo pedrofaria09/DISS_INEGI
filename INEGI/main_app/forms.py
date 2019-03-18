@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm
-from .models import Tower, MyUser, Cluster
+from .models import Tower, MyUser, Cluster, Equipment
 from django.contrib.auth.forms import UserCreationForm
 from bootstrap_datepicker_plus import DatePickerInput
 
@@ -105,22 +105,6 @@ class TowerForm(ModelForm):
         self.fields['name'].label = "Nome"
 
 
-class TowerViewForm(ModelForm):
-    class Meta:
-        model = Tower
-        fields = ('code', 'name')
-        widgets = {
-            'code': forms.TextInput(attrs={'placeholder': 'Enter Tower code', 'style': 'width:100%'}),
-            'name': forms.TextInput(attrs={'placeholder': 'Enter Tower name', 'style': 'width:100%'}),
-        }
-
-    def __init__(self, *args, **kwargs):
-        super(TowerViewForm, self).__init__(*args, **kwargs)
-        self.fields['code'].label = "Code"
-        self.fields['name'].label = "Name"
-        self.fields['code'].disabled = True
-
-
 class ClusterForm(ModelForm):
     class Meta:
         model = Cluster
@@ -135,3 +119,25 @@ class ClusterForm(ModelForm):
         self.fields["towers"].queryset = Tower.objects.all()
         # self.fields['towers'].widget.attrs['size'] = 20
 
+
+class EquipmentForm(ModelForm):
+    class Meta:
+        model = Equipment
+        fields = ('sn', 'manufacturer', 'model', 'version', 'designation', 'status', 'type')
+
+    def __init__(self, *args, **kwargs):
+        super(EquipmentForm, self).__init__(*args, **kwargs)
+        self.fields['sn'].label = "Serial Number"
+        self.fields['manufacturer'].label = "Manufacturer"
+        self.fields['model'].label = "Model"
+        self.fields['version'].label = "Version"
+        self.fields['designation'].label = "Designation"
+        self.fields['status'].label = "Active?"
+        self.fields['type'].label = "Equipment Type"
+
+        self.fields['sn'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['manufacturer'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['model'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['version'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['designation'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['type'].widget.attrs.update({'class': 'form-control mandatory'})
