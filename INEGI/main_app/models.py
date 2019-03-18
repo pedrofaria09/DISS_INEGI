@@ -62,6 +62,26 @@ class Cluster(models.Model):
         return "%s" % self.name
 
 
+class EquipmentType(models.Model):
+    name = models.CharField(primary_key=True, max_length=100)
+
+    def __str__(self):
+        return "%s" % self.name
+
+
+class Equipment(models.Model):
+    sn = models.CharField(primary_key=True, max_length=100)
+    manufacturer = models.CharField(max_length=100, null=True, blank=True)
+    model = models.CharField(max_length=50, null=True, blank=True)
+    version = models.CharField(max_length=10, null=True, blank=True)
+    designation = models.CharField(max_length=100, null=True, blank=True)
+    status = models.BooleanField(default=True)
+    type = models.ForeignKey(EquipmentType, on_delete=DO_NOTHING)
+
+    def __str__(self):
+        return "%s" % self.type
+
+
 class DataSetPG(models.Model):
     # tower_code = models.ForeignKey(Tower, on_delete=models.SET_NULL, blank=True, null=True) # Cant use, because we can have datasets without towers
     tower_code = models.CharField(max_length=20, null=False)

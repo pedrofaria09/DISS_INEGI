@@ -310,6 +310,19 @@ def delete_cluster(request):
     return HttpResponse("not ok")
 
 
+
+def list_equipments(request):
+    equipments = Equipment.objects.all()
+
+    return render(request, 'list_esquipments.html', {'equipments': equipments})
+
+
+
+
+
+
+
+
 def show_towers_data_mongo(request):
     data = {}
 
