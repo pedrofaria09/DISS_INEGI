@@ -49,6 +49,7 @@ class RegisterForm(UserCreationForm):
         self.fields['password1'].widget.attrs.update({'class': 'form-control mandatory'})
         self.fields['password2'].widget.attrs.update({'class': 'form-control mandatory'})
         self.fields['full_name'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['group_type'].widget.attrs.update({'class': 'form-control mandatory'})
         #self.fields['is_client'].widget.attrs.update({'class': 'form-check-input'})
         #self.fields['is_manager'].widget.attrs.update({'class': 'form-check-input'})
 
@@ -80,6 +81,19 @@ class UserForm(ModelForm):
         self.fields['birthdate'].disabled = True
 
 
+class UserTowersFrom(ModelForm):
+    class Meta:
+        model = MyUser
+        fields = ['towers']
+        # towers = forms.ModelMultipleChoiceField(widget=forms.CheckboxSelectMultiple(), queryset=Tower.objects.all())
+
+    def __init__(self, *args, **kwargs):
+        super(UserTowersFrom, self).__init__(*args, **kwargs)
+        self.fields["towers"].widget = forms.CheckboxSelectMultiple()
+        self.fields["towers"].queryset = Tower.objects.all()
+        # self.fields['towers'].widget.attrs['size'] = 20
+
+
 class TowerForm(ModelForm):
     class Meta:
         model = Tower
@@ -95,11 +109,27 @@ class TowerForm(ModelForm):
         self.fields['name'].label = "Nome"
 
 
+class TowerViewForm(ModelForm):
+    class Meta:
+        model = Tower
+        fields = ('code', 'name')
+        widgets = {
+            'code': forms.TextInput(attrs={'placeholder': 'Enter Tower code', 'style': 'width:100%'}),
+            'name': forms.TextInput(attrs={'placeholder': 'Enter Tower name', 'style': 'width:100%'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(TowerViewForm, self).__init__(*args, **kwargs)
+        self.fields['code'].label = "Code"
+        self.fields['name'].label = "Name"
+        self.fields['code'].disabled = True
+
+
 class ClusterForm(ModelForm):
     class Meta:
         model = Cluster
         fields = ('name', 'towers')
-        # tower = forms.ModelMultipleChoiceField(widget=forms.CheckboxSelectMultiple(), queryset=Tower.objects.all())
+        # towers = forms.ModelMultipleChoiceField(widget=forms.CheckboxSelectMultiple(), queryset=Tower.objects.all())
 
     def __init__(self, *args, **kwargs):
         super(ClusterForm, self).__init__(*args, **kwargs)
@@ -109,18 +139,3 @@ class ClusterForm(ModelForm):
         self.fields["towers"].queryset = Tower.objects.all()
         # self.fields['towers'].widget.attrs['size'] = 20
 
-
-class TowerViewForm(ModelForm):
-    class Meta:
-        model = Tower
-        fields = ('code', 'name')
-        widgets = {
-            'code': forms.TextInput(attrs={'placeholder': 'Introduza o codigo da Torre', 'style': 'width:100%'}),
-            'name': forms.TextInput(attrs={'placeholder': 'Introduza o nome da Torre', 'style': 'width:100%'}),
-        }
-
-    def __init__(self, *args, **kwargs):
-        super(TowerViewForm, self).__init__(*args, **kwargs)
-        self.fields['code'].label = "Codigo"
-        self.fields['name'].label = "Nome"
-        self.fields['code'].disabled = True

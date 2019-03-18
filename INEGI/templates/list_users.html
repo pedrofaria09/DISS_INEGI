@@ -38,6 +38,7 @@
                                 <td class="align-middle p-2"><a href="{% url "view_user" user.id %}">{{ user.username }}</a></td>
                                 <td>
                                     <a href="{% url "view_user" user.id %}" class="btn btn-sm btn-info">View - Edit</a>
+                                    <a href="{% url "associate_towers" user.id %}" class="btn btn-sm btn-secondary">Associate Towers</a>
                                 </td>
                             </tr>
                         {% endfor %}

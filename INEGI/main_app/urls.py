@@ -19,6 +19,8 @@ urlpatterns =[
     url(r'^view_user/(?P<user_id>[0-9]+)$', views.view_user, name='view_user'),
     url(r'^view_cluster/(?P<cluster_id>[\w\-]+)$', views.view_cluster, name='view_cluster'),
 
+    url(r'^associate_towers/(?P<user_id>[0-9]+)$', views.associate_towers, name='associate_towers'),
+
     url(r'^delete_tower/?$', views.delete_tower, name='delete_tower'),
     url(r'^delete_user/?$', views.delete_user, name='delete_user'),
     url(r'^delete_cluster/?$', views.delete_cluster, name='delete_cluster'),

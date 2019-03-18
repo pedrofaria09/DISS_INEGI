@@ -31,23 +31,6 @@ GROUP_TYPE = [
 ]
 
 
-class MyUser(AbstractUser):
-    full_name = models.CharField(max_length=100)
-    birthdate = models.DateField(null=True)
-    is_client = models.BooleanField(default=False)
-    is_manager = models.BooleanField(default=False)
-    group_type = models.CharField(max_length=30, choices=GROUP_TYPE, default="NA")
-
-    def __str__(self):
-        return "%s %s" % (self.id, self.full_name)
-
-
-class Test(models.Model):
-    a = models.CharField(primary_key=True, max_length=20, null=False)
-    b = models.CharField(primary_key=True, max_length=20, null=False)
-    c = models.CharField(max_length=300)
-
-
 class Tower(models.Model):
     code = models.CharField(primary_key=True, max_length=20, null=False)
     name = models.CharField(max_length=30, null=False)
@@ -59,9 +42,21 @@ class Tower(models.Model):
         return "%s" % self.code
 
 
+class MyUser(AbstractUser):
+    full_name = models.CharField(max_length=100)
+    birthdate = models.DateField(null=True)
+    is_client = models.BooleanField(default=False)
+    is_manager = models.BooleanField(default=False)
+    group_type = models.CharField(max_length=30, choices=GROUP_TYPE, default="NA")
+    towers = models.ManyToManyField(Tower, verbose_name="list of towers", blank=True)
+
+    def __str__(self):
+        return "%s %s" % (self.id, self.full_name)
+
+
 class Cluster(models.Model):
     name = models.CharField(primary_key=True, max_length=100)
-    towers = models.ManyToManyField(Tower, verbose_name="list of towers")
+    towers = models.ManyToManyField(Tower, verbose_name="list of towers", blank=True)
 
     def __str__(self):
         return "%s" % self.name
@@ -69,9 +64,16 @@ class Cluster(models.Model):
 
 class DataSetPG(models.Model):
     # tower_code = models.ForeignKey(Tower, on_delete=models.SET_NULL, blank=True, null=True) # Cant use, because we can have datasets without towers
-    tower_code = models.CharField(db_index=True, max_length=20, null=False)
-    time_stamp = models.DateTimeField(db_index=True, default=datetime.now, null=True, blank=True)
+    tower_code = models.CharField(max_length=20, null=False)
+    time_stamp = models.DateTimeField(default=datetime.now, null=True, blank=True)
     value = models.CharField(max_length=200)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['tower_code', 'time_stamp', ]),
+            models.Index(fields=['tower_code', ]),
+            models.Index(fields=['time_stamp', ])
+        ]
 
     def __str__(self):
         return "%s" % self.tower_code

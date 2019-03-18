@@ -34,7 +34,7 @@
 {#                            </div>#}
 {#                        {% endif %}#}
 
-                        {% if field.name == "name" %}
+{#                        {% if field.name == "name" %}#}
                             <div class="form-group">
                                 {% if field.field.is_checkbox %}
                                     <div class="form-check">
@@ -45,29 +45,29 @@
                                     {% render_field  field placeholder=field.label %}
                                 {% endif %}
                             </div>
-                        {% endif %}
+{#                        {% endif %}#}
 
                     {% endfor %}
 
-                <div style="height:500px;width:100%;border:1px solid #ccc;overflow:auto;">
-                    {% for field in form %}
-
-                        {% if field.name == "towers" %}
-                            <div class="form-group">
-                                {% if field.field.is_checkbox %}
-                                    <div class="form-check">
-                                        {{ field }}{{ field.label_tag }}
-                                    </div>
-                                {% else %}
-                                    {{ field.label_tag }}
-                                    {% render_field  field placeholder=field.label %}
-                                {% endif %}
-                            </div>
-                        {% endif %}
-
-                    {% endfor %}
-                </div>
-                <br>
+{#                <div style="height:500px;width:100%;border:1px solid #ccc;overflow:auto;">#}
+{#                    {% for field in form %}#}
+{##}
+{#                        {% if field.name == "towers" %}#}
+{#                            <div class="form-group">#}
+{#                                {% if field.field.is_checkbox %}#}
+{#                                    <div class="form-check">#}
+{#                                        {{ field }}{{ field.label_tag }}#}
+{#                                    </div>#}
+{#                                {% else %}#}
+{#                                    {{ field.label_tag }}#}
+{#                                    {% render_field  field placeholder=field.label %}#}
+{#                                {% endif %}#}
+{#                            </div>#}
+{#                        {% endif %}#}
+{##}
+{#                    {% endfor %}#}
+{#                </div>#}
+{#                <br>#}
 
                     <!-- DataTales Example -->
 {#                    <div class="card shadow mb-4">#}

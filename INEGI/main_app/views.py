@@ -94,6 +94,11 @@ def list_users(request):
 
 
 def view_user(request, user_id):
+
+    if not request.user.is_staff and not str(request.user.id) == str(user_id):
+        messages.error(request, 'You dont have permissions to do this!!!')
+        return HttpResponseRedirect(reverse("list_users"))
+
     try:
         user = MyUser.objects.get(id=user_id)
     except MyUser.DoesNotExist:
@@ -163,11 +168,39 @@ def ban_user(request):
     return HttpResponse("not ok")
 
 
+def associate_towers(request, user_id):
+    if not request.user.is_staff:
+        messages.error(request, 'You dont have permissions to do this!!!')
+        return HttpResponseRedirect(reverse("list_users"))
+
+    try:
+        user = MyUser.objects.get(pk=user_id)
+    except MyUser.DoesNotExist:
+        return HttpResponseRedirect(reverse("list_users"))
+
+    if request.method == 'GET':
+        form = UserTowersFrom(instance=user)
+    elif request.method == 'POST':
+        form = UserTowersFrom(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Towers was been associated correctly')
+            return HttpResponseRedirect(reverse("list_users"))
+        else:
+            messages.warning(request, 'Problem associating Towers!!!')
+
+    return render(request, 'associate_towers.html', {'form': form, 'user': user})
+
+
 def add_tower(request):
     if request.method == 'POST':
         form = TowerForm(request.POST)
         if form.is_valid():
-            form.save()
+            tower = form.save()
+
+            # Associate the tower created to the user (that isn't an admin?)
+            # if not request.user.is_staff:
+            MyUser.objects.get(id=request.user.id).towers.add(tower)
 
             messages.success(request, 'Tower created successfully!')
             return HttpResponseRedirect(reverse("list_towers"))
@@ -520,7 +553,8 @@ def show_towers_data_pg(request):
     # DataSetPG.objects.all().delete()
 
     start_time = time.time()
-    dataset = DataSetPG.objects.filter(QD(tower_code='port525'))
+    # dataset = DataSetPG.objects.filter(QD(tower_code='port525'))
+    dataset = DataSetPG.objects.all()
 
     # for t in dataset:
     #     print(t.tower_code, "---", t.time_stamp, "---", t.value)
