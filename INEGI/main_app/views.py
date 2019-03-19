@@ -492,9 +492,9 @@ def add_raw_data_mongo(request):
                 tower_code = tower_code.lower()
 
                 # Check for if tower exists or not, if not create.
-                if firstime:
-                    create_tower_if_doesnt_exists(request, tower_code)
-                    firstime = False
+                # if firstime:
+                #     create_tower_if_doesnt_exists(request, tower_code)
+                #     firstime = False
 
                 # Check if have a tower_code and a time_stamp and replace the value - Heavy Operation
                 try:

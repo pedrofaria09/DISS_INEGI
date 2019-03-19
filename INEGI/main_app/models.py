@@ -31,9 +31,24 @@ GROUP_TYPE = [
 ]
 
 
-class Tower(models.Model):
+class Station(models.Model):
     code = models.CharField(unique=True, max_length=20, null=False)
     name = models.CharField(max_length=30, null=False)
+
+    class Meta:
+        abstract = True
+
+
+class Machine(Station):
+
+    class Meta:
+        ordering = ["code"]
+
+    def __str__(self):
+        return "%s" % self.code
+
+
+class Tower(Station):
 
     class Meta:
         ordering = ["code"]
@@ -44,7 +59,6 @@ class Tower(models.Model):
 
 class MyUser(AbstractUser):
     full_name = models.CharField(max_length=100)
-    # birthdate = models.DateField(null=True)
     is_client = models.BooleanField(default=False)
     is_manager = models.BooleanField(default=False)
     group_type = models.CharField(max_length=30, choices=GROUP_TYPE, default="NA")
@@ -83,7 +97,6 @@ class Equipment(models.Model):
 
 
 class DataSetPG(models.Model):
-    # tower_code = models.ForeignKey(Tower, on_delete=models.SET_NULL, blank=True, null=True) # Cant use, because we can have datasets without towers
     tower_code = models.CharField(max_length=20, null=False)
     time_stamp = models.DateTimeField(default=datetime.now, null=True, blank=True)
     value = models.CharField(max_length=200)
