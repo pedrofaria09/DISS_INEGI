@@ -63,14 +63,14 @@ class Cluster(models.Model):
 
 
 class EquipmentType(models.Model):
-    name = models.CharField(primary_key=True, max_length=100)
+    name = models.CharField(unique=True, max_length=100)
 
     def __str__(self):
         return "%s" % self.name
 
 
 class Equipment(models.Model):
-    sn = models.CharField(primary_key=True, max_length=100)
+    sn = models.CharField(unique=True, max_length=100)
     manufacturer = models.CharField(max_length=100, null=True, blank=True)
     model = models.CharField(max_length=50, null=True, blank=True)
     version = models.CharField(max_length=10, null=True, blank=True)
