@@ -71,14 +71,14 @@
                 System
             </div>
 
-            <!-- Nav Item - Pages Collapse Menu -->
+            <!-- Nav Item - DropDown Towers -->
             <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwoTower"
                    aria-expanded="true" aria-controls="collapseTwo">
                     <i class="fas fa-fw fa-cog"></i>
                     <span>Towers</span>
                 </a>
-                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                <div id="collapseTwoTower" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <a class="collapse-item" href="{% url "add_tower" %}">Add a Tower</a>
                         <a class="collapse-item" href="{% url "list_towers" %}">View all Towers</a>
@@ -86,19 +86,51 @@
                 </div>
             </li>
 
-            <!-- Nav Item - Clusters -->
+            <!-- Nav Item - DropDown Clusters -->
             <li class="nav-item">
-                <a class="nav-link" href="{% url "list_clusters" %}">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwoCluster"
+                   aria-expanded="true" aria-controls="collapseTwo">
                     <i class="fas fa-fw fa-server"></i>
-                    <span>Clusters</span></a>
+                    <span>Clusters</span>
+                </a>
+                <div id="collapseTwoCluster" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <a class="collapse-item" href="{% url "add_cluster" %}">Add a Cluster</a>
+                        <a class="collapse-item" href="{% url "list_clusters" %}">View all Clusters</a>
+                    </div>
+                </div>
             </li>
 
-            <!-- Nav Item - Equipments -->
+            <!-- Nav Item - DropDown Equipments -->
             <li class="nav-item">
-                <a class="nav-link" href="{% url "list_equipments" %}">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwoEquipment"
+                   aria-expanded="true" aria-controls="collapseTwo">
                     <i class="fas fa-fw fa-microchip"></i>
-                    <span>Equipments</span></a>
+                    <span>Equipments</span>
+                </a>
+                <div id="collapseTwoEquipment" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <a class="collapse-item" href="{% url "add_equipment" %}">Add an Equipment</a>
+                        <a class="collapse-item" href="{% url "list_equipments" %}">View all Equipments</a>
+                    </div>
+                </div>
             </li>
+
+
+            <!-- Nav Item - DropDown Equipments -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwoEnum"
+                   aria-expanded="true" aria-controls="collapseTwo">
+                    <i class="fas fa-fw fa-plus"></i>
+                    <span>Types</span>
+                </a>
+                <div id="collapseTwoEnum" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <a class="collapse-item" href="{% url "list_equipments_type" %}">Equipments Types</a>
+                    </div>
+                </div>
+            </li>
+
 
             <!-- Divider -->
             <hr class="sidebar-divider">

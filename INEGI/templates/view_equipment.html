@@ -35,6 +35,9 @@
                                 </div>
                             {% else %}
                                 {{ field.label_tag }}{% if field.field.required %} *{% endif %}
+                                {% if field.name == "type" %}
+                                    <a href="{% url "add_equipment_type" %}" class="related-widget-wrapper-link add-related" id="add_id_type"  title="Add another equipment type"><img src="/static/admin/img/icon-addlink.svg" alt="Add"></a>
+                                {% endif %}
                                 {% render_field field placeholder=field.label %}
                             {% endif %}
                         </div>

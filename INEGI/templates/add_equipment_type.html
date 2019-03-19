@@ -7,12 +7,12 @@
     <div class="container-fluid">
         <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Add an Equipment</h1>
+            <h1 class="h3 mb-0 text-gray-800">Add an Equipment Type</h1>
         </div>
 
         <div class="row">
             <div class="col-12">
-                <form action="{% url "add_equipment" %}" method="POST">
+                <form action="{% url "add_equipment_type" %}" method="POST">
 
                     {% csrf_token %}
 
@@ -28,20 +28,8 @@
 
                     {% for field in form %}
                         <div class="form-group">
-                            {% if field.field.is_checkbox %}
-                                <div class="form-check">
-                                    {{ field }}{% if field.field.required %} *{% endif %}
-                                    {{ field.label_tag }}
-                                </div>
-                            {% else %}
-                                {{ field.label_tag }}{% if field.field.required %} *{% endif %}
-                                {% if field.name == "type" %}
-                                    <a href="{% url "add_equipment_type" %}" class="related-widget-wrapper-link add-related" id="add_id_type"  title="Add another equipment type"><img src="/static/admin/img/icon-addlink.svg" alt="Add"></a>
-                                {% endif %}
-                                {% render_field field placeholder=field.label %}
-
-
-                            {% endif %}
+                            {{ field.label_tag }}{% if field.field.required %} *{% endif %}
+                            {% render_field field placeholder=field.label %}
                         </div>
                     {% endfor %}
 

@@ -25,3 +25,10 @@ $('#dataTableEquipments').DataTable( {
     { 'searchable' : false, 'targets' : [2] },
   ]
 });
+
+$('#dataTableEquipmentsType').DataTable( {
+"columnDefs": [
+    { "orderable": false, "targets": [1] },
+    { 'searchable' : false, 'targets' : [1] },
+  ]
+});

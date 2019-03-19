@@ -317,7 +317,7 @@ def delete_cluster(request):
 def list_equipments(request):
     equipments = Equipment.objects.all()
 
-    return render(request, 'list_esquipments.html', {'equipments': equipments})
+    return render(request, 'list_equipments.html', {'equipments': equipments})
 
 
 def add_equipment(request):
@@ -363,6 +363,58 @@ def delete_equipment(request):
         equipment = Equipment.objects.get(pk=request.POST["id"])
         equipment.delete()
         messages.success(request, 'Equipment was deleted successfully!')
+        return HttpResponse('ok')
+    messages.error(request, 'An error occurred when deleting the equipment!')
+    return HttpResponse("not ok")
+
+
+def list_equipments_type(request):
+    equipments_type = EquipmentType.objects.all()
+
+    return render(request, 'list_equipments_type.html', {'equipments_type': equipments_type})
+
+
+def add_equipment_type(request):
+    if request.method == 'POST':
+        form = EquipmentTypeForm(request.POST)
+        if form.is_valid():
+            form.save()
+
+            messages.success(request, 'Equipment created successfully!')
+            return HttpResponseRedirect(reverse("list_equipments_type"))
+        else:
+            messages.warning(request, 'Equipment not added!!!')
+    else:
+        form = EquipmentTypeForm()
+
+    return render(request, 'add_equipment_type.html', {'form': form})
+
+
+def view_equipment_type(request, equipment_id):
+    try:
+        equipment = EquipmentType.objects.get(pk=equipment_id)
+    except EquipmentType.DoesNotExist:
+        return HttpResponseRedirect(reverse("list_equipments_type"))
+
+    if request.method == 'GET':
+        form = EquipmentTypeForm(instance=equipment)
+    elif request.method == 'POST':
+        form = EquipmentTypeForm(request.POST, instance=equipment)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Equipment Type was edited with success')
+            return HttpResponseRedirect(reverse("list_equipments_type"))
+        else:
+            messages.warning(request, "Equipment Type wasn't edited!!!")
+
+    return render(request, 'view_equipment_type.html', {'form': form, 'equipment_id': equipment_id})
+
+
+def delete_equipment_type(request):
+    if request.is_ajax and request.method == 'POST':
+        equipment = EquipmentType.objects.get(pk=request.POST["id"])
+        equipment.delete()
+        messages.success(request, 'Equipment type was deleted successfully!')
         return HttpResponse('ok')
     messages.error(request, 'An error occurred when deleting the equipment!')
     return HttpResponse("not ok")

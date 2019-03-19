@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm
-from .models import Tower, MyUser, Cluster, Equipment
+from .models import *
 from django.contrib.auth.forms import UserCreationForm
 from bootstrap_datepicker_plus import DatePickerInput
 
@@ -141,3 +141,16 @@ class EquipmentForm(ModelForm):
         self.fields['version'].widget.attrs.update({'class': 'form-control mandatory'})
         self.fields['designation'].widget.attrs.update({'class': 'form-control mandatory'})
         self.fields['type'].widget.attrs.update({'class': 'form-control mandatory'})
+
+
+class EquipmentTypeForm(ModelForm):
+    class Meta:
+        model = EquipmentType
+        fields = ('name',)
+
+    def __init__(self, *args, **kwargs):
+        super(EquipmentTypeForm, self).__init__(*args, **kwargs)
+        self.fields['name'].label = "Equipment Type Name"
+
+        self.fields['name'].widget.attrs.update({'class': 'form-control mandatory'})
+
