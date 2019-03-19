@@ -7,7 +7,7 @@
     <div class="container-fluid">
         <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Visualizar/Editar uma torre</h1>
+            <h1 class="h3 mb-0 text-gray-800">View-Edit Tower: {{ tower.code }}</h1>
         </div>
 
         <div class="row">
@@ -36,10 +36,10 @@
                     <div class="form-group">
                         <div class="form-row">
                             <div class="col-md-6">
-                                <input type="submit" class="btn btn-primary btn-block" value="Editar">
+                                <input type="submit" class="btn btn-primary btn-block" value="Edit">
                             </div>
                             <div class="col-md-6">
-                                <a href="#" name="delete_tower" data-id="{{ tower_id }}" class="btn btn-danger btn-block">Apagar</a>
+                                <a href="#" name="delete_tower" data-id="{{ tower_id }}" class="btn btn-danger btn-block">Delete</a>
                             </div>
                         </div>
                     </div>

@@ -15,6 +15,7 @@ import time, re, io, json
 
 # Create your views here.
 
+
 def get_obj_or_404_2(klass, *args, **kwargs):
     try:
         return klass.objects.get(*args, **kwargs)
@@ -240,21 +241,72 @@ def view_tower(request, tower_id):
         form = TowerForm(request.POST, instance=tower)
         if form.is_valid():
             form.save()
-            messages.success(request, 'A torre foi editada com sucesso')
+            messages.success(request, 'Tower was edited successfully')
             return HttpResponseRedirect(reverse("list_towers"))
         else:
-            messages.warning(request, 'A torre não foi editada')
+            messages.warning(request, 'Tower wasnt edited successfully!!!')
 
-    return render(request, 'view_tower.html', {'form': form, 'tower_id': tower_id})
+    return render(request, 'view_tower.html', {'form': form, 'tower_id': tower_id, 'tower': tower})
 
 
 def delete_tower(request):
     if request.is_ajax and request.method == 'POST':
         tower = Tower.objects.get(pk=request.POST["id"])
         tower.delete()
-        messages.success(request, 'A Torre foi removida com sucesso!')
+        messages.success(request, 'Tower was removed successfully!')
         return HttpResponse('ok')
-    messages.error(request, 'Aconteceu um problema na remoção da Torre!')
+    messages.error(request, 'A problem occurred when deleting the Tower!')
+    return HttpResponse("not ok")
+
+
+def add_machine(request):
+    if request.method == 'POST':
+        form = MachineForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Machine created successfully!')
+            return HttpResponseRedirect(reverse("list_machines"))
+        else:
+            messages.warning(request, 'Machine not added!!!')
+    else:
+        form = MachineForm()
+
+    return render(request, 'add_machine.html', {'form': form})
+
+
+def list_machines(request):
+    machines = Machine.objects.all()
+
+    return render(request, 'list_machines.html', {'machines': machines})
+
+
+def view_machine(request, machine_id):
+    try:
+        machine = Machine.objects.get(pk=machine_id)
+    except Machine.DoesNotExist:
+        return HttpResponseRedirect(reverse("list_machines"))
+
+    if request.method == 'GET':
+        form = MachineForm(instance=machine)
+    elif request.method == 'POST':
+        form = MachineForm(request.POST, instance=machine)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Machine was edited successfully')
+            return HttpResponseRedirect(reverse("list_machines"))
+        else:
+            messages.warning(request, 'Machine wasnt edited!!!')
+
+    return render(request, 'view_machine.html', {'form': form, 'machine_id': machine_id, 'machine': machine})
+
+
+def delete_machine(request):
+    if request.is_ajax and request.method == 'POST':
+        machine = Machine.objects.get(pk=request.POST["id"])
+        machine.delete()
+        messages.success(request, 'Machine was successfully removed!')
+        return HttpResponse('ok')
+    messages.error(request, 'A problem occurred when deleting the Machine!')
     return HttpResponse("not ok")
 
 
@@ -297,7 +349,7 @@ def view_cluster(request, cluster_id):
         else:
             messages.warning(request, "Cluster wasn't edited!!!")
 
-    return render(request, 'view_cluster.html', {'form': form, 'cluster_id': cluster_id})
+    return render(request, 'view_cluster.html', {'form': form, 'cluster_id': cluster_id, 'cluster': cluster})
 
 
 def delete_cluster(request):
@@ -351,7 +403,7 @@ def view_equipment(request, equipment_id):
         else:
             messages.warning(request, "Equipment wasn't edited!!!")
 
-    return render(request, 'view_equipment.html', {'form': form, 'equipment_id': equipment_id})
+    return render(request, 'view_equipment.html', {'form': form, 'equipment_id': equipment_id, 'equipment': equipment})
 
 
 def delete_equipment(request):
@@ -403,7 +455,7 @@ def view_equipment_type(request, equipment_id):
         else:
             messages.warning(request, "Equipment Type wasn't edited!!!")
 
-    return render(request, 'view_equipment_type.html', {'form': form, 'equipment_id': equipment_id})
+    return render(request, 'view_equipment_type.html', {'form': form, 'equipment_id': equipment_id, 'equipment': equipment})
 
 
 def delete_equipment_type(request):
@@ -616,9 +668,9 @@ def add_raw_data_influx(request):
                 tower_code = tower_code.lower()
 
                 # Check for if tower exists or not, if not create.
-                if firstime:
-                    create_tower_if_doesnt_exists(request, tower_code)
-                    firstime = False
+                # if firstime:
+                #     create_tower_if_doesnt_exists(request, tower_code)
+                #     firstime = False
 
                 # MySeriesHelper(measurement=tower_code, time=time_value, value=values)
                 point = {
@@ -733,9 +785,9 @@ def add_raw_data_pg(request):
                 tower_code = tower_code.lower()
 
                 # Check for if tower exists or not, if not create.
-                if firstime:
-                    create_tower_if_doesnt_exists(request, tower_code)
-                    firstime = False
+                # if firstime:
+                #     create_tower_if_doesnt_exists(request, tower_code)
+                #     firstime = False
 
                 # Check if have a tower_code and a time_stamp and replace the value - VERY Heavy operation
                 db_time_start = time.time()

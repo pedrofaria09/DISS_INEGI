@@ -8,7 +8,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                    <h1 class="h3 mb-0 text-gray-800">View/Edit user - {{ user.username }}</h1>
+                    <h1 class="h3 mb-0 text-gray-800">View-Edit user: {{ user.username }}</h1>
                 </div>
 
                 <form action="{% url "view_user" user.id %}" method="POST">
@@ -96,7 +96,7 @@
                             <div class="form-group">
                                 <div class="form-row">
                                     <div class="col-md-4">
-                                        <input type="submit" class="btn btn-primary btn-block" value="Editar">
+                                        <input type="submit" class="btn btn-primary btn-block" value="Edit">
                                     </div>
                                 </div>
                             </div>

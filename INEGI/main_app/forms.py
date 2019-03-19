@@ -95,14 +95,29 @@ class TowerForm(ModelForm):
         model = Tower
         fields = ('code', 'name')
         widgets = {
-            'code': forms.TextInput(attrs={'placeholder': 'Introduza o codigo da Torre', 'style': 'width:100%'}),
-            'name': forms.TextInput(attrs={'placeholder': 'Introduza o nome da Torre', 'style': 'width:100%'}),
+            'code': forms.TextInput(attrs={'placeholder': 'Please enter the Tower code', 'style': 'width:100%'}),
+            'name': forms.TextInput(attrs={'placeholder': 'Please enter the Tower name', 'style': 'width:100%'}),
         }
 
     def __init__(self, *args, **kwargs):
         super(TowerForm, self).__init__(*args, **kwargs)
-        self.fields['code'].label = "Codigo"
-        self.fields['name'].label = "Nome"
+        self.fields['code'].label = "Code"
+        self.fields['name'].label = "Name"
+
+
+class MachineForm(ModelForm):
+    class Meta:
+        model = Machine
+        fields = ('code', 'name')
+        widgets = {
+            'code': forms.TextInput(attrs={'placeholder': 'Please enter the Machine code', 'style': 'width:100%'}),
+            'name': forms.TextInput(attrs={'placeholder': 'Please enter the Machine name', 'style': 'width:100%'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(MachineForm, self).__init__(*args, **kwargs)
+        self.fields['code'].label = "Code"
+        self.fields['name'].label = "Name"
 
 
 class ClusterForm(ModelForm):
@@ -153,4 +168,3 @@ class EquipmentTypeForm(ModelForm):
         self.fields['name'].label = "Equipment Type Name"
 
         self.fields['name'].widget.attrs.update({'class': 'form-control mandatory'})
-

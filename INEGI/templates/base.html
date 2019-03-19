@@ -86,6 +86,21 @@
                 </div>
             </li>
 
+            <!-- Nav Item - DropDown Machines -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwoMachine"
+                   aria-expanded="true" aria-controls="collapseTwo">
+                    <i class="fas fa-fw fa-gopuram"></i>
+                    <span>Machines</span>
+                </a>
+                <div id="collapseTwoMachine" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <a class="collapse-item" href="{% url "add_machine" %}">Add a Machine</a>
+                        <a class="collapse-item" href="{% url "list_machines" %}">View all Machines</a>
+                    </div>
+                </div>
+            </li>
+
             <!-- Nav Item - DropDown Clusters -->
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwoCluster"
