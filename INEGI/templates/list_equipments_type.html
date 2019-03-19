@@ -39,7 +39,7 @@
 
                         {% for equipment in equipments_type %}
                             <tr>
-                                <td class="align-middle p-2"><a href="{% url "view_equipment_type" equipment.pk %}">{{ equipment.pk }}</a></th>
+                                <td class="align-middle p-2"><a href="{% url "view_equipment_type" equipment.pk %}">{{ equipment.name }}</a></th>
                                 <td>
                                     <a href="{% url "view_equipment_type" equipment.pk %}" class="btn btn-sm btn-info">View - Edit</a>
                                 </td>

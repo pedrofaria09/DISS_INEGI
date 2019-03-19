@@ -108,12 +108,10 @@ def view_user(request, user_id):
         if str(request.user.id) == str(user_id):
             password_form = PasswordChangeForm(request.user)
         form = UserForm(instance=user)
-        form.fields['username'].disabled = True
     elif request.method == 'POST':
         if str(request.user.id) == str(user_id):
             password_form = PasswordChangeForm(request.user, request.POST)
         form = UserForm(request.POST, instance=user)
-        form.fields['username'].disabled = True
 
         if form.is_valid():
             form.save()
@@ -238,10 +236,8 @@ def view_tower(request, tower_id):
 
     if request.method == 'GET':
         form = TowerForm(instance=tower)
-        form.fields['code'].disabled = True
     elif request.method == 'POST':
         form = TowerForm(request.POST, instance=tower)
-        form.fields['code'].disabled = True
         if form.is_valid():
             form.save()
             messages.success(request, 'A torre foi editada com sucesso')

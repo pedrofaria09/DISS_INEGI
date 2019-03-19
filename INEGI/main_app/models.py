@@ -32,7 +32,7 @@ GROUP_TYPE = [
 
 
 class Tower(models.Model):
-    code = models.CharField(primary_key=True, max_length=20, null=False)
+    code = models.CharField(unique=True, max_length=20, null=False)
     name = models.CharField(max_length=30, null=False)
 
     class Meta:
@@ -55,7 +55,7 @@ class MyUser(AbstractUser):
 
 
 class Cluster(models.Model):
-    name = models.CharField(primary_key=True, max_length=100)
+    name = models.CharField(unique=True, max_length=100)
     towers = models.ManyToManyField(Tower, verbose_name="list of towers", blank=True)
 
     def __str__(self):
