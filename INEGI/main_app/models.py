@@ -57,11 +57,18 @@ class Tower(Station):
         return "%s" % self.code
 
 
+class UserGroupType(models.Model):
+    name = models.CharField(unique=True, max_length=100)
+
+    def __str__(self):
+        return "%s" % self.name
+
+
 class MyUser(AbstractUser):
     full_name = models.CharField(max_length=100)
     is_client = models.BooleanField(default=False)
     is_manager = models.BooleanField(default=False)
-    group_type = models.CharField(max_length=30, choices=GROUP_TYPE, default="NA")
+    group_type = models.ForeignKey(UserGroupType, on_delete=DO_NOTHING)
     towers = models.ManyToManyField(Tower, verbose_name="list of towers", blank=True)
 
     def __str__(self):

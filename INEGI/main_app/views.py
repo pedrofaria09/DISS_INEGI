@@ -424,7 +424,7 @@ def list_equipments_type(request):
 
 def add_equipment_type(request):
     if request.method == 'POST':
-        form = EquipmentTypeForm(request.POST)
+        form = TypeForm(request.POST)
         if form.is_valid():
             form.save()
 
@@ -433,7 +433,7 @@ def add_equipment_type(request):
         else:
             messages.warning(request, 'Equipment not added!!!')
     else:
-        form = EquipmentTypeForm()
+        form = TypeForm()
 
     return render(request, 'add_equipment_type.html', {'form': form})
 
@@ -445,9 +445,9 @@ def view_equipment_type(request, equipment_id):
         return HttpResponseRedirect(reverse("list_equipments_type"))
 
     if request.method == 'GET':
-        form = EquipmentTypeForm(instance=equipment)
+        form = TypeForm(instance=equipment)
     elif request.method == 'POST':
-        form = EquipmentTypeForm(request.POST, instance=equipment)
+        form = TypeForm(request.POST, instance=equipment)
         if form.is_valid():
             form.save()
             messages.success(request, 'Equipment Type was edited with success')
