@@ -416,55 +416,100 @@ def delete_equipment(request):
     return HttpResponse("not ok")
 
 
-def list_equipments_type(request):
-    equipments_type = EquipmentType.objects.all()
+def list_type(request, type):
+    if type == 'equipment':
+        type_obj = EquipmentType.objects.all()
+        name = "Equipments"
+    elif type == 'user_group':
+        type_obj = UserGroupType.objects.all()
+        name = "Users Groups"
 
-    return render(request, 'list_equipments_type.html', {'equipments_type': equipments_type})
+    return render(request, 'list_type.html', {'type_obj': type_obj, 'type': type, 'name': name})
 
 
-def add_equipment_type(request):
+def add_type(request, type):
+    if type == 'equipment':
+        name = "Equipment"
+    elif type == 'user_group':
+        name = "User Group"
+
     if request.method == 'POST':
-        form = TypeForm(request.POST)
+        if type == 'equipment':
+            form = EquipmentTypeForm(request.POST)
+        elif type == 'user_group':
+            form = UserGroupTypeForm(request.POST)
+
         if form.is_valid():
             form.save()
-
-            messages.success(request, 'Equipment created successfully!')
-            return HttpResponseRedirect(reverse("list_equipments_type"))
+            messages.success(request, 'New Type created successfully!')
+            return HttpResponseRedirect(reverse("list_type", kwargs={'type': type}))
         else:
-            messages.warning(request, 'Equipment not added!!!')
+            messages.warning(request, 'Type not added!!!')
     else:
-        form = TypeForm()
+        if type == 'equipment':
+            form = EquipmentTypeForm()
+        elif type == 'user_group':
+            form = UserGroupTypeForm()
 
-    return render(request, 'add_equipment_type.html', {'form': form})
+    return render(request, 'add_type.html', {'form': form, 'type': type, 'name': name})
 
 
-def view_equipment_type(request, equipment_id):
-    try:
-        equipment = EquipmentType.objects.get(pk=equipment_id)
-    except EquipmentType.DoesNotExist:
-        return HttpResponseRedirect(reverse("list_equipments_type"))
+def view_type(request, equipment_id, type):
+    if type == 'equipment':
+        name = "Equipment"
+        try:
+            obj = EquipmentType.objects.get(pk=equipment_id)
+        except EquipmentType.DoesNotExist:
+            return HttpResponseRedirect(reverse("list_type", kwargs={'type': type}))
+    elif type == 'user_group':
+        name = "User Group"
+        try:
+            obj = UserGroupType.objects.get(pk=equipment_id)
+        except UserGroupType.DoesNotExist:
+            return HttpResponseRedirect(reverse("list_type", kwargs={'type': type}))
 
     if request.method == 'GET':
-        form = TypeForm(instance=equipment)
+        if type == 'equipment':
+            form = EquipmentTypeForm(instance=obj)
+        elif type == 'user_group':
+            form = UserGroupTypeForm(instance=obj)
+
     elif request.method == 'POST':
-        form = TypeForm(request.POST, instance=equipment)
+        if type == 'equipment':
+            form = EquipmentTypeForm(request.POST, instance=obj)
+        elif type == 'user_group':
+            form = UserGroupTypeForm(request.POST, instance=obj)
+
         if form.is_valid():
             form.save()
-            messages.success(request, 'Equipment Type was edited with success')
-            return HttpResponseRedirect(reverse("list_equipments_type"))
+            messages.success(request, 'Type was edited with success')
+            return HttpResponseRedirect(reverse("list_type", kwargs={'type': type}))
         else:
-            messages.warning(request, "Equipment Type wasn't edited!!!")
+            messages.warning(request, "Type wasn't edited!!!")
 
-    return render(request, 'view_equipment_type.html', {'form': form, 'equipment_id': equipment_id, 'equipment': equipment})
+    return render(request, 'view_type.html', {'form': form, 'obj_id': equipment_id, 'obj': obj, 'type': type, 'name': name})
 
 
-def delete_equipment_type(request):
+def delete_type(request):
     if request.is_ajax and request.method == 'POST':
-        equipment = EquipmentType.objects.get(pk=request.POST["id"])
-        equipment.delete()
-        messages.success(request, 'Equipment type was deleted successfully!')
+        if request.POST["typex"] == 'equipment':
+            obj = EquipmentType.objects.get(pk=request.POST["id"])
+            try:
+                obj.delete()
+            except TypeError:
+                messages.error(request, 'Cant delete this type because have Equipment associated to him!')
+                return HttpResponse("not ok")
+        elif request.POST["typex"] == 'user_group':
+            obj = UserGroupType.objects.get(pk=request.POST["id"])
+            try:
+                obj.delete()
+            except TypeError:
+                messages.error(request, 'Cant delete this type because have an User associated to him!')
+                return HttpResponse("not ok")
+
+        messages.success(request, 'Type was deleted successfully!')
         return HttpResponse('ok')
-    messages.error(request, 'An error occurred when deleting the equipment!')
+    messages.error(request, 'An error occurred when deleting the type!')
     return HttpResponse("not ok")
 
 

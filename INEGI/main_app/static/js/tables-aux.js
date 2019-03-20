@@ -26,7 +26,7 @@ $('#dataTableEquipments').DataTable( {
   ]
 });
 
-$('#dataTableEquipmentsType').DataTable( {
+$('#dataTableType').DataTable( {
 "columnDefs": [
     { "orderable": false, "targets": [1] },
     { 'searchable' : false, 'targets' : [1] },

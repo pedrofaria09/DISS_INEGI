@@ -5,12 +5,12 @@
     <div class="container-fluid">
 
         <!-- Page Heading -->
-        <h1 class="h3 mb-2 text-gray-800">Equipments Type</h1>
-        <p class="mb-4">This page shows the Equipments types on the system</a>.</p>
+        <h1 class="h3 mb-2 text-gray-800">{{ name }} Type</h1>
+        <p class="mb-4">This page shows the {{ name }} types on the system</a>.</p>
 
         <div class="row">
             <div class="col-md-12">
-                <a href="{% url "add_equipment_type" %}" class="btn btn-success">Add a new Equipment Type</a><br>
+                <a href="{% url "add_type" type %}" class="btn btn-success">Add a new {{ name }} Type</a><br>
                 <br>
             </div>
         </div>
@@ -18,11 +18,11 @@
         <!-- DataTales Example -->
         <div class="card shadow mb-4">
             <div class="card-header py-2">
-                <h6 class="m-0 font-weight-bold text-primary text-center">Equipments Type Table</h6>
+                <h6 class="m-0 font-weight-bold text-primary text-center">{{ name }} Type Table</h6>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover table-sm" id="dataTableEquipmentsType" width="100%" cellspacing="0">
+                    <table class="table table-bordered table-hover table-sm" id="dataTableType" width="100%" cellspacing="0">
                         <thead class="thead-light">
                             <tr>
                                 <th>Name</th>
@@ -37,11 +37,11 @@
                         </tfoot>
                         <tbody>
 
-                        {% for equipment in equipments_type %}
+                        {% for obj in type_obj %}
                             <tr>
-                                <td class="align-middle p-2"><a href="{% url "view_equipment_type" equipment.pk %}">{{ equipment.name }}</a></th>
+                                <td class="align-middle p-2"><a href="{% url "view_type" obj.pk type %}">{{ obj.name }}</a></th>
                                 <td>
-                                    <a href="{% url "view_equipment_type" equipment.pk %}" class="btn btn-sm btn-info">View - Edit</a>
+                                    <a href="{% url "view_type" obj.pk type %}" class="btn btn-sm btn-info">View - Edit</a>
                                 </td>
                             </tr>
                         {% endfor %}

@@ -7,12 +7,12 @@
     <div class="container-fluid">
         <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">View-Edit Equipment Type: {{ equipment.name }}</h1>
+            <h1 class="h3 mb-0 text-gray-800">View-Edit {{ name }} Type: {{ obj.name }}</h1>
         </div>
 
         <div class="row">
             <div class="col-12">
-                <form action="{% url "view_equipment_type" equipment_id %}" method="POST">
+                <form action="{% url "view_type" obj_id type %}" method="POST">
 
                     {% csrf_token %}
 
@@ -39,7 +39,7 @@
                                 <input type="submit" class="btn btn-primary btn-block" value="Edit">
                             </div>
                             <div class="col-md-6">
-                                <a href="#" name="delete_equipment_type" data-id="{{ equipment_id }}" class="btn btn-danger btn-block">Delete</a>
+                                <a href="#" name="delete_type" data-id="{{ obj_id }}" data-type="{{ type }}" class="btn btn-danger btn-block">Delete</a>
                             </div>
                         </div>
                     </div>

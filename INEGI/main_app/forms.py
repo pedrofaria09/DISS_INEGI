@@ -158,13 +158,23 @@ class EquipmentForm(ModelForm):
         self.fields['type'].widget.attrs.update({'class': 'form-control mandatory'})
 
 
-class TypeForm(ModelForm):
+class EquipmentTypeForm(ModelForm):
     class Meta:
         model = EquipmentType
         fields = ('name',)
 
     def __init__(self, *args, **kwargs):
-        super(TypeForm, self).__init__(*args, **kwargs)
+        super(EquipmentTypeForm, self).__init__(*args, **kwargs)
         self.fields['name'].label = "Equipment Type Name"
+        self.fields['name'].widget.attrs.update({'class': 'form-control mandatory'})
 
+
+class UserGroupTypeForm(ModelForm):
+    class Meta:
+        model = UserGroupType
+        fields = ('name',)
+
+    def __init__(self, *args, **kwargs):
+        super(UserGroupTypeForm, self).__init__(*args, **kwargs)
+        self.fields['name'].label = "User Group Type Name"
         self.fields['name'].widget.attrs.update({'class': 'form-control mandatory'})

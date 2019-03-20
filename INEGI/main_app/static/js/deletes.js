@@ -110,9 +110,9 @@ $(function () {
         }
     })
 
-    $('a[name=delete_equipment_type]').on('click', function () {
+    $('a[name=delete_type]').on('click', function () {
 
-        if (window.confirm("Do you really want to delete the equipment type?")) {
+        if (window.confirm("Do you really want to delete this type?")) {
             var csrftoken = getCookie('csrftoken');
             $.ajaxSetup({
                 beforeSend: function (xhr, settings) {
@@ -122,9 +122,10 @@ $(function () {
                 }
             });
 
-            $.post('/delete_equipment_type',
+            $.post('/delete_type',
                 {
                     id: $(this).attr('data-id'),
+                    typex: $(this).attr('data-type'),
                 },
                 function (data, status) {
                     location.reload();
