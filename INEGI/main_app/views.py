@@ -10,7 +10,7 @@ from .models import *
 from .forms import *
 from datetime import *
 from .aux_functions import *
-from django.views.generic import ListView
+from formtools.wizard.views import SessionWizardView
 
 import time, re, io, json
 
@@ -876,3 +876,17 @@ def add_raw_data_pg(request):
         messages.success(request, "All files was entered successfully")
 
     return HttpResponseRedirect(reverse("show_towers_data_pg"))
+
+
+class FormWizardView(SessionWizardView):
+    template_name = "wizard.html"
+
+    # towers = Tower.objects.all()
+    # ClusterForm.fields['towers'].choices = [(x, x) for x in towers]
+
+    form_list = [ClusterForm, TowerForm]
+
+    def done(self, form_list,  **kwargs):
+        return render(self.request, 'home.html', {
+            'form_data': [form.cleaned_data for form in form_list],
+        })
