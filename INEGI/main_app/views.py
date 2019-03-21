@@ -10,6 +10,7 @@ from .models import *
 from .forms import *
 from datetime import *
 from .aux_functions import *
+from django.views.generic import ListView
 
 import time, re, io, json
 

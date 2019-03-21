@@ -138,7 +138,7 @@ class ClusterForm(ModelForm):
 class EquipmentForm(ModelForm):
     class Meta:
         model = Equipment
-        fields = ('sn', 'manufacturer', 'model', 'version', 'designation', 'status', 'type')
+        fields = ('sn', 'manufacturer', 'model', 'version', 'designation', 'is_active', 'type')
 
     def __init__(self, *args, **kwargs):
         super(EquipmentForm, self).__init__(*args, **kwargs)
@@ -147,7 +147,7 @@ class EquipmentForm(ModelForm):
         self.fields['model'].label = "Model"
         self.fields['version'].label = "Version"
         self.fields['designation'].label = "Designation"
-        self.fields['status'].label = "Active?"
+        self.fields['is_active'].label = "Active?"
         self.fields['type'].label = "Equipment Type"
 
         self.fields['sn'].widget.attrs.update({'class': 'form-control mandatory'})
