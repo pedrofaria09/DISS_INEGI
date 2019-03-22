@@ -247,7 +247,12 @@ def view_tower(request, tower_id):
         else:
             messages.warning(request, 'Tower wasnt edited successfully!!!')
 
-    return render(request, 'view_tower.html', {'form': form, 'tower_id': tower_id, 'tower': tower})
+    periods = PeriodConfiguration.objects.filter(tower=tower_id)
+
+    for p in periods:
+        print(p)
+
+    return render(request, 'view_tower.html', {'form': form, 'tower_id': tower_id, 'tower': tower, 'periods': periods})
 
 
 def delete_tower(request):
@@ -890,3 +895,40 @@ class FormWizardView(SessionWizardView):
         return render(self.request, 'home.html', {
             'form_data': [form.cleaned_data for form in form_list],
         })
+
+
+def add_conf_period(request, tower_id):
+
+    try:
+        tower = Tower.objects.get(pk=tower_id)
+    except Tower.DoesNotExist:
+        return HttpResponseRedirect(reverse("list_towers"))
+
+    if request.method == 'POST':
+        form = PeriodConfigForm(request.POST)
+
+        if form.is_valid():
+            bool_wind = form.cleaned_data.get('wind_rss')
+            bool_rss = form.cleaned_data.get('solar_rss')
+
+            if bool_wind and bool_rss:
+                form._errors['wind_rss'] = ['Tower cant be wind and solar']
+            elif form.is_valid():
+                PeriodConfiguration(begin_date=form.cleaned_data.get('begin_date'),
+                                    end_date=form.cleaned_data.get('end_date'),
+                                    wind_rss=form.cleaned_data.get('wind_rss'),
+                                    solar_rss=form.cleaned_data.get('solar_rss'),
+                                    raw_freq=form.cleaned_data.get('raw_freq'),
+                                    time_zone=form.cleaned_data.get('time_zone'),
+                                    tower=tower).save()
+                messages.success(request, 'Period was created successfully!')
+                return HttpResponseRedirect(reverse("view_tower", kwargs={'tower_id': tower_id}))
+            else:
+                messages.warning(request, 'Period not added!!!')
+
+        else:
+            messages.warning(request, 'Period was not added!!!')
+    else:
+        form = PeriodConfigForm()
+
+    return render(request, 'add_conf_period.html', {'form': form, 'tower': tower, 'tower_id': tower_id})

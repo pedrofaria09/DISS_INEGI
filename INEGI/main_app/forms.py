@@ -178,3 +178,27 @@ class UserGroupTypeForm(ModelForm):
         super(UserGroupTypeForm, self).__init__(*args, **kwargs)
         self.fields['name'].label = "User Group Type Name"
         self.fields['name'].widget.attrs.update({'class': 'form-control mandatory'})
+
+
+class PeriodConfigForm(ModelForm):
+    begin_date = forms.DateTimeField(input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M"))
+    end_date = forms.DateTimeField(required=False, input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M"))
+
+    class Meta:
+        model = PeriodConfiguration
+        fields = ('begin_date', 'end_date', 'wind_rss', 'solar_rss', 'raw_freq', 'time_zone')
+
+        # widgets = {'begin_date': DatePickerInput(format='%Y/%m/%d %H:%M'),
+        #            'end_date': DatePickerInput(format='%Y/%m/%d %H:%M'), }
+
+    def __init__(self, *args, **kwargs):
+        super(PeriodConfigForm, self).__init__(*args, **kwargs)
+        self.fields['begin_date'].label = "Start Date"
+        self.fields['end_date'].label = "End Date"
+        self.fields['wind_rss'].label = "Is this a Wind RSS Tower Period?"
+        self.fields['solar_rss'].label = "Is this a Solar RSS Tower Period?"
+        self.fields['raw_freq'].label = "Raw Frequency"
+        self.fields['time_zone'].label = "Time Zone"
+
+        self.fields['raw_freq'].widget.attrs.update({'class': 'form-control mandatory', 'style': 'width:25%'})
+        self.fields['time_zone'].widget.attrs.update({'class': 'form-control mandatory', 'style': 'width:25%'})

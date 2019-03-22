@@ -13,6 +13,7 @@ urlpatterns =[
     url(r'^add_equipment/?$', views.add_equipment, name='add_equipment'),
     url(r'^add_type/(?P<type>([\w ]+))$', views.add_type, name='add_type'),
     url(r'^add_machine/?$', views.add_machine, name='add_machine'),
+    url(r'^add_conf_period/(?P<tower_id>[0-9]+)$', views.add_conf_period, name='add_conf_period'),
 
     url(r'^list_towers/?$', views.list_towers, name='list_towers'),
     url(r'^list_users/?$', views.list_users, name='list_users'),
