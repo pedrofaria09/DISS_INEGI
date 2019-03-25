@@ -247,10 +247,7 @@ def view_tower(request, tower_id):
         else:
             messages.warning(request, 'Tower wasnt edited successfully!!!')
 
-    periods = PeriodConfiguration.objects.filter(tower=tower_id)
-
-    for p in periods:
-        print(p)
+    periods = PeriodConfiguration.objects.filter(tower=tower_id).order_by('-begin_date')
 
     return render(request, 'view_tower.html', {'form': form, 'tower_id': tower_id, 'tower': tower, 'periods': periods})
 
@@ -914,15 +911,26 @@ def add_conf_period(request, tower_id):
             if bool_wind and bool_rss:
                 form._errors['wind_rss'] = ['Tower cant be wind and solar']
             elif form.is_valid():
-                PeriodConfiguration(begin_date=form.cleaned_data.get('begin_date'),
-                                    end_date=form.cleaned_data.get('end_date'),
-                                    wind_rss=form.cleaned_data.get('wind_rss'),
-                                    solar_rss=form.cleaned_data.get('solar_rss'),
-                                    raw_freq=form.cleaned_data.get('raw_freq'),
-                                    time_zone=form.cleaned_data.get('time_zone'),
-                                    tower=tower).save()
-                messages.success(request, 'Period was created successfully!')
-                return HttpResponseRedirect(reverse("view_tower", kwargs={'tower_id': tower_id}))
+                verify = check_if_period_is_valid(tower_id, form.cleaned_data.get('begin_date'), form.cleaned_data.get('end_date'), 0)
+
+                if verify is 0:
+                    period = PeriodConfiguration(begin_date=form.cleaned_data.get('begin_date'),
+                                                 end_date=form.cleaned_data.get('end_date'),
+                                                 wind_rss=form.cleaned_data.get('wind_rss'),
+                                                 solar_rss=form.cleaned_data.get('solar_rss'),
+                                                 raw_freq=form.cleaned_data.get('raw_freq'),
+                                                 time_zone=form.cleaned_data.get('time_zone'),
+                                                 tower=tower)
+                    period.save()
+                    messages.success(request, 'Period was created successfully!')
+                    return HttpResponseRedirect(reverse("view_tower", kwargs={'tower_id': tower_id}))
+                elif verify is 1:
+                    messages.error(request, "End date can't be higher than the Begin date!!!")
+                elif verify is 2:
+                    messages.error(request, "Begin date is invalid!!!")
+                elif verify is 3:
+                    messages.error(request, "End date is invalid!!!")
+
             else:
                 messages.warning(request, 'Period not added!!!')
 
@@ -932,3 +940,42 @@ def add_conf_period(request, tower_id):
         form = PeriodConfigForm()
 
     return render(request, 'add_conf_period.html', {'form': form, 'tower': tower, 'tower_id': tower_id})
+
+
+def view_conf_period(request, period_id, tower_id):
+    try:
+        period = PeriodConfiguration.objects.get(pk=period_id)
+    except PeriodConfiguration.DoesNotExist:
+        return HttpResponseRedirect(reverse("view_tower", kwargs={'tower_id': tower_id}))
+
+    if request.method == 'GET':
+        form = PeriodConfigForm(instance=period)
+    elif request.method == 'POST':
+        form = PeriodConfigForm(request.POST, instance=period)
+        if form.is_valid():
+            verify = check_if_period_is_valid(tower_id, form.cleaned_data.get('begin_date'), form.cleaned_data.get('end_date'), period_id)
+
+            if verify is 0:
+                form.save()
+                messages.success(request, 'Period was edited successfully')
+                return HttpResponseRedirect(reverse("view_tower", kwargs={'tower_id': tower_id}))
+            elif verify is 1:
+                messages.error(request, "End date can't be higher than the Begin date!!!")
+            elif verify is 2:
+                messages.error(request, "Begin date is invalid!!!")
+            elif verify is 3:
+                messages.error(request, "End date is invalid!!!")
+        else:
+            messages.warning(request, 'Period wasnt edited successfully!!!')
+
+    return render(request, 'view_conf_period.html', {'form': form, 'tower_id': tower_id, 'period_id': period_id, 'period': period})
+
+
+def delete_conf_period(request):
+    if request.is_ajax and request.method == 'POST':
+        period = PeriodConfiguration.objects.get(pk=request.POST["id"])
+        period.delete()
+        messages.success(request, 'Period was deleted successfully!')
+        return HttpResponse('ok')
+    messages.error(request, 'An error occurred when deleting the Period!')
+    return HttpResponse("not ok")

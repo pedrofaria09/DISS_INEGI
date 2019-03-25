@@ -5,7 +5,7 @@
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-bordered table-hover table-sm" id="dataTable" width="100%" cellspacing="0">
+            <table class="table table-bordered table-hover table-sm" id="dataTableConfPeriods" width="100%" cellspacing="0">
                 <thead class="thead-light">
                     <tr>
                         <th>Begin Data</th>
@@ -22,8 +22,14 @@
 
                 {% for p in periods %}
                     <tr>
-                        <td class="align-middle p-2">{{ p.begin_date }}</td>
-                        <td class="align-middle p-2">{{ p.end_date }}</td>
+                        <td class="align-middle p-2"><a href="{% url "view_conf_period" tower_id p.pk %}">{{ p.begin_date|date:'d/m/Y H:i' }}</a></td>
+                        <td class="align-middle p-2"><a href="{% url "view_conf_period" tower_id p.pk %}">
+                            {% if p.end_date %}
+                                {{ p.end_date|date:'d/m/Y H:i' }}
+                            {% else %}
+                                None
+                            {% endif %}
+                        </a></td>
                     </tr>
                 {% endfor %}
 

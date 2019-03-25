@@ -1,7 +1,4 @@
-import re, pytz
-from django.contrib import messages
-from datetime import *
-
+from .views import *
 
 def parsedate(request, file, mylist, i):
 
@@ -73,3 +70,31 @@ def parsedate(request, file, mylist, i):
     #     time_value = datetime.datetime.strptime(mydate, '%Y%m%d %H:%M') - datetime.timedelta(minutes=10)
 
     return time_value, flag
+
+
+def check_if_period_is_valid(tower_id, begin_date, end_date, period_id):
+    print("VOU VERIFICAR", tower_id, begin_date, end_date, period_id)
+    if end_date:
+        if begin_date >= end_date:
+            return 1
+    try:
+        tower = Tower.objects.get(pk=tower_id)
+    except Tower.DoesNotExist:
+        return HttpResponseRedirect(reverse("list_towers"))
+
+    p1 = PeriodConfiguration.objects.filter(tower=tower, begin_date__lte=begin_date, end_date__gte=begin_date).exclude(id=period_id)
+    if p1:
+        print("Print 1")
+        return 2
+
+    p2 = PeriodConfiguration.objects.filter(tower=tower, begin_date__gte=begin_date).exclude(id=period_id)
+    if p2:
+        print("Print 2")
+        return 2
+
+    if end_date:
+        p3 = PeriodConfiguration.objects.filter(tower=tower, end_date__lte=end_date, end_date__gte=end_date).exclude(id=period_id)
+        if p3:
+            print("Print 3")
+            return 3
+    return 0

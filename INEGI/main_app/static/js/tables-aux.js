@@ -39,3 +39,9 @@ $('#dataTableMachines').DataTable( {
     { 'searchable' : false, 'targets' : [2] },
   ]
 });
+
+$('#dataTableConfPeriods').DataTable( {
+"columnDefs": [
+    { "orderable": false, "targets": [0,1] },
+  ], "order": []
+});

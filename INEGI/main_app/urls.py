@@ -28,6 +28,7 @@ urlpatterns =[
     url(r'^view_equipment/(?P<equipment_id>([\w ]+))$', views.view_equipment, name='view_equipment'),
     url(r'^view_type/(?P<equipment_id>([\w ]+))/(?P<type>([\w ]+))$', views.view_type, name='view_type'),
     url(r'^view_machine/(?P<machine_id>([\w ]+))$', views.view_machine, name='view_machine'),
+    url(r'^view_conf_period/(?P<tower_id>[0-9]+)/(?P<period_id>[0-9]+)$', views.view_conf_period, name='view_conf_period'),
 
     url(r'^associate_towers/(?P<user_id>[0-9]+)$', views.associate_towers, name='associate_towers'),
 
@@ -37,6 +38,7 @@ urlpatterns =[
     url(r'^delete_equipment/?$', views.delete_equipment, name='delete_equipment'),
     url(r'^delete_type/?$', views.delete_type, name='delete_type'),
     url(r'^delete_machine/?$', views.delete_machine, name='delete_machine'),
+    url(r'^delete_conf_period/?$', views.delete_conf_period, name='delete_conf_period'),
 
     url(r'^ban_user/?$', views.ban_user, name='ban_user'),
 

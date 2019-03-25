@@ -160,8 +160,8 @@ class Calibration(models.Model):
 
 
 class PeriodConfiguration(models.Model):
-    begin_date = models.DateField()
-    end_date = models.DateField(null=True, blank=True)
+    begin_date = models.DateTimeField()
+    end_date = models.DateTimeField(null=True, blank=True)
     wind_rss = models.BooleanField(default=False)
     solar_rss = models.BooleanField(default=False)
     raw_freq = models.CharField(max_length=20, default="10m")
