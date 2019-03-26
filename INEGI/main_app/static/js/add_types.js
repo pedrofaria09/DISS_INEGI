@@ -3,7 +3,7 @@ $(function () {
     $(".js-create-type-equipment").click(function () {
         console.log("ALOOOOO")
         $.ajax({
-            url: 'add_type_equipment',
+            url: '/add_type_equipment',
             type: 'get',
             dataType: 'json',
             beforeSend: function () {
