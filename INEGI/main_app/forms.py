@@ -3,6 +3,7 @@ from django.forms import ModelForm
 from .models import *
 from django.contrib.auth.forms import UserCreationForm
 from bootstrap_datepicker_plus import DatePickerInput
+from dal import autocomplete
 
 
 class LoginForm(forms.Form):
@@ -136,6 +137,11 @@ class ClusterForm(ModelForm):
 
 
 class EquipmentForm(ModelForm):
+    type = forms.ModelChoiceField(
+        queryset=EquipmentType.objects.all(),
+        widget=autocomplete.ModelSelect2(url='equipment-autocomplete')
+    )
+
     class Meta:
         model = Equipment
         fields = ('sn', 'manufacturer', 'model', 'version', 'designation', 'is_active', 'type')
@@ -155,7 +161,7 @@ class EquipmentForm(ModelForm):
         self.fields['model'].widget.attrs.update({'class': 'form-control mandatory'})
         self.fields['version'].widget.attrs.update({'class': 'form-control mandatory'})
         self.fields['designation'].widget.attrs.update({'class': 'form-control mandatory'})
-        self.fields['type'].widget.attrs.update({'class': 'form-control mandatory'})
+        # self.fields['type'].widget.attrs.update({'class': 'form-control mandatory'})
 
 
 class EquipmentTypeForm(ModelForm):

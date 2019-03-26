@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponseRedirect, Http404, HttpResponse
+from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse
 from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout, update_session_auth_hash
@@ -11,6 +11,8 @@ from .forms import *
 from datetime import *
 from .aux_functions import *
 from formtools.wizard.views import SessionWizardView
+from dal import autocomplete
+from django.utils.html import format_html
 
 import time, re, io, json
 
@@ -371,6 +373,16 @@ def list_equipments(request):
     return render(request, 'list_equipments.html', {'equipments': equipments})
 
 
+class EquipmentAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = EquipmentType.objects.all()
+
+        if self.q:
+            qs = qs.filter(name__istartswith=self.q)
+
+        return qs
+
+
 def add_equipment(request):
     if request.method == 'POST':
         form = EquipmentForm(request.POST)
@@ -431,6 +443,7 @@ def list_type(request, type):
 
 
 def add_type(request, type):
+    print(request.META['HTTP_REFERER'])
     if type == 'equipment':
         name = "Equipment"
     elif type == 'user_group':

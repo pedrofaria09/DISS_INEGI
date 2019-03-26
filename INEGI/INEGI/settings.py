@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'bootstrap_datepicker_plus',
     'bootstrap4',
     'formtools',
+    'dal',
+    'dal_select2',
 ]
 
 MIDDLEWARE = [

@@ -42,6 +42,7 @@
                                 <td class="align-middle p-2"><a href="{% url "view_type" obj.pk type %}">{{ obj.name }}</a></th>
                                 <td>
                                     <a href="{% url "view_type" obj.pk type %}" class="btn btn-sm btn-info">View - Edit</a>
+                                    <a href="#" name="delete_type" data-id="{{ obj.pk }}" data-type="{{ type }}" class="btn btn-sm btn-danger">Delete</a>
                                 </td>
                             </tr>
                         {% endfor %}

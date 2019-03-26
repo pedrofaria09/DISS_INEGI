@@ -38,6 +38,7 @@
                                 <td class="align-middle p-2"><a href="{% url "view_equipment" equipment.pk %}">{{ equipment.type }}</a></td>
                                 <td>
                                     <a href="{% url "view_equipment" equipment.pk %}" class="btn btn-sm btn-info">View - Edit</a>
+                                    <a href="#" name="delete_equipment" data-id="{{ equipment.pk }}" class="btn btn-sm btn-danger">Delete</a>
                                 </td>
                             </tr>
                         {% endfor %}

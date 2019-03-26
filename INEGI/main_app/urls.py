@@ -40,6 +40,8 @@ urlpatterns =[
     url(r'^delete_machine/?$', views.delete_machine, name='delete_machine'),
     url(r'^delete_conf_period/?$', views.delete_conf_period, name='delete_conf_period'),
 
+    url(r'^equipment-autocomplete/$', views.EquipmentAutocomplete.as_view(), name='equipment-autocomplete'),
+
     url(r'^ban_user/?$', views.ban_user, name='ban_user'),
 
     url(r'^show_towers_data_mongo/?$', views.show_towers_data_mongo, name='show_towers_data_mongo'),
@@ -52,4 +54,5 @@ urlpatterns =[
     url(r'^add_raw_data_pg/?$', views.add_raw_data_pg, name='add_raw_data_pg'),
 
     url(r'^wizard/?$', views.FormWizardView.as_view(), name='wizard'),
+
 ]
