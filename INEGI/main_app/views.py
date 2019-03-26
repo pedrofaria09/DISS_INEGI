@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout, update_session_auth_hash
@@ -495,6 +496,27 @@ def add_type(request, type):
             form = UserGroupTypeForm()
 
     return render(request, 'add_type.html', {'form': form, 'type': type, 'name': name})
+
+
+def add_type_equipment(request):
+    data = dict()
+
+    if request.method == 'POST':
+        form = EquipmentTypeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            data['form_is_valid'] = True
+        else:
+            data['form_is_valid'] = False
+    else:
+        form = EquipmentTypeForm()
+
+    for r in request:
+        print(r)
+
+    context = {'form': form}
+    data['html_form'] = render_to_string('add_type_equipment.html', context, request=request)
+    return JsonResponse(data)
 
 
 def view_type(request, equipment_id, type):
