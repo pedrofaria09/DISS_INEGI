@@ -9,6 +9,7 @@ from django.db.models import Q as QD
 from .models import *
 from .forms import *
 from datetime import *
+from django.db import IntegrityError
 from .aux_functions import *
 from formtools.wizard.views import SessionWizardView
 from dal import autocomplete
@@ -151,7 +152,11 @@ def view_user(request, user_id):
 def delete_user(request):
     if request.is_ajax and request.method == 'POST':
         user = MyUser.objects.get(id=request.POST["id"])
-        user.delete()
+        try:
+            user.delete()
+        except (TypeError, IntegrityError) as e:
+            messages.error(request, e.__cause__)
+            return HttpResponse("not ok")
         messages.success(request, 'User was deleted!')
         return HttpResponse('ok')
     messages.error(request, 'A problem happen when removing the user!!!')
@@ -257,7 +262,11 @@ def view_tower(request, tower_id):
 def delete_tower(request):
     if request.is_ajax and request.method == 'POST':
         tower = Tower.objects.get(pk=request.POST["id"])
-        tower.delete()
+        try:
+            tower.delete()
+        except (TypeError, IntegrityError) as e:
+            messages.error(request, e.__cause__)
+            return HttpResponse("not ok")
         messages.success(request, 'Tower was removed successfully!')
         return HttpResponse('ok')
     messages.error(request, 'A problem occurred when deleting the Tower!')
@@ -308,7 +317,11 @@ def view_machine(request, machine_id):
 def delete_machine(request):
     if request.is_ajax and request.method == 'POST':
         machine = Machine.objects.get(pk=request.POST["id"])
-        machine.delete()
+        try:
+            machine.delete()
+        except (TypeError, IntegrityError) as e:
+            messages.error(request, e.__cause__)
+            return HttpResponse("not ok")
         messages.success(request, 'Machine was successfully removed!')
         return HttpResponse('ok')
     messages.error(request, 'A problem occurred when deleting the Machine!')
@@ -360,7 +373,11 @@ def view_cluster(request, cluster_id):
 def delete_cluster(request):
     if request.is_ajax and request.method == 'POST':
         cluster = Cluster.objects.get(pk=request.POST["id"])
-        cluster.delete()
+        try:
+            cluster.delete()
+        except (TypeError, IntegrityError) as e:
+            messages.error(request, e.__cause__)
+            return HttpResponse("not ok")
         messages.success(request, 'Cluster was deleted successfully!')
         return HttpResponse('ok')
     messages.error(request, 'An error occurred when deleting the cluster!')
@@ -424,7 +441,11 @@ def view_equipment(request, equipment_id):
 def delete_equipment(request):
     if request.is_ajax and request.method == 'POST':
         equipment = Equipment.objects.get(pk=request.POST["id"])
-        equipment.delete()
+        try:
+            equipment.delete()
+        except (TypeError, IntegrityError) as e:
+            messages.error(request, e.__cause__)
+            return HttpResponse("not ok")
         messages.success(request, 'Equipment was deleted successfully!')
         return HttpResponse('ok')
     messages.error(request, 'An error occurred when deleting the equipment!')
@@ -443,7 +464,6 @@ def list_type(request, type):
 
 
 def add_type(request, type):
-    print(request.META['HTTP_REFERER'])
     if type == 'equipment':
         name = "Equipment"
     elif type == 'user_group':
@@ -510,18 +530,14 @@ def delete_type(request):
     if request.is_ajax and request.method == 'POST':
         if request.POST["typex"] == 'equipment':
             obj = EquipmentType.objects.get(pk=request.POST["id"])
-            try:
-                obj.delete()
-            except TypeError:
-                messages.error(request, 'Cant delete this type because have Equipment associated to him!')
-                return HttpResponse("not ok")
         elif request.POST["typex"] == 'user_group':
             obj = UserGroupType.objects.get(pk=request.POST["id"])
-            try:
-                obj.delete()
-            except TypeError:
-                messages.error(request, 'Cant delete this type because have an User associated to him!')
-                return HttpResponse("not ok")
+
+        try:
+            obj.delete()
+        except (TypeError, IntegrityError) as e:
+            messages.error(request, e.__cause__)
+            return HttpResponse("not ok")
 
         messages.success(request, 'Type was deleted successfully!')
         return HttpResponse('ok')
@@ -987,7 +1003,12 @@ def view_conf_period(request, period_id, tower_id):
 def delete_conf_period(request):
     if request.is_ajax and request.method == 'POST':
         period = PeriodConfiguration.objects.get(pk=request.POST["id"])
-        period.delete()
+        try:
+            period.delete()
+        except (TypeError, IntegrityError) as e:
+            messages.error(request, e.__cause__)
+            return HttpResponse("not ok")
+
         messages.success(request, 'Period was deleted successfully!')
         return HttpResponse('ok')
     messages.error(request, 'An error occurred when deleting the Period!')
