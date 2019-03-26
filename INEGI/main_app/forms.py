@@ -91,11 +91,14 @@ class UserTowersFrom(ModelForm):
         model = MyUser
         fields = ['towers']
         # towers = forms.ModelMultipleChoiceField(widget=forms.CheckboxSelectMultiple(), queryset=Tower.objects.all())
+        widgets = {
+            'towers': autocomplete.ModelSelect2Multiple(url='tower-autocomplete', attrs={'style': 'width:100%'})
+        }
 
     def __init__(self, *args, **kwargs):
         super(UserTowersFrom, self).__init__(*args, **kwargs)
-        self.fields["towers"].widget = forms.CheckboxSelectMultiple()
-        self.fields["towers"].queryset = Tower.objects.all()
+        # self.fields["towers"].widget = forms.CheckboxSelectMultiple()
+        # self.fields["towers"].queryset = Tower.objects.all()
         # self.fields['towers'].widget.attrs['size'] = 20
 
 

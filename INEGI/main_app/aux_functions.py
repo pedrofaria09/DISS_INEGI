@@ -73,7 +73,6 @@ def parsedate(request, file, mylist, i):
 
 
 def check_if_period_is_valid(tower_id, begin_date, end_date, period_id):
-    print("VOU VERIFICAR", tower_id, begin_date, end_date, period_id)
     if end_date:
         if begin_date >= end_date:
             return 1
@@ -82,19 +81,28 @@ def check_if_period_is_valid(tower_id, begin_date, end_date, period_id):
     except Tower.DoesNotExist:
         return HttpResponseRedirect(reverse("list_towers"))
 
-    p1 = PeriodConfiguration.objects.filter(tower=tower, begin_date__lte=begin_date, end_date__gte=begin_date).exclude(id=period_id)
+    p1 = PeriodConfiguration.objects.filter(tower=tower, begin_date__lte=begin_date, end_date__gte=begin_date).exclude(
+        id=period_id)
     if p1:
         print("Print 1")
         return 2
 
     p2 = PeriodConfiguration.objects.filter(tower=tower, begin_date__gte=begin_date).exclude(id=period_id)
-    if p2:
+    if p2 and end_date is None:
         print("Print 2")
         return 2
 
     if end_date:
-        p3 = PeriodConfiguration.objects.filter(tower=tower, end_date__lte=end_date, end_date__gte=end_date).exclude(id=period_id)
+        p3 = PeriodConfiguration.objects.filter(tower=tower, end_date__lte=end_date, end_date__gte=end_date).exclude(
+            id=period_id)
         if p3:
             print("Print 3")
             return 3
+
+    if end_date is None:
+        p4 = PeriodConfiguration.objects.filter(tower=tower, end_date=end_date).exclude(
+            id=period_id)
+        if p4:
+            print("Print 4")
+            return 4
     return 0

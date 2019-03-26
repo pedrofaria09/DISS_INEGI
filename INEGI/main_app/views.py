@@ -975,6 +975,8 @@ def add_conf_period(request, tower_id):
                     messages.error(request, "Begin date is invalid!!!")
                 elif verify is 3:
                     messages.error(request, "End date is invalid!!!")
+                elif verify is 4:
+                    messages.error(request, "Have an open period")
 
             else:
                 messages.warning(request, 'Period not added!!!')
