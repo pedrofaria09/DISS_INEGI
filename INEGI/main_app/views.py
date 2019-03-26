@@ -10,12 +10,12 @@ from .models import *
 from .forms import *
 from datetime import *
 from django.db import IntegrityError
-from .aux_functions import *
+from .aux_functions import parsedate, check_if_period_is_valid
 from formtools.wizard.views import SessionWizardView
 from dal import autocomplete
 from django.utils.html import format_html
 
-import time, re, io, json
+import time, re, io, json, pytz
 
 # Create your views here.
 
@@ -26,6 +26,8 @@ def get_obj_or_404_2(klass, *args, **kwargs):
     except klass.DoesNotExist:
         raise Http404
 
+
+# ========================================= USERS =========================================
 
 def index(request):
     if request.user.id is None:
@@ -177,6 +179,9 @@ def ban_user(request):
     return HttpResponse("not ok")
 
 
+# ========================================= TOWERS =========================================
+
+
 def associate_towers(request, user_id):
     if not request.user.is_staff:
         messages.error(request, 'You dont have permissions to do this!!!')
@@ -273,6 +278,9 @@ def delete_tower(request):
     return HttpResponse("not ok")
 
 
+# ========================================= MACHINES =========================================
+
+
 def add_machine(request):
     if request.method == 'POST':
         form = MachineForm(request.POST)
@@ -326,6 +334,9 @@ def delete_machine(request):
         return HttpResponse('ok')
     messages.error(request, 'A problem occurred when deleting the Machine!')
     return HttpResponse("not ok")
+
+
+# ========================================= CLUSTERS =========================================
 
 
 def add_cluster(request):
@@ -384,20 +395,13 @@ def delete_cluster(request):
     return HttpResponse("not ok")
 
 
+# ========================================= EQUIPMENTS =========================================
+
+
 def list_equipments(request):
     equipments = Equipment.objects.all()
 
     return render(request, 'list_equipments.html', {'equipments': equipments})
-
-
-class EquipmentAutocomplete(autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        qs = EquipmentType.objects.all()
-
-        if self.q:
-            qs = qs.filter(name__istartswith=self.q)
-
-        return qs
 
 
 def add_equipment(request):
@@ -450,6 +454,9 @@ def delete_equipment(request):
         return HttpResponse('ok')
     messages.error(request, 'An error occurred when deleting the equipment!')
     return HttpResponse("not ok")
+
+
+# ========================================= TYPES =========================================
 
 
 def list_type(request, type):
@@ -543,6 +550,9 @@ def delete_type(request):
         return HttpResponse('ok')
     messages.error(request, 'An error occurred when deleting the type!')
     return HttpResponse("not ok")
+
+
+# ========================================= DATASETS =========================================
 
 
 def show_towers_data_mongo(request):
@@ -909,6 +919,9 @@ def add_raw_data_pg(request):
     return HttpResponseRedirect(reverse("show_towers_data_pg"))
 
 
+# ========================================= WIZARD =========================================
+
+
 class FormWizardView(SessionWizardView):
     template_name = "wizard.html"
 
@@ -921,6 +934,9 @@ class FormWizardView(SessionWizardView):
         return render(self.request, 'home.html', {
             'form_data': [form.cleaned_data for form in form_list],
         })
+
+
+# ========================================= CONFIGURATION OF PERIODS TO TOWERS =========================================
 
 
 def add_conf_period(request, tower_id):
@@ -1013,3 +1029,35 @@ def delete_conf_period(request):
         return HttpResponse('ok')
     messages.error(request, 'An error occurred when deleting the Period!')
     return HttpResponse("not ok")
+
+
+# ========================================= AUTOCOMPLETES =========================================
+
+class EquipmentAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = EquipmentType.objects.all()
+
+        if self.q:
+            qs = qs.filter(name__istartswith=self.q)
+
+        return qs
+
+
+class TowerAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Tower.objects.all()
+
+        if self.q:
+            qs = qs.filter(name__istartswith=self.q)
+
+        return qs
+
+
+class GroupAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = UserGroupType.objects.all()
+
+        if self.q:
+            qs = qs.filter(name__istartswith=self.q)
+
+        return qs

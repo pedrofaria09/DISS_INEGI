@@ -24,6 +24,10 @@ class RegisterForm(UserCreationForm):
 
         # widgets = {'birthdate': DatePickerInput(format='%d/%m/%Y'),}
 
+        widgets = {
+            'group_type': autocomplete.ModelSelect2(url='group-autocomplete', attrs={'style': 'width:100%'})
+        }
+
     def clean_username(self):
         username = self.cleaned_data.get('username')
         if username and MyUser.objects.filter(username=username).exists():
@@ -48,7 +52,7 @@ class RegisterForm(UserCreationForm):
         self.fields['password1'].widget.attrs.update({'class': 'form-control mandatory'})
         self.fields['password2'].widget.attrs.update({'class': 'form-control mandatory'})
         self.fields['full_name'].widget.attrs.update({'class': 'form-control mandatory'})
-        self.fields['group_type'].widget.attrs.update({'class': 'form-control mandatory'})
+        # self.fields['group_type'].widget.attrs.update({'class': 'form-control mandatory'})
         #self.fields['is_client'].widget.attrs.update({'class': 'form-check-input'})
         #self.fields['is_manager'].widget.attrs.update({'class': 'form-check-input'})
 
@@ -59,6 +63,10 @@ class UserForm(ModelForm):
         fields = ('username', 'full_name', 'is_client', 'is_manager', 'is_staff', 'group_type')
 
         # widgets = {'birthdate': DatePickerInput(format='%d/%m/%Y'),}
+
+        widgets = {
+            'group_type': autocomplete.ModelSelect2(url='group-autocomplete', attrs={'style': 'width:100%'})
+        }
 
     def __init__(self, *args, **kwargs):
         super(UserForm, self).__init__(*args, **kwargs)
@@ -74,7 +82,7 @@ class UserForm(ModelForm):
 
         self.fields['username'].widget.attrs.update({'class': 'form-control mandatory'})
         self.fields['full_name'].widget.attrs.update({'class': 'form-control mandatory'})
-        self.fields['group_type'].widget.attrs.update({'class': 'form-control mandatory'})
+        # self.fields['group_type'].widget.attrs.update({'class': 'form-control mandatory'})
         # self.fields['birthdate'].disabled = True
 
 
@@ -126,25 +134,31 @@ class ClusterForm(ModelForm):
         model = Cluster
         fields = ('name', 'towers')
         # towers = forms.ModelMultipleChoiceField(widget=forms.CheckboxSelectMultiple(), queryset=Tower.objects.all())
+        widgets = {
+            'towers': autocomplete.ModelSelect2Multiple(url='tower-autocomplete', attrs={'style': 'width:100%'})
+        }
 
     def __init__(self, *args, **kwargs):
         super(ClusterForm, self).__init__(*args, **kwargs)
         self.fields['name'].widget.attrs.update({'class': 'form-control mandatory'})
-
-        self.fields["towers"].widget = forms.CheckboxSelectMultiple()
-        self.fields["towers"].queryset = Tower.objects.all()
+        # self.fields["towers"].widget = forms.CheckboxSelectMultiple()
+        # self.fields["towers"].queryset = Tower.objects.all()
         # self.fields['towers'].widget.attrs['size'] = 20
 
 
 class EquipmentForm(ModelForm):
-    type = forms.ModelChoiceField(
-        queryset=EquipmentType.objects.all(),
-        widget=autocomplete.ModelSelect2(url='equipment-autocomplete')
-    )
+    # type = forms.ModelChoiceField(
+    #     queryset=EquipmentType.objects.all(),
+    #     widget=autocomplete.ModelSelect2(url='equipment-autocomplete')
+    # )
 
     class Meta:
         model = Equipment
         fields = ('sn', 'manufacturer', 'model', 'version', 'designation', 'is_active', 'type')
+
+        widgets = {
+            'type': autocomplete.ModelSelect2(url='equipment-autocomplete', attrs={'style': 'width:100%'})
+        }
 
     def __init__(self, *args, **kwargs):
         super(EquipmentForm, self).__init__(*args, **kwargs)
@@ -161,7 +175,6 @@ class EquipmentForm(ModelForm):
         self.fields['model'].widget.attrs.update({'class': 'form-control mandatory'})
         self.fields['version'].widget.attrs.update({'class': 'form-control mandatory'})
         self.fields['designation'].widget.attrs.update({'class': 'form-control mandatory'})
-        # self.fields['type'].widget.attrs.update({'class': 'form-control mandatory'})
 
 
 class EquipmentTypeForm(ModelForm):
