@@ -461,25 +461,32 @@ def delete_equipment(request):
 def list_type(request, type):
     if type == 'equipment':
         type_obj = EquipmentType.objects.all()
-        name = "Equipments"
+        name = "Equipments Type"
     elif type == 'user_group':
         type_obj = UserGroupType.objects.all()
-        name = "Users Groups"
+        name = "Users Groups Type"
+    elif type == 'model':
+        type_obj = EquipmentCharacteristic.objects.all()
+        name = "Equipment Models"
 
     return render(request, 'list_type.html', {'type_obj': type_obj, 'type': type, 'name': name})
 
 
 def add_type(request, type):
     if type == 'equipment':
-        name = "Equipment"
+        name = "Equipment Type"
     elif type == 'user_group':
-        name = "User Group"
+        name = "User Group Type"
+    elif type == 'model':
+        name = "Equipment Models"
 
     if request.method == 'POST':
         if type == 'equipment':
             form = EquipmentTypeForm(request.POST)
         elif type == 'user_group':
             form = UserGroupTypeForm(request.POST)
+        elif type == 'model':
+            form = EquipmentCharacteristicForm(request.POST)
 
         if form.is_valid():
             form.save()
@@ -492,6 +499,8 @@ def add_type(request, type):
             form = EquipmentTypeForm()
         elif type == 'user_group':
             form = UserGroupTypeForm()
+        elif type == 'model':
+            form = EquipmentCharacteristicForm()
 
     return render(request, 'add_type.html', {'form': form, 'type': type, 'name': name})
 
@@ -514,18 +523,42 @@ def add_type_equipment(request):
     return JsonResponse(data)
 
 
+def add_type_model(request):
+    data = dict()
+
+    if request.method == 'POST':
+        form = EquipmentCharacteristicForm(request.POST)
+        if form.is_valid():
+            form.save()
+            data['form_is_valid'] = True
+        else:
+            data['form_is_valid'] = False
+    else:
+        form = EquipmentCharacteristicForm()
+
+    context = {'form': form}
+    data['html_form'] = render_to_string('add_type_model.html', context, request=request)
+    return JsonResponse(data)
+
+
 def view_type(request, equipment_id, type):
     if type == 'equipment':
-        name = "Equipment"
+        name = "Equipment Type"
         try:
             obj = EquipmentType.objects.get(pk=equipment_id)
         except EquipmentType.DoesNotExist:
             return HttpResponseRedirect(reverse("list_type", kwargs={'type': type}))
     elif type == 'user_group':
-        name = "User Group"
+        name = "User Group Type"
         try:
             obj = UserGroupType.objects.get(pk=equipment_id)
         except UserGroupType.DoesNotExist:
+            return HttpResponseRedirect(reverse("list_type", kwargs={'type': type}))
+    elif type == 'model':
+        name = "Equipment Models"
+        try:
+            obj = EquipmentCharacteristic.objects.get(pk=equipment_id)
+        except EquipmentCharacteristic.DoesNotExist:
             return HttpResponseRedirect(reverse("list_type", kwargs={'type': type}))
 
     if request.method == 'GET':
@@ -533,12 +566,16 @@ def view_type(request, equipment_id, type):
             form = EquipmentTypeForm(instance=obj)
         elif type == 'user_group':
             form = UserGroupTypeForm(instance=obj)
+        elif type == 'model':
+            form = EquipmentCharacteristicForm(instance=obj)
 
     elif request.method == 'POST':
         if type == 'equipment':
             form = EquipmentTypeForm(request.POST, instance=obj)
         elif type == 'user_group':
             form = UserGroupTypeForm(request.POST, instance=obj)
+        elif type == 'model':
+            form = EquipmentCharacteristicForm(request.POST, instance=obj)
 
         if form.is_valid():
             form.save()
@@ -556,6 +593,8 @@ def delete_type(request):
             obj = EquipmentType.objects.get(pk=request.POST["id"])
         elif request.POST["typex"] == 'user_group':
             obj = UserGroupType.objects.get(pk=request.POST["id"])
+        elif request.POST["typex"] == 'model':
+            obj = EquipmentCharacteristic.objects.get(pk=request.POST["id"])
 
         try:
             obj.delete()

@@ -1,9 +1,9 @@
 {% load widget_tweaks %}
 
-<form method="post" action="{% url 'add_type_equipment' %}" class="js-create-type-form">
+<form method="post" action="{% url 'add_type_model' %}" class="js-create-type-form">
     {% csrf_token %}
     <div class="modal-header">
-        <h4 class="modal-title">Create a new Equipment Type</h4>
+        <h4 class="modal-title">Create a new Equipment Model Type</h4>
     </div>
     <div class="modal-body">
         {% for field in form %}

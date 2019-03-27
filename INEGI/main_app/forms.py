@@ -173,6 +173,42 @@ class EquipmentForm(ModelForm):
     field_order = ['sn', 'type', 'model']
 
 
+
+class EquipmentCharacteristicForm(ModelForm):
+    type = forms.ModelChoiceField(
+        queryset=EquipmentType.objects.all(),
+        widget=autocomplete.ModelSelect2(url='equipment-autocomplete', attrs={'style': 'width:100%'})
+    )
+
+    class Meta:
+        model = EquipmentCharacteristic
+        fields = ('__all__')
+
+    def __init__(self, *args, **kwargs):
+        super(EquipmentCharacteristicForm, self).__init__(*args, **kwargs)
+        self.fields['manufacturer'].label = "Manufacturer"
+        self.fields['model'].label = "Model"
+        self.fields['version'].label = "Version"
+        self.fields['designation'].label = "Designation"
+        self.fields['output'].label = "Output"
+        self.fields['gama'].label = "Gama"
+        self.fields['error'].label = "Error"
+        self.fields['sep_field'].label = "Separator Field - Dataset"
+        self.fields['sep_dec'].label = "Separator Decimal - Dataset"
+        self.fields['sep_thousand'].label = "Separator Thousand - Dataset"
+
+        self.fields['manufacturer'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['model'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['version'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['designation'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['output'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['gama'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['error'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['sep_field'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['sep_dec'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['sep_thousand'].widget.attrs.update({'class': 'form-control mandatory'})
+
+
 class EquipmentTypeForm(ModelForm):
     class Meta:
         model = EquipmentType

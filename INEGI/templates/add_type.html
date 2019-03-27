@@ -29,6 +29,9 @@
                     {% for field in form %}
                         <div class="form-group">
                             {{ field.label_tag }}{% if field.field.required %} *{% endif %}
+                            {% if field.name == "type" %}
+                                <a href="#" class="js-create-type related-widget-wrapper-link add-related" data-type="equipment" id="add_id_type" title="Add another equipment type"><img src="/static/admin/img/icon-addlink.svg" alt="Add"></a>
+                            {% endif %}
                             {% render_field field placeholder=field.label %}
                         </div>
                     {% endfor %}
@@ -47,8 +50,13 @@
                 </form>
             </div>
         </div>
+    </div>
 
-
+    <!-- THE MODAL WE WILL BE USING -->
+    <div class="modal fade" id="modal-type">
+        <div class="modal-dialog">
+            <div class="modal-content"></div>
+        </div>
     </div>
 
 {% endblock %}

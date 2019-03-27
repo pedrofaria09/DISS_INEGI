@@ -1,9 +1,20 @@
 $(function () {
 
     $(".js-create-type").click(function () {
-        console.log("Equipment")
+
+        var type_data =$(this).attr('data-type');
+        var string_url = null;
+
+        if(type_data === "equipment" )
+            string_url = '/add_type_equipment';
+
+        if(type_data === "model" )
+            string_url = '/add_type_model';
+
+        console.log(string_url);
+
         $.ajax({
-            url: '/add_type_equipment',
+            url: string_url,
             type: 'get',
             dataType: 'json',
             beforeSend: function () {

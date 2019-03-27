@@ -5,12 +5,12 @@
     <div class="container-fluid">
 
         <!-- Page Heading -->
-        <h1 class="h3 mb-2 text-gray-800">{{ name }} Type</h1>
-        <p class="mb-4">This page shows the {{ name }} types on the system</a>.</p>
+        <h1 class="h3 mb-2 text-gray-800">{{ name }}</h1>
+        <p class="mb-4">This page shows the {{ name }} on the system</a>.</p>
 
         <div class="row">
             <div class="col-md-12">
-                <a href="{% url "add_type" type %}" class="btn btn-success">Add a new {{ name }} Type</a><br>
+                <a href="{% url "add_type" type %}" class="btn btn-success">Add a new {{ name }}</a><br>
                 <br>
             </div>
         </div>
@@ -18,7 +18,7 @@
         <!-- DataTales Example -->
         <div class="card shadow mb-4">
             <div class="card-header py-2">
-                <h6 class="m-0 font-weight-bold text-primary text-center">{{ name }} Type Table</h6>
+                <h6 class="m-0 font-weight-bold text-primary text-center">{{ name }} Table</h6>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -39,7 +39,7 @@
 
                         {% for obj in type_obj %}
                             <tr>
-                                <td class="align-middle p-2"><a href="{% url "view_type" obj.pk type %}">{{ obj.name }}</a></th>
+                                <td class="align-middle p-2"><a href="{% url "view_type" obj.pk type %}">{{ obj }}</a></th>
                                 <td>
                                     <a href="{% url "view_type" obj.pk type %}" class="btn btn-sm btn-info">View - Edit</a>
                                     <a href="#" name="delete_type" data-id="{{ obj.pk }}" data-type="{{ type }}" class="btn btn-sm btn-danger">Delete</a>
