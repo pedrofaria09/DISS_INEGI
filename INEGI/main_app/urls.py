@@ -14,6 +14,7 @@ urlpatterns =[
     url(r'^add_type/(?P<type>([\w ]+))$', views.add_type, name='add_type'),
     url(r'^add_machine/?$', views.add_machine, name='add_machine'),
     url(r'^add_conf_period/(?P<tower_id>[0-9]+)$', views.add_conf_period, name='add_conf_period'),
+    url(r'^add_calibration/(?P<equipment_id>[0-9]+)$', views.add_calibration, name='add_calibration'),
 
     url(r'^list_towers/?$', views.list_towers, name='list_towers'),
     url(r'^list_users/?$', views.list_users, name='list_users'),
@@ -29,6 +30,7 @@ urlpatterns =[
     url(r'^view_type/(?P<equipment_id>([\w ]+))/(?P<type>([\w ]+))$', views.view_type, name='view_type'),
     url(r'^view_machine/(?P<machine_id>([\w ]+))$', views.view_machine, name='view_machine'),
     url(r'^view_conf_period/(?P<tower_id>[0-9]+)/(?P<period_id>[0-9]+)$', views.view_conf_period, name='view_conf_period'),
+    url(r'^view_calibration/(?P<equipment_id>[0-9]+)/(?P<calib_id>[0-9]+)$', views.view_calibration, name='view_calibration'),
 
     url(r'^associate_towers/(?P<user_id>[0-9]+)$', views.associate_towers, name='associate_towers'),
 
@@ -39,7 +41,9 @@ urlpatterns =[
     url(r'^delete_type/?$', views.delete_type, name='delete_type'),
     url(r'^delete_machine/?$', views.delete_machine, name='delete_machine'),
     url(r'^delete_conf_period/?$', views.delete_conf_period, name='delete_conf_period'),
+    url(r'^delete_calibration/?$', views.delete_calibration, name='delete_calibration'),
 
+    url(r'^equipment-type-autocomplete/$', views.EquipmentTypeAutocomplete.as_view(), name='equipment-type-autocomplete'),
     url(r'^equipment-autocomplete/$', views.EquipmentAutocomplete.as_view(), name='equipment-autocomplete'),
     url(r'^tower-autocomplete/$', views.TowerAutocomplete.as_view(), name='tower-autocomplete'),
     url(r'^group-autocomplete/$', views.GroupAutocomplete.as_view(), name='group-autocomplete'),

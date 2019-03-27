@@ -438,7 +438,9 @@ def view_equipment(request, equipment_id):
         else:
             messages.warning(request, "Equipment wasn't edited!!!")
 
-    return render(request, 'view_equipment.html', {'form': form, 'equipment_id': equipment_id, 'equipment': equipment})
+    calibrations = Calibration.objects.filter(equipment=equipment_id).order_by('-calib_date')
+
+    return render(request, 'view_equipment.html', {'form': form, 'equipment_id': equipment_id, 'equipment': equipment, 'calibrations':calibrations})
 
 
 def delete_equipment(request):
@@ -1089,11 +1091,78 @@ def delete_conf_period(request):
     return HttpResponse("not ok")
 
 
+# ========================================= CALIBRATIONS =========================================
+
+
+def add_calibration(request, equipment_id):
+
+    try:
+        equipment = Equipment.objects.get(pk=equipment_id)
+    except Equipment.DoesNotExist:
+        return HttpResponseRedirect(reverse("view_equipment", kwargs={'equipment_id': equipment_id}))
+
+    if request.method == 'POST':
+        form = CalibrationForm(request.POST)
+
+        if form.is_valid():
+            calibration = Calibration(offset=form.cleaned_data.get('offset'),
+                                      slope=form.cleaned_data.get('slope'),
+                                      calib_date=form.cleaned_data.get('calib_date'),
+                                      ref=form.cleaned_data.get('ref'),
+                                      equipment=equipment)
+            calibration.save()
+            messages.success(request, 'Calibration was added successfully')
+            return HttpResponseRedirect(reverse("view_equipment", kwargs={'equipment_id': equipment_id}))
+        else:
+            messages.warning(request, 'Calibration was not added!!!')
+    else:
+        form = CalibrationForm()
+
+    return render(request, 'add_calibration.html', {'form': form, 'equipment': equipment, 'equipment_id': equipment_id})
+
+
+def view_calibration(request, equipment_id, calib_id):
+    try:
+        calibration = Calibration.objects.get(pk=calib_id)
+    except Calibration.DoesNotExist:
+        return HttpResponseRedirect(reverse("view_equipment", kwargs={'equipment_id': equipment_id}))
+
+    if request.method == 'GET':
+        form = CalibrationForm(instance=calibration)
+    elif request.method == 'POST':
+        form = CalibrationForm(request.POST, instance=calibration)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Calibration was added successfully')
+            return HttpResponseRedirect(reverse("view_equipment", kwargs={'equipment_id': equipment_id}))
+        else:
+            messages.warning(request, 'Calibration wasnt edited successfully!!!')
+
+    return render(request, 'view_calibration.html', {'form': form, 'equipment_id': equipment_id, 'calib_id': calib_id, 'calibration': calibration})
+
+
+def delete_calibration(request):
+    if request.is_ajax and request.method == 'POST':
+        print(request.POST["id"])
+        calib = Calibration.objects.get(pk=request.POST["id"])
+        try:
+            calib.delete()
+        except (TypeError, IntegrityError) as e:
+            messages.error(request, e.__cause__)
+            return HttpResponse("not ok")
+
+        messages.success(request, 'Calibration was deleted successfully!')
+        return HttpResponse('ok')
+    messages.error(request, 'An error occurred when deleting the Calibration!')
+    return HttpResponse("not ok")
+
+
 # ========================================= AUTOCOMPLETES =========================================
 
-class EquipmentAutocomplete(autocomplete.Select2QuerySetView):
+
+class EquipmentTypeAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        qs = EquipmentType.objects.all()
+        qs = EquipmentType.objects.all().order_by('-id')
 
         if self.q:
             qs = qs.filter(name__istartswith=self.q)
@@ -1101,9 +1170,19 @@ class EquipmentAutocomplete(autocomplete.Select2QuerySetView):
         return qs
 
 
+class EquipmentAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Equipment.objects.all().order_by('-id')
+
+        if self.q:
+            qs = qs.filter(sn__istartswith=self.q)
+
+        return qs
+
+
 class TowerAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        qs = Tower.objects.all()
+        qs = Tower.objects.all().order_by('-id')
 
         if self.q:
             qs = qs.filter(name__istartswith=self.q)
@@ -1113,7 +1192,7 @@ class TowerAutocomplete(autocomplete.Select2QuerySetView):
 
 class GroupAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        qs = UserGroupType.objects.all()
+        qs = UserGroupType.objects.all().order_by('-id')
 
         if self.q:
             qs = qs.filter(name__istartswith=self.q)
@@ -1123,7 +1202,7 @@ class GroupAutocomplete(autocomplete.Select2QuerySetView):
 
 class ModelAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        qs = EquipmentCharacteristic.objects.all()
+        qs = EquipmentCharacteristic.objects.all().order_by('-id')
 
         type = self.forwarded.get('type', None)
 
@@ -1131,6 +1210,6 @@ class ModelAutocomplete(autocomplete.Select2QuerySetView):
             qs = qs.filter(type=type)
 
         if self.q:
-            qs = qs.filter(name__istartswith=self.q)
+            qs = qs.filter(QD(type__name__istartswith=self.q) | QD(model__istartswith=self.q) | QD(version__istartswith=self.q))
 
         return qs

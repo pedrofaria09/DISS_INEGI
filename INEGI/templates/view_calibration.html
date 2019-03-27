@@ -7,12 +7,13 @@
     <div class="container-fluid">
         <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">View-Edit Tower: {{ tower.code }}</h1>
+            <h1 class="h3 mb-0 text-gray-800">View-Edit Calibration: {{ calibration.ref }}
+            </h1>
         </div>
 
         <div class="row">
             <div class="col-12">
-                <form action="{% url "view_tower" tower_id %}" method="POST">
+                <form action="{% url "view_calibration" equipment_id calib_id %}" method="POST">
 
                     {% csrf_token %}
 
@@ -28,8 +29,14 @@
 
                     {% for field in form %}
                         <div class="form-group">
-                            {{ field.label_tag }}
-                            {% render_field field class="form-control" %}
+                            {% if field.field.is_checkbox %}
+                                <div class="form-check">
+                                    {{ field }}{{ field.label_tag }}
+                                </div>
+                            {% else %}
+                                {{ field.label_tag }}
+                                {% render_field field placeholder=field.label %}
+                            {% endif %}
                         </div>
                     {% endfor %}
 
@@ -39,7 +46,7 @@
                                 <input type="submit" class="btn btn-primary btn-block" value="Edit">
                             </div>
                             <div class="col-md-6">
-                                <a href="#" name="delete_tower" data-id="{{ tower_id }}" class="btn btn-danger btn-block">Delete</a>
+                                <a href="#" name="delete_calibration" data-id="{{ calib_id }}" class="btn btn-danger btn-block">Delete</a>
                             </div>
                         </div>
                     </div>
@@ -47,22 +54,6 @@
                 </form>
             </div>
         </div>
-
-        <hr>
-
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h2 class="h3 mb-0 text-gray-800">Configurations of Periods</h2>
-        </div>
-
-        <div class="row">
-            <div class="col-12">
-                <a href="{% url "add_conf_period" tower_id %}" class="btn btn-success">Add a new Period</a>
-                <br><br>
-
-                {% include "list_conf_periods.html" %}
-            </div>
-        </div>
-
     </div>
 
 {% endblock %}

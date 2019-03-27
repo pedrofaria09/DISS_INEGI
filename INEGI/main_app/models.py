@@ -172,12 +172,12 @@ class EquipmentCharacteristic(models.Model):
 class Calibration(models.Model):
     offset = models.FloatField()
     slope = models.FloatField()
-    calib_date = models.DateField(null=True, blank=True)
+    calib_date = models.DateTimeField(null=True, blank=True)
     ref = models.CharField(max_length=100)
     equipment = models.ForeignKey('Equipment', on_delete=models.DO_NOTHING)
 
     def __str__(self):
-        return "SN:%s REF:%s" % (self.equipment, self.ref)
+        return "SN:%s Date:%s OF:%s SL:%s" % (self.equipment, self.ref, self.offset, self.slope)
 
 
 class PeriodConfiguration(models.Model):

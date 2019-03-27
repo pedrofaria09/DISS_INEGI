@@ -152,7 +152,8 @@ class ClusterForm(ModelForm):
 class EquipmentForm(ModelForm):
     type = forms.ModelChoiceField(
         queryset=EquipmentType.objects.all(),
-        widget=autocomplete.ModelSelect2(url='equipment-autocomplete', attrs={'style': 'width:100%'})
+        required=False,
+        widget=autocomplete.ModelSelect2(url='equipment-type-autocomplete', attrs={'style': 'width:100%'})
     )
 
     class Meta:
@@ -173,11 +174,10 @@ class EquipmentForm(ModelForm):
     field_order = ['sn', 'type', 'model']
 
 
-
 class EquipmentCharacteristicForm(ModelForm):
     type = forms.ModelChoiceField(
         queryset=EquipmentType.objects.all(),
-        widget=autocomplete.ModelSelect2(url='equipment-autocomplete', attrs={'style': 'width:100%'})
+        widget=autocomplete.ModelSelect2(url='equipment-type-autocomplete', attrs={'style': 'width:100%'})
     )
 
     class Meta:
@@ -207,6 +207,26 @@ class EquipmentCharacteristicForm(ModelForm):
         self.fields['sep_field'].widget.attrs.update({'class': 'form-control mandatory'})
         self.fields['sep_dec'].widget.attrs.update({'class': 'form-control mandatory'})
         self.fields['sep_thousand'].widget.attrs.update({'class': 'form-control mandatory'})
+
+
+class CalibrationForm(ModelForm):
+    equipment = forms.ModelChoiceField(
+        queryset=Equipment.objects.all().order_by('-id'),
+        widget=autocomplete.ModelSelect2(url='equipment-autocomplete', attrs={'style': 'width:100%'})
+    )
+    calib_date = forms.DateTimeField(required=False, input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M"))
+
+    class Meta:
+        model = Calibration
+        fields = ('__all__')
+
+    def __init__(self, *args, **kwargs):
+        super(CalibrationForm, self).__init__(*args, **kwargs)
+        self.fields['calib_date'].label = "Date of calibration"
+
+        self.fields['offset'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['slope'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['ref'].widget.attrs.update({'class': 'form-control mandatory'})
 
 
 class EquipmentTypeForm(ModelForm):
