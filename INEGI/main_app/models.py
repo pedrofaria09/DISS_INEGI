@@ -76,6 +76,31 @@ else:
 #         return "%s" % self.sn
 
 
+class TestTower(models.Model):
+    name = models.CharField(max_length=128)
+
+    def __str__(self):
+        return self.name
+
+
+class TestUser(models.Model):
+    name = models.CharField(max_length=128)
+    members = models.ManyToManyField('TestTower', through='TestDates')
+
+    def __str__(self):
+        return self.name
+
+
+class TestDates(models.Model):
+    tower = models.ForeignKey('TestTower', on_delete=models.CASCADE)
+    user = models.ForeignKey('TestUser', on_delete=models.CASCADE)
+    begin_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+
+    def __str__(self):
+        return self.tower, self.user
+    
+
 class UserGroupType(models.Model):
     name = models.CharField(unique=True, max_length=100)
 
