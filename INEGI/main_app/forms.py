@@ -150,34 +150,27 @@ class ClusterForm(ModelForm):
 
 
 class EquipmentForm(ModelForm):
-    # type = forms.ModelChoiceField(
-    #     queryset=EquipmentType.objects.all(),
-    #     widget=autocomplete.ModelSelect2(url='equipment-autocomplete')
-    # )
+    type = forms.ModelChoiceField(
+        queryset=EquipmentType.objects.all(),
+        widget=autocomplete.ModelSelect2(url='equipment-autocomplete', attrs={'style': 'width:100%'})
+    )
 
     class Meta:
         model = Equipment
-        fields = ('sn', 'manufacturer', 'model', 'version', 'designation', 'is_active', 'type')
+        fields = ('__all__')
 
         widgets = {
-            'type': autocomplete.ModelSelect2(url='equipment-autocomplete', attrs={'style': 'width:100%'})
+            'model': autocomplete.ModelSelect2(url='model-autocomplete', forward=['type'], attrs={'style': 'width:100%'})
         }
 
     def __init__(self, *args, **kwargs):
         super(EquipmentForm, self).__init__(*args, **kwargs)
         self.fields['sn'].label = "Serial Number"
-        self.fields['manufacturer'].label = "Manufacturer"
-        self.fields['model'].label = "Model"
-        self.fields['version'].label = "Version"
-        self.fields['designation'].label = "Designation"
-        self.fields['is_active'].label = "Active?"
         self.fields['type'].label = "Equipment Type"
+        self.fields['model'].label = "Model"
 
         self.fields['sn'].widget.attrs.update({'class': 'form-control mandatory'})
-        self.fields['manufacturer'].widget.attrs.update({'class': 'form-control mandatory'})
-        self.fields['model'].widget.attrs.update({'class': 'form-control mandatory'})
-        self.fields['version'].widget.attrs.update({'class': 'form-control mandatory'})
-        self.fields['designation'].widget.attrs.update({'class': 'form-control mandatory'})
+    field_order = ['sn', 'type', 'model']
 
 
 class EquipmentTypeForm(ModelForm):

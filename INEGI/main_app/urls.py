@@ -43,6 +43,7 @@ urlpatterns =[
     url(r'^equipment-autocomplete/$', views.EquipmentAutocomplete.as_view(), name='equipment-autocomplete'),
     url(r'^tower-autocomplete/$', views.TowerAutocomplete.as_view(), name='tower-autocomplete'),
     url(r'^group-autocomplete/$', views.GroupAutocomplete.as_view(), name='group-autocomplete'),
+    url(r'^model-autocomplete/$', views.ModelAutocomplete.as_view(), name='model-autocomplete'),
 
     url(r'^ban_user/?$', views.ban_user, name='ban_user'),
 

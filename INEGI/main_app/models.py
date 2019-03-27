@@ -143,15 +143,30 @@ class Cluster(models.Model):
 
 class Equipment(models.Model):
     sn = models.CharField(unique=True, max_length=100)
+    model = models.ForeignKey('EquipmentCharacteristic', on_delete=models.DO_NOTHING)
+
+    def __str__(self):
+        return "%s" % self.sn
+
+
+class EquipmentCharacteristic(models.Model):
     manufacturer = models.CharField(max_length=100, null=True, blank=True)
     model = models.CharField(max_length=50, null=True, blank=True)
     version = models.CharField(max_length=10, null=True, blank=True)
     designation = models.CharField(max_length=100, null=True, blank=True)
-    is_active = models.BooleanField(default=True)
+    output = models.CharField(max_length=100)
+    gama = models.CharField(max_length=100, null=True, blank=True)
+    error = models.CharField(max_length=100, null=True, blank=True)
+    sep_field = models.CharField(max_length=10, null=True, blank=True)
+    sep_dec = models.CharField(max_length=10, null=True, blank=True)
+    sep_thousand = models.CharField(max_length=10, null=True, blank=True)
     type = models.ForeignKey('EquipmentType', on_delete=models.DO_NOTHING)
 
+    class Meta:
+        ordering = ['-id']
+
     def __str__(self):
-        return "%s" % self.type
+        return "%s - %s - %s" % (self.type, self.model, self.version)
 
 
 class Calibration(models.Model):
@@ -162,7 +177,7 @@ class Calibration(models.Model):
     equipment = models.ForeignKey('Equipment', on_delete=models.DO_NOTHING)
 
     def __str__(self):
-        return "Off:%s Slop:%s Date:%s Eq:%s" % (self.offset, self.slope, self.calib_date, self.equipment)
+        return "SN:%s REF:%s" % (self.equipment, self.ref)
 
 
 class PeriodConfiguration(models.Model):

@@ -429,10 +429,8 @@ def view_equipment(request, equipment_id):
 
     if request.method == 'GET':
         form = EquipmentForm(instance=equipment)
-        form.fields['sn'].disabled = True
     elif request.method == 'POST':
         form = EquipmentForm(request.POST, instance=equipment)
-        form.fields['sn'].disabled = True
         if form.is_valid():
             form.save()
             messages.success(request, 'Equipment was edited with success')
@@ -1077,6 +1075,21 @@ class TowerAutocomplete(autocomplete.Select2QuerySetView):
 class GroupAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = UserGroupType.objects.all()
+
+        if self.q:
+            qs = qs.filter(name__istartswith=self.q)
+
+        return qs
+
+
+class ModelAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = EquipmentCharacteristic.objects.all()
+
+        type = self.forwarded.get('type', None)
+
+        if type:
+            qs = qs.filter(type=type)
 
         if self.q:
             qs = qs.filter(name__istartswith=self.q)
