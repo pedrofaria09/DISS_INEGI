@@ -36,7 +36,7 @@
                             {% else %}
                                 {{ field.label_tag }}{% if field.field.required %} *{% endif %}
                                 {% if field.name == "type" %}
-                                    <a href="#" class="js-create-type-equipment related-widget-wrapper-link add-related js-create-type-equipmen" id="add_id_type" title="Add another equipment type"><img src="/static/admin/img/icon-addlink.svg" alt="Add"></a>
+                                    <a href="#" class="js-create-type related-widget-wrapper-link add-related" id="add_id_type" title="Add another equipment type"><img src="/static/admin/img/icon-addlink.svg" alt="Add"></a>
                                 {% endif %}
                                 {% render_field field placeholder=field.label %}
 
@@ -62,7 +62,7 @@
     </div>
 
     <!-- THE MODAL WE WILL BE USING -->
-    <div class="modal fade" id="modal-type-equipment">
+    <div class="modal fade" id="modal-type">
         <div class="modal-dialog">
             <div class="modal-content"></div>
         </div>

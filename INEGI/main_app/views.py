@@ -511,9 +511,6 @@ def add_type_equipment(request):
     else:
         form = EquipmentTypeForm()
 
-    for r in request:
-        print(r)
-
     context = {'form': form}
     data['html_form'] = render_to_string('add_type_equipment.html', context, request=request)
     return JsonResponse(data)
