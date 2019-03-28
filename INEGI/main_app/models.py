@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractUser
 from influxdb import InfluxDBClient, SeriesHelper
 from datetime import datetime
 from django.conf import settings
+from django.db.models import Q as QD
 
 # Connection to MongoDB
 if settings.DOCKER:
@@ -98,7 +99,7 @@ else:
 #     end_date = models.DateTimeField()
 #
 #     def __str__(self):
-#         return "Tower:%s User:%s" % (self.tower, self.user)
+#         return "Tower:%s User:%s" % (self.tower.name, self.user)
 
 
 class UserGroupType(models.Model):
@@ -122,13 +123,14 @@ class EquipmentType(models.Model):
 
 
 class UserTowerDates(models.Model):
-    tower = models.ForeignKey('Tower', on_delete=models.CASCADE)
-    user = models.ForeignKey('MyUser', on_delete=models.CASCADE)
+    tower = models.ManyToManyField('Tower', blank=True)
+    user = models.ForeignKey('MyUser', on_delete=models.DO_NOTHING)
     begin_date = models.DateField()
     end_date = models.DateField()
 
     def __str__(self):
-        return "Tower:%s User:%s" % (self.tower, self.user)
+        return "Tower:%s User:%s" % (self.tower.all, self.user)
+
 
 
 class MyUser(AbstractUser):
@@ -136,7 +138,7 @@ class MyUser(AbstractUser):
     is_client = models.BooleanField(default=False)
     is_manager = models.BooleanField(default=False)
     group_type = models.ForeignKey('UserGroupType', on_delete=models.DO_NOTHING)
-    towers = models.ManyToManyField('Tower', through='UserTowerDates', verbose_name="list of towers", blank=True)
+    towers = models.ManyToManyField('UserTowerDates', blank=True)
 
     def __str__(self):
         return "%s %s" % (self.id, self.full_name)

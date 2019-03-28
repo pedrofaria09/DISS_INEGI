@@ -196,26 +196,17 @@ def associate_towers(request):
     if request.method == 'POST':
         form = UserTowersFrom(request.POST)
         if form.is_valid():
-            Flag = 0
-            for tw in request.POST.getlist('towers2'):
-                tower = Tower.objects.get(pk=tw)
-                user = MyUser.objects.get(pk=request.POST['user'])
-                begin_date = form.cleaned_data['begin_date']
-                end_date = form.cleaned_data['end_date']
-                verify = check_if_period_is_valid_2(tower, user, begin_date, end_date)
-                if verify is 0:
-                    utd = UserTowerDates(tower=tower,
-                                         user=user,
-                                         begin_date=begin_date,
-                                         end_date=end_date)
-                    utd.save()
-                Flag = verify
-
-            if Flag is 0:
+            tower = form.cleaned_data['tower'][0]
+            user = form.cleaned_data['user']
+            begin_date = form.cleaned_data['begin_date']
+            end_date = form.cleaned_data['end_date']
+            verify = check_if_period_is_valid_2(tower, user, begin_date, end_date)
+            if verify is 0:
+                form.save()
                 messages.success(request, 'Towers associated successfully!')
-            elif Flag is 1:
+            elif verify is 1:
                 messages.error(request, "End date can't be higher than the Begin date!!!")
-            elif Flag is 2:
+            elif verify is 2:
                 messages.error(request, "There are already a period for that user and towers")
         else:
             messages.warning(request, 'Problem associating towers!!!')
@@ -223,17 +214,8 @@ def associate_towers(request):
         form = UserTowersFrom()
 
     utd = UserTowerDates.objects.all()
-    print(utd)
-    for i in utd:
-        print(i)
 
-    utd2 = MyUser.objects.get(pk=1).towers.all().values_list('myuser', flat=True)
-    print(utd2)
-    utd2 = Tower.objects.filter(pk__in=utd2).distinct()
-    print(utd2)
-    for i in utd2:
-        print(i)
-    return render(request, 'associate_towers.html', {'form': form ,'utd':utd})
+    return render(request, 'associate_towers.html', {'form': form, 'utd': utd})
 
 
 def add_tower(request):
