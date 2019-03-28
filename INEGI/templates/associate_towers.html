@@ -7,12 +7,12 @@
     <div class="container-fluid">
         <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Associate Towers to user: {{ user.full_name }}</h1>
+            <h1 class="h3 mb-0 text-gray-800">Associate Towers to a user</h1>
         </div>
 
         <div class="row">
             <div class="col-12">
-                <form action="{% url "associate_towers" user.id %}" method="POST">
+                <form action="{% url "associate_towers" %}" method="POST">
 
                     {% csrf_token %}
 
@@ -38,7 +38,7 @@
                                     {{ field }}{{ field.label_tag }}
                                 </div>
                             {% else %}
-                                {{ field.label_tag }}
+                                {{ field.label_tag }} {% if field.field.required %} *{% endif %}
                                 {% render_field  field placeholder=field.label %}
                             {% endif %}
                         </div>
@@ -58,7 +58,17 @@
             </div>
         </div>
 
-
-    </div>
+    {% regroup utd by user as list %}
+    <ul>
+    {% for user in list %}
+        <li>{{ user.grouper }}
+        <ul>
+            {% for c in user.list %}
+              <li>{{ c }}</li>
+            {% endfor %}
+        </ul>
+        </li>
+    {% endfor %}
+    </ul>
 
 {% endblock %}

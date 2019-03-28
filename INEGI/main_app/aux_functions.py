@@ -106,3 +106,17 @@ def check_if_period_is_valid(tower_id, begin_date, end_date, period_id):
             print("Print 4")
             return 4
     return 0
+
+
+def check_if_period_is_valid_2(tower, user, begin_date, end_date):
+    if end_date:
+        if begin_date >= end_date:
+            return 1
+
+    try:
+        UserTowerDates.objects.get(QD(begin_date__range=(begin_date, end_date), tower=tower, user=user) |
+                                   QD(end_date__range=(end_date, end_date), tower=tower, user=user) |
+                                   QD(begin_date__lt=begin_date, end_date__gt=end_date, tower=tower, user=user))
+    except UserTowerDates.DoesNotExist:
+        return 0
+    return 2

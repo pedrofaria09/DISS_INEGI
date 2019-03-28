@@ -87,19 +87,34 @@ class UserForm(ModelForm):
 
 
 class UserTowersFrom(ModelForm):
+    towers2 = forms.ModelMultipleChoiceField(
+        queryset=Tower.objects.all(),
+        required=False,
+        widget=autocomplete.ModelSelect2Multiple(url='tower-autocomplete',
+                                                 attrs={'style': 'width:100%'})
+    )
+
+    user = forms.ModelChoiceField(
+        queryset=MyUser.objects.all(),
+        required=True,
+        widget=autocomplete.ModelSelect2(url='user-autocomplete', attrs={'style': 'width:100%'})
+    )
+
+    begin_date = forms.DateTimeField(input_formats=["%d/%m/%Y"], required=False,widget=DatePickerInput(format="%d/%m/%Y"))
+    end_date = forms.DateTimeField(input_formats=["%d/%m/%Y"],required=False, widget=DatePickerInput(format="%d/%m/%Y"))
+
     class Meta:
-        model = MyUser
-        fields = ['towers']
-        # towers = forms.ModelMultipleChoiceField(widget=forms.CheckboxSelectMultiple(), queryset=Tower.objects.all())
-        widgets = {
-            'towers': autocomplete.ModelSelect2Multiple(url='tower-autocomplete', attrs={'style': 'width:100%'})
-        }
+        model = UserTowerDates
+        fields = ('user', 'begin_date', 'end_date')
+
 
     def __init__(self, *args, **kwargs):
         super(UserTowersFrom, self).__init__(*args, **kwargs)
-        # self.fields["towers"].widget = forms.CheckboxSelectMultiple()
-        # self.fields["towers"].queryset = Tower.objects.all()
-        # self.fields['towers'].widget.attrs['size'] = 20
+        self.fields['towers2'].label = "Towers"
+        self.fields['user'].label = "User"
+        self.fields['begin_date'].label = "Begin Date"
+        self.fields['end_date'].label = "End Date"
+    field_order = ['towers2', 'user', 'begin_date', 'end_date']
 
 
 class TowerForm(ModelForm):

@@ -74,32 +74,32 @@ else:
 #
 #     def __str__(self):
 #         return "%s" % self.sn
+#
+#
+# class TestTower(models.Model):
+#     name = models.CharField(max_length=128)
+#
+#     def __str__(self):
+#         return self.name
+#
+#
+# class TestUser(models.Model):
+#     name = models.CharField(max_length=128)
+#     members = models.ManyToManyField('TestDates', blank=True)
+#
+#     def __str__(self):
+#         return self.name
+#
+#
+# class TestDates(models.Model):
+#     tower = models.ManyToManyField('TestTower', blank=True)
+#     user = models.ForeignKey('TestUser', on_delete=models.CASCADE)
+#     begin_date = models.DateTimeField()
+#     end_date = models.DateTimeField()
+#
+#     def __str__(self):
+#         return "Tower:%s User:%s" % (self.tower, self.user)
 
-
-class TestTower(models.Model):
-    name = models.CharField(max_length=128)
-
-    def __str__(self):
-        return self.name
-
-
-class TestUser(models.Model):
-    name = models.CharField(max_length=128)
-    members = models.ManyToManyField('TestTower', through='TestDates')
-
-    def __str__(self):
-        return self.name
-
-
-class TestDates(models.Model):
-    tower = models.ForeignKey('TestTower', on_delete=models.CASCADE)
-    user = models.ForeignKey('TestUser', on_delete=models.CASCADE)
-    begin_date = models.DateTimeField()
-    end_date = models.DateTimeField()
-
-    def __str__(self):
-        return self.tower, self.user
-    
 
 class UserGroupType(models.Model):
     name = models.CharField(unique=True, max_length=100)
@@ -121,12 +121,22 @@ class EquipmentType(models.Model):
         return "%s" % self.name
 
 
+class UserTowerDates(models.Model):
+    tower = models.ForeignKey('Tower', on_delete=models.CASCADE)
+    user = models.ForeignKey('MyUser', on_delete=models.CASCADE)
+    begin_date = models.DateField()
+    end_date = models.DateField()
+
+    def __str__(self):
+        return "Tower:%s User:%s" % (self.tower, self.user)
+
+
 class MyUser(AbstractUser):
     full_name = models.CharField(max_length=100)
     is_client = models.BooleanField(default=False)
     is_manager = models.BooleanField(default=False)
     group_type = models.ForeignKey('UserGroupType', on_delete=models.DO_NOTHING)
-    towers = models.ManyToManyField('Tower', verbose_name="list of towers", blank=True)
+    towers = models.ManyToManyField('Tower', through='UserTowerDates', verbose_name="list of towers", blank=True)
 
     def __str__(self):
         return "%s %s" % (self.id, self.full_name)

@@ -11,7 +11,7 @@ from .models import *
 from .forms import *
 from datetime import *
 from django.db import IntegrityError
-from .aux_functions import parsedate, check_if_period_is_valid
+from .aux_functions import parsedate, check_if_period_is_valid, check_if_period_is_valid_2
 from formtools.wizard.views import SessionWizardView
 from dal import autocomplete
 from django.utils.html import format_html
@@ -31,6 +31,11 @@ def get_obj_or_404_2(klass, *args, **kwargs):
 # ========================================= USERS =========================================
 
 def index(request):
+
+    tu = UserTowerDates.objects.all()
+    for t in tu:
+        print(t)
+
     if request.user.id is None:
         form = LoginForm()
         return render(request, 'home.html', {'form': form})
@@ -183,28 +188,52 @@ def ban_user(request):
 # ========================================= TOWERS =========================================
 
 
-def associate_towers(request, user_id):
+def associate_towers(request):
     if not request.user.is_staff:
         messages.error(request, 'You dont have permissions to do this!!!')
-        return HttpResponseRedirect(reverse("list_users"))
+        return HttpResponseRedirect(reverse("associate_towers"))
 
-    try:
-        user = MyUser.objects.get(pk=user_id)
-    except MyUser.DoesNotExist:
-        return HttpResponseRedirect(reverse("list_users"))
-
-    if request.method == 'GET':
-        form = UserTowersFrom(instance=user)
-    elif request.method == 'POST':
-        form = UserTowersFrom(request.POST, instance=user)
+    if request.method == 'POST':
+        form = UserTowersFrom(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Towers was been associated correctly')
-            return HttpResponseRedirect(reverse("list_users"))
-        else:
-            messages.warning(request, 'Problem associating Towers!!!')
+            Flag = 0
+            for tw in request.POST.getlist('towers2'):
+                tower = Tower.objects.get(pk=tw)
+                user = MyUser.objects.get(pk=request.POST['user'])
+                begin_date = form.cleaned_data['begin_date']
+                end_date = form.cleaned_data['end_date']
+                verify = check_if_period_is_valid_2(tower, user, begin_date, end_date)
+                if verify is 0:
+                    utd = UserTowerDates(tower=tower,
+                                         user=user,
+                                         begin_date=begin_date,
+                                         end_date=end_date)
+                    utd.save()
+                Flag = verify
 
-    return render(request, 'associate_towers.html', {'form': form, 'user': user})
+            if Flag is 0:
+                messages.success(request, 'Towers associated successfully!')
+            elif Flag is 1:
+                messages.error(request, "End date can't be higher than the Begin date!!!")
+            elif Flag is 2:
+                messages.error(request, "There are already a period for that user and towers")
+        else:
+            messages.warning(request, 'Problem associating towers!!!')
+    else:
+        form = UserTowersFrom()
+
+    utd = UserTowerDates.objects.all()
+    print(utd)
+    for i in utd:
+        print(i)
+
+    utd2 = MyUser.objects.get(pk=1).towers.all().values_list('myuser', flat=True)
+    print(utd2)
+    utd2 = Tower.objects.filter(pk__in=utd2).distinct()
+    print(utd2)
+    for i in utd2:
+        print(i)
+    return render(request, 'associate_towers.html', {'form': form ,'utd':utd})
 
 
 def add_tower(request):
@@ -1185,7 +1214,7 @@ class TowerAutocomplete(autocomplete.Select2QuerySetView):
         qs = Tower.objects.all().order_by('-id')
 
         if self.q:
-            qs = qs.filter(name__istartswith=self.q)
+            qs = qs.filter(code__istartswith=self.q)
 
         return qs
 
@@ -1196,6 +1225,16 @@ class GroupAutocomplete(autocomplete.Select2QuerySetView):
 
         if self.q:
             qs = qs.filter(name__istartswith=self.q)
+
+        return qs
+
+
+class UserAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = MyUser.objects.all().order_by('-id')
+
+        if self.q:
+            qs = qs.filter(full_name__istartswith=self.q)
 
         return qs
 
