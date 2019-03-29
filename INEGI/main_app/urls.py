@@ -15,6 +15,7 @@ urlpatterns =[
     url(r'^add_machine/?$', views.add_machine, name='add_machine'),
     url(r'^add_conf_period/(?P<tower_id>[0-9]+)$', views.add_conf_period, name='add_conf_period'),
     url(r'^add_calibration/(?P<equipment_id>[0-9]+)$', views.add_calibration, name='add_calibration'),
+    url(r'^add_associate_towers/$', views.add_associate_towers, name='add_associate_towers'),
 
     url(r'^list_towers/?$', views.list_towers, name='list_towers'),
     url(r'^list_users/?$', views.list_users, name='list_users'),
@@ -22,6 +23,7 @@ urlpatterns =[
     url(r'^list_equipments/?$', views.list_equipments, name='list_equipments'),
     url(r'^list_type/(?P<type>([\w ]+))$', views.list_type, name='list_type'),
     url(r'^list_machines/?$', views.list_machines, name='list_machines'),
+    url(r'^list_associate_towers/$', views.list_associate_towers, name='list_associate_towers'),
 
     url(r'^view_tower/(?P<tower_id>([\w ]+))$', views.view_tower, name='view_tower'),
     url(r'^view_user/(?P<user_id>[0-9]+)$', views.view_user, name='view_user'),
@@ -31,8 +33,7 @@ urlpatterns =[
     url(r'^view_machine/(?P<machine_id>([\w ]+))$', views.view_machine, name='view_machine'),
     url(r'^view_conf_period/(?P<tower_id>[0-9]+)/(?P<period_id>[0-9]+)$', views.view_conf_period, name='view_conf_period'),
     url(r'^view_calibration/(?P<equipment_id>[0-9]+)/(?P<calib_id>[0-9]+)$', views.view_calibration, name='view_calibration'),
-
-    url(r'^associate_towers/$', views.associate_towers, name='associate_towers'),
+    url(r'^view_associate_towers/(?P<association_id>([\w ]+))$', views.view_associate_towers, name='view_associate_towers'),
 
     url(r'^delete_tower/?$', views.delete_tower, name='delete_tower'),
     url(r'^delete_user/?$', views.delete_user, name='delete_user'),
@@ -42,6 +43,7 @@ urlpatterns =[
     url(r'^delete_machine/?$', views.delete_machine, name='delete_machine'),
     url(r'^delete_conf_period/?$', views.delete_conf_period, name='delete_conf_period'),
     url(r'^delete_calibration/?$', views.delete_calibration, name='delete_calibration'),
+    url(r'^delete_associate_tower/?$', views.delete_associate_tower, name='delete_associate_tower'),
 
     url(r'^equipment-type-autocomplete/$', views.EquipmentTypeAutocomplete.as_view(), name='equipment-type-autocomplete'),
     url(r'^equipment-autocomplete/$', views.EquipmentAutocomplete.as_view(), name='equipment-autocomplete'),

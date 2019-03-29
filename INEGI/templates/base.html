@@ -161,7 +161,7 @@
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="{% url "associate_towers" %}">
+                <a class="nav-link" href="{% url "list_associate_towers" %}">
                     <i class="fas fa-fw fa-building"></i>
                     <span>Associate Towers</span></a>
             </li>
@@ -284,7 +284,7 @@
     <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
 
     {% load bootstrap4 %} {# import bootstrap4/bootstrap3 #}
-    {% bootstrap_css %} {# Embed Bootstrap CSS #}
+{#    {% bootstrap_css %} {# Embed Bootstrap CSS#}
     {% bootstrap_javascript jquery='full' %} {# Embed Bootstrap JS+jQuery #}
     {% block extrahead %}       {# Extra Resources Start #}
         {{ form.media }}            {# Form required JS and CSS #}

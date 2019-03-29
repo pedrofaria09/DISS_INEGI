@@ -188,36 +188,6 @@ def ban_user(request):
 # ========================================= TOWERS =========================================
 
 
-def associate_towers(request):
-    if not request.user.is_staff:
-        messages.error(request, 'You dont have permissions to do this!!!')
-        return HttpResponseRedirect(reverse("associate_towers"))
-
-    if request.method == 'POST':
-        form = UserTowersFrom(request.POST)
-        if form.is_valid():
-            tower = form.cleaned_data['tower'][0]
-            user = form.cleaned_data['user']
-            begin_date = form.cleaned_data['begin_date']
-            end_date = form.cleaned_data['end_date']
-            verify = check_if_period_is_valid_2(tower, user, begin_date, end_date)
-            if verify is 0:
-                form.save()
-                messages.success(request, 'Towers associated successfully!')
-            elif verify is 1:
-                messages.error(request, "End date can't be higher than the Begin date!!!")
-            elif verify is 2:
-                messages.error(request, "There are already a period for that user and towers")
-        else:
-            messages.warning(request, 'Problem associating towers!!!')
-    else:
-        form = UserTowersFrom()
-
-    utd = UserTowerDates.objects.all()
-
-    return render(request, 'associate_towers.html', {'form': form, 'utd': utd})
-
-
 def add_tower(request):
     if request.method == 'POST':
         form = TowerForm(request.POST)
@@ -289,6 +259,103 @@ def delete_tower(request):
     messages.error(request, 'A problem occurred when deleting the Tower!')
     return HttpResponse("not ok")
 
+
+# ========================================= TOWERS ASSOCIATION =========================================
+
+
+def add_associate_towers(request):
+    if not request.user.is_staff:
+        messages.error(request, 'You dont have permissions to do this!!!')
+        return redirect('/')
+
+    if request.method == 'POST':
+        form = UserTowersFrom(request.POST)
+        if form.is_valid():
+            tower = form.cleaned_data['tower']
+            user = form.cleaned_data['user']
+            begin_date = form.cleaned_data['begin_date']
+            end_date = form.cleaned_data['end_date']
+            verify = 0
+            for t in tower:
+                verify = check_if_period_is_valid_2(t, user, begin_date, end_date, 0)
+                if verify is not 0:
+                    pass
+            if verify is 0:
+                form.save()
+                messages.success(request, 'Towers associated successfully!')
+                return HttpResponseRedirect(reverse("list_associate_towers"))
+            elif verify is 1:
+                messages.error(request, "End date can't be higher or equal to the Begin date!!!")
+            elif verify is 2:
+                messages.error(request, "There are already a period for that user and towers")
+        else:
+            messages.warning(request, 'Problem associating towers!!!')
+    else:
+        form = UserTowersFrom()
+
+    return render(request, 'add_associate_towers.html', {'form': form})
+
+
+def list_associate_towers(request):
+    if not request.user.is_staff:
+        messages.error(request, 'You dont have permissions to do this!!!')
+        return redirect('/')
+
+    utd = UserTowerDates.objects.all()
+
+    return render(request, 'list_associate_towers.html', {'utd': utd})
+
+
+def view_associate_towers(request, association_id):
+    if not request.user.is_staff:
+        messages.error(request, 'You dont have permissions to do this!!!')
+        return redirect('/')
+
+    try:
+        utd = UserTowerDates.objects.get(pk=association_id)
+    except UserTowerDates.DoesNotExist:
+        return HttpResponseRedirect(reverse("list_associate_towers"))
+
+    if request.method == 'POST':
+        form = UserTowersFrom(request.POST, instance=utd)
+        if form.is_valid():
+            tower = form.cleaned_data['tower']
+            user = form.cleaned_data['user']
+            begin_date = form.cleaned_data['begin_date']
+            end_date = form.cleaned_data['end_date']
+            verify = 0
+            for t in tower:
+                verify = check_if_period_is_valid_2(t, user, begin_date, end_date, association_id)
+                if verify is not 0:
+                    pass
+            if verify is 0:
+                form.save()
+                messages.success(request, 'Towers associated successfully!')
+                return HttpResponseRedirect(reverse("list_associate_towers"))
+            elif verify is 1:
+                messages.error(request, "End date can't be higher or equal to the Begin date!!!")
+            elif verify is 2:
+                messages.error(request, "There are already a period for that user and towers")
+        else:
+            messages.warning(request, 'Problem associating towers!!!')
+    else:
+        form = UserTowersFrom(instance=utd)
+
+    return render(request, 'view_associate_towers.html', {'form': form, 'association_id': association_id, 'utd': utd})
+
+
+def delete_associate_tower(request):
+    if request.is_ajax and request.method == 'POST':
+        utd = UserTowerDates.objects.get(pk=request.POST["id"])
+        try:
+            utd.delete()
+        except (TypeError, IntegrityError) as e:
+            messages.error(request, e.__cause__)
+            return HttpResponse("not ok")
+        messages.success(request, 'Association was removed successfully!')
+        return HttpResponse('ok')
+    messages.error(request, 'A problem occurred when deleting the Association!')
+    return HttpResponse("not ok")
 
 # ========================================= MACHINES =========================================
 
@@ -1039,12 +1106,12 @@ def add_conf_period(request, tower_id):
                     messages.success(request, 'Period was created successfully!')
                     return HttpResponseRedirect(reverse("view_tower", kwargs={'tower_id': tower_id}))
                 elif verify is 1:
-                    messages.error(request, "End date can't be higher than the Begin date!!!")
+                    messages.error(request, "End date can't be higher or equal to the Begin date!!!")
                 elif verify is 2:
                     messages.error(request, "Begin date is invalid!!!")
-                elif verify is 3:
+                elif verify is 3 or verify is 4:
                     messages.error(request, "End date is invalid!!!")
-                elif verify is 4:
+                elif verify is 5:
                     messages.error(request, "Have an open period")
 
             else:
@@ -1076,10 +1143,10 @@ def view_conf_period(request, period_id, tower_id):
                 messages.success(request, 'Period was edited successfully')
                 return HttpResponseRedirect(reverse("view_tower", kwargs={'tower_id': tower_id}))
             elif verify is 1:
-                messages.error(request, "End date can't be higher than the Begin date!!!")
+                messages.error(request, "End date can't be higher or equal to the Begin date!!!")
             elif verify is 2:
                 messages.error(request, "Begin date is invalid!!!")
-            elif verify is 3:
+            elif verify is 3 or verify is 4 or verify is 5:
                 messages.error(request, "End date is invalid!!!")
         else:
             messages.warning(request, 'Period wasnt edited successfully!!!')

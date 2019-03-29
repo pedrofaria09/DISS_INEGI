@@ -51,3 +51,10 @@ $('#dataTableCalibration').DataTable( {
     { "orderable": false, "targets": [0] },
   ], "order": []
 });
+
+$('#dataTableAssociations').DataTable( {
+"columnDefs": [
+    { "orderable": false, "targets": [3,4] },
+    { 'searchable' : false, 'targets' : [4] },
+  ]
+});

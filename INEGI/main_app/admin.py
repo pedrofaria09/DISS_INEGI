@@ -14,6 +14,12 @@ admin.site.register(Calibration)
 admin.site.register(PeriodConfiguration)
 admin.site.register(EquipmentCharacteristic)
 admin.site.register(UserTowerDates)
+
 # admin.site.register(TestTower)
 # admin.site.register(TestUser)
 # admin.site.register(TestDates)
+
+admin.site.register(TestConfPeriod)
+admin.site.register(TestSensorConfig)
+admin.site.register(TestCalibration)
+admin.site.register(TestEquipment)

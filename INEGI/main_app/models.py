@@ -23,12 +23,12 @@ else:
 
 # Create your models here.
 
-# class TestConfPeriod(models.Model):
-#     begin_date = models.DateField()
-#     end_date = models.DateField(null=True)
-#
-#     def __str__(self):
-#         return "%s %s" % (self.begin_date, self.end_date)
+class TestConfPeriod(models.Model):
+    begin_date = models.DateField()
+    end_date = models.DateField(null=True)
+
+    def __str__(self):
+        return "%s %s" % (self.begin_date, self.end_date)
 #
 #
 # class TestClassificationPeriod(models.Model):
@@ -50,32 +50,32 @@ else:
 #         return "%s %s %s" % (self.column, self.unit, self.sensorsconfiguration)
 #
 #
-# class TestSensorConfig(models.Model):
-#     height = models.FloatField()
-#     orientation = models.FloatField()
-#     calibrations = models.ForeignKey('TestCalibration', on_delete=models.DO_NOTHING)
-#     confperiods = models.ForeignKey('TestConfPeriod', on_delete=models.DO_NOTHING)
-#
-#     def __str__(self):
-#         return "%s %s %s %s" % (self.height, self.orientation, self.calibrations, self.confperiods)
-#
-#
-# class TestCalibration(models.Model):
-#     offset = models.FloatField()
-#     slope = models.FloatField(null=True)
-#     equipment = models.ForeignKey('TestEquipment', on_delete=models.DO_NOTHING)
-#
-#     def __str__(self):
-#         return "%s %s %s" % (self.offset,self.offset, self.equipment)
-#
-#
-# class TestEquipment(models.Model):
-#     sn = models.CharField(unique=True, max_length=100)
-#     calibrations = models.ManyToManyField('TestCalibration', blank=True)
-#
-#     def __str__(self):
-#         return "%s" % self.sn
-#
+class TestSensorConfig(models.Model):
+    height = models.FloatField()
+    orientation = models.FloatField()
+    calibrations = models.ForeignKey('TestCalibration', on_delete=models.DO_NOTHING)
+    confperiods = models.ForeignKey('TestConfPeriod', on_delete=models.DO_NOTHING)
+
+    def __str__(self):
+        return "%s %s %s %s" % (self.height, self.orientation, self.calibrations, self.confperiods)
+
+
+class TestCalibration(models.Model):
+    offset = models.FloatField()
+    slope = models.FloatField(null=True)
+    equipment = models.ForeignKey('TestEquipment', on_delete=models.DO_NOTHING)
+
+    def __str__(self):
+        return "%s %s %s" % (self.offset,self.offset, self.equipment)
+
+
+class TestEquipment(models.Model):
+    sn = models.CharField(unique=True, max_length=100)
+    calibrations = models.ManyToManyField('TestCalibration', blank=True)
+
+    def __str__(self):
+        return "%s" % self.sn
+
 #
 # class TestTower(models.Model):
 #     name = models.CharField(max_length=128)

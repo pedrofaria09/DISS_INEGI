@@ -100,8 +100,8 @@ class UserTowersFrom(ModelForm):
         widget=autocomplete.ModelSelect2(url='user-autocomplete', attrs={'style': 'width:100%'})
     )
 
-    begin_date = forms.DateTimeField(input_formats=["%d/%m/%Y"], required=False, widget=DatePickerInput(format="%d/%m/%Y"))
-    end_date = forms.DateTimeField(input_formats=["%d/%m/%Y"], required=False, widget=DatePickerInput(format="%d/%m/%Y"))
+    begin_date = forms.DateTimeField(input_formats=["%m/%Y"], widget=DatePickerInput(format="%m/%Y", attrs={'autocomplete': 'off'}))
+    end_date = forms.DateTimeField(input_formats=["%m/%Y"], widget=DatePickerInput(format="%m/%Y", attrs={'autocomplete': 'off'}))
 
     class Meta:
         model = UserTowerDates
@@ -227,7 +227,7 @@ class CalibrationForm(ModelForm):
         queryset=Equipment.objects.all().order_by('-id'),
         widget=autocomplete.ModelSelect2(url='equipment-autocomplete', attrs={'style': 'width:100%'})
     )
-    calib_date = forms.DateTimeField(required=False, input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M"))
+    calib_date = forms.DateTimeField(required=False, input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M", attrs={'autocomplete': 'off'}))
 
     class Meta:
         model = Calibration
@@ -265,8 +265,8 @@ class UserGroupTypeForm(ModelForm):
 
 
 class PeriodConfigForm(ModelForm):
-    begin_date = forms.DateTimeField(input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M"))
-    end_date = forms.DateTimeField(required=False, input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M"))
+    begin_date = forms.DateTimeField(input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M", attrs={'autocomplete': 'off'}))
+    end_date = forms.DateTimeField(required=False, input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M", attrs={'autocomplete': 'off'}))
 
     class Meta:
         model = PeriodConfiguration

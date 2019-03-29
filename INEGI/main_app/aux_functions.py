@@ -99,24 +99,31 @@ def check_if_period_is_valid(tower_id, begin_date, end_date, period_id):
             print("Print 3")
             return 3
 
+    if end_date:
+        p3 = PeriodConfiguration.objects.filter(tower=tower, begin_date__lte=end_date, end_date__gte=end_date).exclude(
+            id=period_id)
+        if p3:
+            print("Print 4")
+            return 4
+
     if end_date is None:
         p4 = PeriodConfiguration.objects.filter(tower=tower, end_date=end_date).exclude(
             id=period_id)
         if p4:
-            print("Print 4")
-            return 4
+            print("Print 5")
+            return 5
     return 0
 
 
-def check_if_period_is_valid_2(tower, user, begin_date, end_date):
+def check_if_period_is_valid_2(tower, user, begin_date, end_date, association_id):
     if end_date:
-        if begin_date >= end_date:
+        if begin_date > end_date:
             return 1
 
     try:
-        UserTowerDates.objects.get(QD(begin_date__range=(begin_date, end_date), tower=tower, user=user) |
-                                   QD(end_date__range=(end_date, end_date), tower=tower, user=user) |
-                                   QD(begin_date__lt=begin_date, end_date__gt=end_date, tower=tower, user=user))
+        UserTowerDates.objects.get((~QD(pk=association_id) & QD(begin_date__range=(begin_date, end_date-timedelta(milliseconds=1)), tower=tower, user=user)) |
+                                   (~QD(pk=association_id) & QD(end_date__range=(end_date, end_date), tower=tower, user=user)) |
+                                   (~QD(pk=association_id) & QD(begin_date__gt=begin_date, end_date__lt=end_date, tower=tower, user=user)))
     except UserTowerDates.DoesNotExist:
         return 0
     return 2
