@@ -1152,7 +1152,9 @@ def view_conf_period(request, period_id, tower_id):
         else:
             messages.warning(request, 'Period wasnt edited successfully!!!')
 
-    return render(request, 'view_conf_period.html', {'form': form, 'tower_id': tower_id, 'period_id': period_id, 'period': period})
+    configurations = EquipmentConfig.objects.filter(conf_period=period_id).order_by('-id')
+
+    return render(request, 'view_conf_period.html', {'form': form, 'tower_id': tower_id, 'period_id': period_id, 'period': period, 'configurations': configurations})
 
 
 def delete_conf_period(request):
