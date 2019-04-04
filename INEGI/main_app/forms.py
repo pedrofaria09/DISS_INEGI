@@ -286,3 +286,25 @@ class PeriodConfigForm(ModelForm):
 
         self.fields['raw_freq'].widget.attrs.update({'class': 'form-control mandatory', 'style': 'width:25%'})
         self.fields['time_zone'].widget.attrs.update({'class': 'form-control mandatory', 'style': 'width:25%'})
+
+
+class EquipmentConfigForm(ModelForm):
+    calibration = forms.ModelChoiceField(
+        queryset=Calibration.objects.all().order_by('-id'),
+        widget=autocomplete.ModelSelect2(url='calibration-autocomplete', attrs={'style': 'width:100%'})
+    )
+
+    class Meta:
+        model = EquipmentConfig
+        fields = '__all__'
+        exclude = ('conf_period',)
+
+    def __init__(self, *args, **kwargs):
+        super(EquipmentConfigForm, self).__init__(*args, **kwargs)
+        self.fields['calibration'].label = "Equipment/Calibration"
+
+        self.fields['height'].widget.attrs.update({'class': 'form-control mandatory', 'style': 'width:25%'})
+        self.fields['height_label'].widget.attrs.update({'class': 'form-control mandatory', 'style': 'width:25%'})
+        self.fields['orientation'].widget.attrs.update({'class': 'form-control mandatory', 'style': 'width:25%'})
+        self.fields['boom_length'].widget.attrs.update({'class': 'form-control mandatory', 'style': 'width:25%'})
+        self.fields['boom_var_height'].widget.attrs.update({'class': 'form-control mandatory', 'style': 'width:25%'})

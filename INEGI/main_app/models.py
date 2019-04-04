@@ -23,12 +23,6 @@ else:
 
 # Create your models here.
 
-class TestConfPeriod(models.Model):
-    begin_date = models.DateField()
-    end_date = models.DateField(null=True)
-
-    def __str__(self):
-        return "%s %s" % (self.begin_date, self.end_date)
 #
 #
 # class TestClassificationPeriod(models.Model):
@@ -50,6 +44,14 @@ class TestConfPeriod(models.Model):
 #         return "%s %s %s" % (self.column, self.unit, self.sensorsconfiguration)
 #
 #
+class TestConfPeriod(models.Model):
+    begin_date = models.DateField()
+    end_date = models.DateField(null=True)
+
+    def __str__(self):
+        return "%s %s" % (self.begin_date, self.end_date)
+
+
 class TestSensorConfig(models.Model):
     height = models.FloatField()
     orientation = models.FloatField()
@@ -130,7 +132,6 @@ class UserTowerDates(models.Model):
 
     def __str__(self):
         return "Tower:%s User:%s" % (self.tower.all, self.user)
-
 
 
 class MyUser(AbstractUser):
@@ -214,7 +215,20 @@ class Calibration(models.Model):
     equipment = models.ForeignKey('Equipment', on_delete=models.DO_NOTHING)
 
     def __str__(self):
-        return "SN:%s Date:%s OF:%s SL:%s" % (self.equipment, self.ref, self.offset, self.slope)
+        return "SN:%s Ref:%s OF:%s SL:%s" % (self.equipment, self.ref, self.offset, self.slope)
+
+
+class EquipmentConfig(models.Model):
+    height = models.FloatField()
+    height_label = models.CharField(max_length=20, null=True, blank=True)
+    orientation = models.FloatField(null=True, blank=True)
+    boom_length = models.FloatField(null=True, blank=True)
+    boom_var_height = models.FloatField(null=True, blank=True)
+    calibration = models.ForeignKey('Calibration', on_delete=models.DO_NOTHING)
+    conf_period = models.ForeignKey('PeriodConfiguration', on_delete=models.DO_NOTHING)
+
+    def __str__(self):
+        return "%s %s %s %s" % (self.height, self.calibration.slope, self.conf_period.begin_date, self.conf_period.end_date)
 
 
 class PeriodConfiguration(models.Model):

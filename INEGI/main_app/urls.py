@@ -16,6 +16,7 @@ urlpatterns =[
     url(r'^add_conf_period/(?P<tower_id>[0-9]+)$', views.add_conf_period, name='add_conf_period'),
     url(r'^add_calibration/(?P<equipment_id>[0-9]+)$', views.add_calibration, name='add_calibration'),
     url(r'^add_associate_towers/$', views.add_associate_towers, name='add_associate_towers'),
+    url(r'^add_equipment_config/(?P<tower_id>[0-9]+)/(?P<period_id>[0-9]+)$', views.add_equipment_config, name='add_equipment_config'),
 
     url(r'^list_towers/?$', views.list_towers, name='list_towers'),
     url(r'^list_users/?$', views.list_users, name='list_users'),
@@ -51,6 +52,7 @@ urlpatterns =[
     url(r'^group-autocomplete/$', views.GroupAutocomplete.as_view(), name='group-autocomplete'),
     url(r'^model-autocomplete/$', views.ModelAutocomplete.as_view(), name='model-autocomplete'),
     url(r'^user-autocomplete/$', views.UserAutocomplete.as_view(), name='user-autocomplete'),
+    url(r'^calibration-autocomplete/$', views.CalibrationAutocomplete.as_view(), name='calibration-autocomplete'),
 
     url(r'^ban_user/?$', views.ban_user, name='ban_user'),
 

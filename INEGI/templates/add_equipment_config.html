@@ -7,18 +7,12 @@
     <div class="container-fluid">
         <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">View-Edit Period of Configuration: {{ period.begin_date|date:'d/m/Y H:i' }} -
-                {% if period.end_date %}
-                    {{ period.end_date|date:'d/m/Y H:i' }}
-                {% else %}
-                    None
-                {% endif %}
-            </h1>
+            <h1 class="h3 mb-0 text-gray-800">Add a new Equipment Configuration to Period: {{ conf_period.begin_date }} - {{ conf_period.end_date }}</h1>
         </div>
 
         <div class="row">
             <div class="col-12">
-                <form action="{% url "view_conf_period" tower_id period_id %}" method="POST">
+                <form action="{% url "add_equipment_config" tower_id period_id %}" method="POST">
 
                     {% csrf_token %}
 
@@ -33,25 +27,32 @@
                     {% endif %}
 
                     {% for field in form %}
+{#                        <div class="form-group">#}
+{#                            {{ field.label_tag }}{% if field.field.required %} *{% endif %}#}
+{#                            {% render_field field class="form-control" %}#}
+{#                        </div>#}
+
                         <div class="form-group">
                             {% if field.field.is_checkbox %}
                                 <div class="form-check">
-                                    {{ field }}{{ field.label_tag }}
+                                    {{ field }} {% if field.field.required %} *{% endif %}
+                                    {{ field.label_tag }}
                                 </div>
                             {% else %}
-                                {{ field.label_tag }}
-                                {% render_field field placeholder=field.label %}
+                                {{ field.label_tag }}{% if field.field.required %} *{% endif %}
+                                {% render_field  field placeholder=field.label %}
                             {% endif %}
                         </div>
+
                     {% endfor %}
 
                     <div class="form-group">
                         <div class="form-row">
                             <div class="col-md-6">
-                                <input type="submit" class="btn btn-primary btn-block" value="Edit">
+                                <input type="submit" class="btn btn-primary btn-block" value="Create">
                             </div>
                             <div class="col-md-6">
-                                <a href="#" name="delete_conf_period" data-id="{{ period_id }}" class="btn btn-danger btn-block">Delete</a>
+                                <button id="reset" type="reset" class="btn btn-warning btn-block"> Clean</button>
                             </div>
                         </div>
                     </div>
@@ -60,20 +61,7 @@
             </div>
         </div>
 
-        <hr>
 
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h2 class="h3 mb-0 text-gray-800">Equipments Configurations</h2>
-        </div>
-
-        <div class="row">
-            <div class="col-12">
-                <a href="{% url "add_equipment_config" tower_id period_id %}" class="btn btn-success">Add a new Equipment Configration</a>
-                <br><br>
-
-{#                {% include "list_conf_periods.html" %}#}
-            </div>
-        </div>
     </div>
 
 {% endblock %}
