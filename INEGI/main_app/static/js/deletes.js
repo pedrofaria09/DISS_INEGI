@@ -221,6 +221,28 @@ $(function () {
         }
     })
 
+    $('a[name=delete_equipment_config]').on('click', function () {
+
+        if (window.confirm("Do you really want to delete this Equipment Configuration?")) {
+            var csrftoken = getCookie('csrftoken');
+            $.ajaxSetup({
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                }
+            });
+
+            $.post('/delete_equipment_config',
+                {
+                    id: $(this).attr('data-id'),
+                },
+                function (data, status) {
+                    location.reload();
+                });
+        }
+    })
+
 });
 
 

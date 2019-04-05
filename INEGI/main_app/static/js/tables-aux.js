@@ -58,3 +58,10 @@ $('#dataTableAssociations').DataTable( {
     { 'searchable' : false, 'targets' : [4] },
   ]
 });
+
+$('#dataTableEquipmentConfig').DataTable( {
+"columnDefs": [
+    { "orderable": false, "targets": [4] },
+    { 'searchable' : false, 'targets' : [4] },
+  ]
+});

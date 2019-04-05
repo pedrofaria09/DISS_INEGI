@@ -1257,16 +1257,19 @@ def add_equipment_config(request, tower_id, period_id):
         form = EquipmentConfigForm(request.POST)
 
         if form.is_valid():
-            equipment_config = EquipmentConfig(height=form.cleaned_data.get('height'),
-                                               height_label=form.cleaned_data.get('height_label'),
-                                               orientation=form.cleaned_data.get('orientation'),
-                                               boom_length=form.cleaned_data.get('boom_length'),
-                                               boom_var_height=form.cleaned_data.get('boom_var_height'),
-                                               calibration=form.cleaned_data.get('calibration'),
-                                               conf_period=conf_period)
-            equipment_config.save()
-            messages.success(request, 'Equipment Configuration was added successfully')
-            return HttpResponseRedirect(reverse("view_conf_period", kwargs={'tower_id': tower_id, 'period_id': period_id}))
+            if EquipmentConfig.objects.filter(conf_period=period_id, calibration=form.cleaned_data.get('calibration')):
+                messages.error(request, 'This Period Configuration already have that Equipment/Calibration!!!')
+            else:
+                equipment_config = EquipmentConfig(height=form.cleaned_data.get('height'),
+                                                   height_label=form.cleaned_data.get('height_label'),
+                                                   orientation=form.cleaned_data.get('orientation'),
+                                                   boom_length=form.cleaned_data.get('boom_length'),
+                                                   boom_var_height=form.cleaned_data.get('boom_var_height'),
+                                                   calibration=form.cleaned_data.get('calibration'),
+                                                   conf_period=conf_period)
+                equipment_config.save()
+                messages.success(request, 'Equipment Configuration was added successfully')
+                return HttpResponseRedirect(reverse("view_conf_period", kwargs={'tower_id': tower_id, 'period_id': period_id}))
         else:
             messages.warning(request, 'Equipment Configuration was not added!!!')
     else:
@@ -1275,48 +1278,53 @@ def add_equipment_config(request, tower_id, period_id):
     return render(request, 'add_equipment_config.html', {'form': form, 'tower_id': tower_id, 'period_id': period_id, 'conf_period': conf_period})
 
 
-# def view_conf_period(request, period_id, tower_id):
-#     try:
-#         period = PeriodConfiguration.objects.get(pk=period_id)
-#     except PeriodConfiguration.DoesNotExist:
-#         return HttpResponseRedirect(reverse("view_tower", kwargs={'tower_id': tower_id}))
-#
-#     if request.method == 'GET':
-#         form = PeriodConfigForm(instance=period)
-#     elif request.method == 'POST':
-#         form = PeriodConfigForm(request.POST, instance=period)
-#         if form.is_valid():
-#             verify = check_if_period_is_valid(tower_id, form.cleaned_data.get('begin_date'), form.cleaned_data.get('end_date'), period_id)
-#
-#             if verify is 0:
-#                 form.save()
-#                 messages.success(request, 'Period was edited successfully')
-#                 return HttpResponseRedirect(reverse("view_tower", kwargs={'tower_id': tower_id}))
-#             elif verify is 1:
-#                 messages.error(request, "End date can't be higher or equal to the Begin date!!!")
-#             elif verify is 2:
-#                 messages.error(request, "Begin date is invalid!!!")
-#             elif verify is 3 or verify is 4 or verify is 5:
-#                 messages.error(request, "End date is invalid!!!")
-#         else:
-#             messages.warning(request, 'Period wasnt edited successfully!!!')
-#
-#     return render(request, 'view_conf_period.html', {'form': form, 'tower_id': tower_id, 'period_id': period_id, 'period': period})
-#
-#
-# def delete_conf_period(request):
-#     if request.is_ajax and request.method == 'POST':
-#         period = PeriodConfiguration.objects.get(pk=request.POST["id"])
-#         try:
-#             period.delete()
-#         except (TypeError, IntegrityError) as e:
-#             messages.error(request, e.__cause__)
-#             return HttpResponse("not ok")
-#
-#         messages.success(request, 'Period was deleted successfully!')
-#         return HttpResponse('ok')
-#     messages.error(request, 'An error occurred when deleting the Period!')
-#     return HttpResponse("not ok")
+def view_equipment_config(request, tower_id, period_id, equi_conf_id):
+
+    try:
+        Tower.objects.get(pk=tower_id)
+    except Tower.DoesNotExist:
+        return HttpResponseRedirect(reverse("list_towers"))
+
+    try:
+        PeriodConfiguration.objects.get(pk=period_id)
+    except PeriodConfiguration.DoesNotExist:
+        return HttpResponseRedirect(reverse("view_tower", kwargs={'tower_id': tower_id}))
+
+    try:
+        equipment_config = EquipmentConfig.objects.get(pk=equi_conf_id)
+    except EquipmentConfig.DoesNotExist:
+        return HttpResponseRedirect(reverse("view_conf_period", kwargs={'tower_id': tower_id, 'period_id': period_id}))
+
+    if request.method == 'GET':
+        form = EquipmentConfigForm(instance=equipment_config)
+    elif request.method == 'POST':
+        form = EquipmentConfigForm(request.POST, instance=equipment_config)
+        if form.is_valid():
+            if EquipmentConfig.objects.filter(conf_period=period_id, calibration=form.cleaned_data.get('calibration')).exclude(pk=equi_conf_id):
+                messages.error(request, 'This Period Configuration already have that Equipment/Calibration!!!')
+            else:
+                form.save()
+                messages.success(request, 'Equipment Configuration was edited successfully')
+                return HttpResponseRedirect(reverse("view_conf_period", kwargs={'tower_id': tower_id, 'period_id': period_id}))
+        else:
+            messages.warning(request, 'Equipment Configuration wasnt edited successfully!!!')
+
+    return render(request, 'view_equipment_config.html', {'form': form, 'tower_id': tower_id, 'period_id': period_id, 'equi_conf_id': equi_conf_id, 'equipment_config': equipment_config})
+
+
+def delete_equipment_config(request):
+    if request.is_ajax and request.method == 'POST':
+        equipment_config = EquipmentConfig.objects.get(pk=request.POST["id"])
+        try:
+            equipment_config.delete()
+        except (TypeError, IntegrityError) as e:
+            messages.error(request, e.__cause__)
+            return HttpResponse("not ok")
+
+        messages.success(request, 'Equipment Configuration was deleted successfully!')
+        return HttpResponse('ok')
+    messages.error(request, 'An error occurred when deleting the Equipment Configuration!')
+    return HttpResponse("not ok")
 
 
 # ========================================= AUTOCOMPLETES =========================================
