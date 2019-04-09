@@ -8,24 +8,27 @@
 
         <div class="row">
             <div class="col-12">
-                <p><a href="{% url "view_tower" tower_id %}">Tower</a> /
-                    <a href="{% url "view_conf_period" tower_id period_id %}">Period of Configuration</a> /
+                <p><a href="{% url "view_tower" tower_id %}">Tower</a> / Period of Configuration
                 </p>
             </div>
         </div>
 
         <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">View-Edit Period of Configuration: {{ period.begin_date|date:'d/m/Y H:i' }} -
-                {% if period.end_date %}
-                    {{ period.end_date|date:'d/m/Y H:i' }}
-                {% else %}
-                    None
-                {% endif %}
+            <h1 class="h3 mb-0 text-gray-800">
+                <a href="#" class="collapsed" data-toggle="collapse" data-target="#collapseForm" aria-expanded="true" aria-controls="collapseTwo">
+                    View-Edit Period of Configuration: {{ period.begin_date|date:'d/m/Y H:i' }} -
+                    {% if period.end_date %}
+                        {{ period.end_date|date:'d/m/Y H:i' }}
+                    {% else %}
+                        None
+                    {% endif %}
+                    <i class="fas fa-angle-double-down fa-xs"></i>
+                </a>
             </h1>
         </div>
 
-        <div class="row">
+        <div class="row collapse" id="collapseForm" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
             <div class="col-12">
                 <form action="{% url "view_conf_period" tower_id period_id %}" method="POST">
 

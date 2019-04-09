@@ -1309,7 +1309,9 @@ def view_equipment_config(request, tower_id, period_id, equi_conf_id):
         else:
             messages.warning(request, 'Equipment Configuration wasnt edited successfully!!!')
 
-    return render(request, 'view_equipment_config.html', {'form': form, 'tower_id': tower_id, 'period_id': period_id, 'equi_conf_id': equi_conf_id, 'equipment_config': equipment_config})
+    classification = ClassificationPeriod.objects.filter(equipment_configuration=equipment_config)
+
+    return render(request, 'view_equipment_config.html', {'form': form, 'tower_id': tower_id, 'period_id': period_id, 'equi_conf_id': equi_conf_id, 'equipment_config': equipment_config, 'classification': classification})
 
 
 def delete_equipment_config(request):
@@ -1344,6 +1346,24 @@ def add_status(request):
         form = StatusForm()
 
     return render(request, 'add_status.html', {'form': form})
+
+
+def add_type_status(request):
+    data = dict()
+
+    if request.method == 'POST':
+        form = StatusForm(request.POST)
+        if form.is_valid():
+            form.save()
+            data['form_is_valid'] = True
+        else:
+            data['form_is_valid'] = False
+    else:
+        form = StatusForm()
+
+    context = {'form': form}
+    data['html_form'] = render_to_string('add_type_status.html', context, request=request)
+    return JsonResponse(data)
 
 
 def list_status(request):
@@ -1386,6 +1406,61 @@ def delete_status(request):
     messages.error(request, 'An error occurred when deleting the Status!')
     return HttpResponse("not ok")
 
+
+# ========================================= CLASSIFICATION PERIODS =========================================
+
+
+def add_classification_period(request, tower_id, period_id, equi_conf_id):
+    try:
+        Tower.objects.get(pk=tower_id)
+    except Tower.DoesNotExist:
+        return HttpResponseRedirect(reverse("list_towers"))
+
+    try:
+        period = PeriodConfiguration.objects.get(pk=period_id)
+    except PeriodConfiguration.DoesNotExist:
+        return HttpResponseRedirect(reverse("view_tower", kwargs={'tower_id': tower_id}))
+
+    try:
+        equipment_config = EquipmentConfig.objects.get(pk=equi_conf_id)
+    except EquipmentConfig.DoesNotExist:
+        return HttpResponseRedirect(reverse("view_conf_period", kwargs={'tower_id': tower_id, 'period_id': period_id}))
+
+    if request.method == 'POST':
+        form = ClassificationPeriodForm(request.POST)
+
+        if form.is_valid():
+            if form.cleaned_data.get('begin_date') < period.begin_date or form.cleaned_data.get('end_date') > period.end_date:
+                messages.error(request, 'Data must be between the Period Configuration')
+            else:
+                classification = form.save(commit=False)
+                classification.user = request.user
+                classification.equipment_configuration = equipment_config
+                classification.save()
+                messages.success(request, 'Classification added!')
+                return HttpResponseRedirect(reverse("view_equipment_config", kwargs={'tower_id': tower_id, 'period_id': period_id, 'equi_conf_id': equi_conf_id}))
+        else:
+            messages.warning(request, 'Classification not added!!!')
+    else:
+        cla = ClassificationPeriod(begin_date=period.begin_date, end_date=period.end_date)
+        form = ClassificationPeriodForm(instance=cla)
+
+    return render(request, 'add_classification_period.html', {'form': form, 'tower_id': tower_id, 'period_id': period_id, 'equi_conf_id': equi_conf_id, 'period': period, 'equipment_config': equipment_config})
+
+
+def delete_classification_period(request):
+    if request.is_ajax and request.method == 'POST':
+        classification = ClassificationPeriod.objects.get(pk=request.POST["id"])
+        try:
+            classification.delete()
+        except (TypeError, IntegrityError) as e:
+            messages.error(request, e.__cause__)
+            return HttpResponse("not ok")
+
+        messages.success(request, 'Classification Period was deleted successfully!')
+        return HttpResponse('ok')
+    messages.error(request, 'An error occurred when deleting the Classification Period!')
+    return HttpResponse("not ok")
 
 # ========================================= AUTOCOMPLETES =========================================
 
@@ -1461,5 +1536,15 @@ class CalibrationAutocomplete(autocomplete.Select2QuerySetView):
 
         if self.q:
             qs = qs.filter(equipment__sn__istartswith=self.q)
+
+        return qs
+
+
+class StatusAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Status.objects.all().order_by('-id')
+
+        if self.q:
+            qs = qs.filter(code__istartswith=self.q)
 
         return qs

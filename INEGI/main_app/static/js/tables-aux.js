@@ -65,3 +65,17 @@ $('#dataTableEquipmentConfig').DataTable( {
     { 'searchable' : false, 'targets' : [4] },
   ]
 });
+
+$('#dataTableStatus').DataTable( {
+"columnDefs": [
+    { "orderable": false, "targets": [2] },
+    { 'searchable' : false, 'targets' : [2] },
+  ]
+});
+
+$('#dataTableClassification').DataTable( {
+"columnDefs": [
+    { "orderable": false, "targets": [4] },
+    { 'searchable' : false, 'targets' : [4] },
+  ]
+});

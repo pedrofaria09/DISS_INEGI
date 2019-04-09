@@ -18,6 +18,7 @@ urlpatterns =[
     url(r'^add_associate_towers/$', views.add_associate_towers, name='add_associate_towers'),
     url(r'^add_equipment_config/(?P<tower_id>[0-9]+)/(?P<period_id>[0-9]+)$', views.add_equipment_config, name='add_equipment_config'),
     url(r'^add_status/?$', views.add_status, name='add_status'),
+    url(r'^add_classification_period/(?P<tower_id>[0-9]+)/(?P<period_id>[0-9]+)/(?P<equi_conf_id>[0-9]+)$', views.add_classification_period, name='add_classification_period'),
 
     url(r'^list_towers/?$', views.list_towers, name='list_towers'),
     url(r'^list_users/?$', views.list_users, name='list_users'),
@@ -51,6 +52,7 @@ urlpatterns =[
     url(r'^delete_associate_tower/?$', views.delete_associate_tower, name='delete_associate_tower'),
     url(r'^delete_equipment_config/?$', views.delete_equipment_config, name='delete_equipment_config'),
     url(r'^delete_status/?$', views.delete_status, name='delete_status'),
+    url(r'^delete_classification_period/?$', views.delete_classification_period, name='delete_classification_period'),
 
     url(r'^equipment-type-autocomplete/$', views.EquipmentTypeAutocomplete.as_view(), name='equipment-type-autocomplete'),
     url(r'^equipment-autocomplete/$', views.EquipmentAutocomplete.as_view(), name='equipment-autocomplete'),
@@ -59,6 +61,7 @@ urlpatterns =[
     url(r'^model-autocomplete/$', views.ModelAutocomplete.as_view(), name='model-autocomplete'),
     url(r'^user-autocomplete/$', views.UserAutocomplete.as_view(), name='user-autocomplete'),
     url(r'^calibration-autocomplete/$', views.CalibrationAutocomplete.as_view(), name='calibration-autocomplete'),
+    url(r'^status-autocomplete/$', views.StatusAutocomplete.as_view(), name='status-autocomplete'),
 
     url(r'^ban_user/?$', views.ban_user, name='ban_user'),
 
@@ -75,5 +78,6 @@ urlpatterns =[
 
     url(r'^add_type_equipment/$', views.add_type_equipment, name='add_type_equipment'),
     url(r'^add_type_model/$', views.add_type_model, name='add_type_model'),
+    url(r'^add_type_status/$', views.add_type_status, name='add_type_status'),
 
 ]

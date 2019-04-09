@@ -9,18 +9,22 @@
         <div class="row">
             <div class="col-12">
                 <p> <a href="{% url "view_tower" tower_id %}">Tower</a> /
-                    <a href="{% url "view_conf_period" tower_id period_id %}">Period of Configuration</a> /
-                    <a href="{% url "view_equipment_config" tower_id period_id equi_conf_id%}">Equipment Configuration</a> /
+                    <a href="{% url "view_conf_period" tower_id period_id %}">Period of Configuration</a> / Equipment Configuration
                 </p>
             </div>
         </div>
 
         <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">View-Edit Equipment Configuration: Height - {{ equipment_config.height }} SN - {{ equipment_config.calibration.equipment.sn }}</h1>
+            <h1 class="h3 mb-0 text-gray-800">
+                <a href="#" class="collapsed" data-toggle="collapse" data-target="#collapseForm" aria-expanded="true" aria-controls="collapseTwo">
+                    View-Edit Equipment Configuration: Height - {{ equipment_config.height }} SN - {{ equipment_config.calibration.equipment.sn }}
+                    <i class="fas fa-angle-double-down fa-xs"></i>
+                </a>
+            </h1>
         </div>
 
-        <div class="row">
+        <div class="row collapse" id="collapseForm" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
             <div class="col-12">
                 <form action="{% url "view_equipment_config" tower_id period_id equi_conf_id %}" method="POST">
 
@@ -62,6 +66,21 @@
                     </div>
 
                 </form>
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h2 class="h3 mb-0 text-gray-800">Classifications Periods</h2>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <a href="{% url "add_classification_period" tower_id period_id equi_conf_id %}" class="btn btn-success">Add a new Classification Period</a>
+                <br><br>
+
+                {% include "list_classification_period.html" %}
             </div>
         </div>
     </div>

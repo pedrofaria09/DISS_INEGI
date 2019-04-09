@@ -319,3 +319,21 @@ class StatusForm(ModelForm):
         super(StatusForm, self).__init__(*args, **kwargs)
         self.fields['code'].widget.attrs.update({'class': 'form-control mandatory', 'autocomplete': 'off'})
         self.fields['name'].widget.attrs.update({'class': 'form-control mandatory', 'autocomplete': 'off'})
+
+
+class ClassificationPeriodForm(ModelForm):
+    begin_date = forms.DateTimeField(input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M", attrs={'autocomplete': 'off'}))
+    end_date = forms.DateTimeField(input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M", attrs={'autocomplete': 'off'}))
+
+    status = forms.ModelChoiceField(
+        queryset=Status.objects.all().order_by('-id'),
+        widget=autocomplete.ModelSelect2(url='status-autocomplete', attrs={'style': 'width:100%'})
+    )
+
+    class Meta:
+        model = ClassificationPeriod
+        fields = '__all__'
+        exclude = ('user', 'equipment_configuration', )
+
+    def __init__(self, *args, **kwargs):
+        super(ClassificationPeriodForm, self).__init__(*args, **kwargs)

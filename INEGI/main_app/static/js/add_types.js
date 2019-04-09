@@ -11,6 +11,9 @@ $(function () {
         if(type_data === "model" )
             string_url = '/add_type_model';
 
+        if(type_data === "status" )
+            string_url = '/add_type_status';
+
         console.log(string_url);
 
         $.ajax({
