@@ -243,6 +243,28 @@ $(function () {
         }
     })
 
+    $('a[name=delete_status]').on('click', function () {
+
+        if (window.confirm("Do you really want to delete this Status?")) {
+            var csrftoken = getCookie('csrftoken');
+            $.ajaxSetup({
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                }
+            });
+
+            $.post('/delete_status',
+                {
+                    id: $(this).attr('data-id'),
+                },
+                function (data, status) {
+                    location.reload();
+                });
+        }
+    })
+
 });
 
 

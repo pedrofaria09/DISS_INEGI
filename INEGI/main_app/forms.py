@@ -308,3 +308,14 @@ class EquipmentConfigForm(ModelForm):
         self.fields['orientation'].widget.attrs.update({'class': 'form-control mandatory', 'style': 'width:25%'})
         self.fields['boom_length'].widget.attrs.update({'class': 'form-control mandatory', 'style': 'width:25%'})
         self.fields['boom_var_height'].widget.attrs.update({'class': 'form-control mandatory', 'style': 'width:25%'})
+
+
+class StatusForm(ModelForm):
+    class Meta:
+        model = Status
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super(StatusForm, self).__init__(*args, **kwargs)
+        self.fields['code'].widget.attrs.update({'class': 'form-control mandatory', 'autocomplete': 'off'})
+        self.fields['name'].widget.attrs.update({'class': 'form-control mandatory', 'autocomplete': 'off'})

@@ -5,6 +5,15 @@
 {% block content %}
 
     <div class="container-fluid">
+
+        <div class="row">
+            <div class="col-12">
+                <p><a href="{% url "view_tower" tower_id %}">Tower</a> /
+                    <a href="{% url "view_conf_period" tower_id period_id %}">Period of Configuration</a> /
+                </p>
+            </div>
+        </div>
+
         <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">View-Edit Period of Configuration: {{ period.begin_date|date:'d/m/Y H:i' }} -

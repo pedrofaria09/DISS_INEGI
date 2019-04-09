@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+    <div class="container-fluid">
+
+        <!-- Page Heading -->
+        <h1 class="h3 mb-2 text-gray-800">Status</h1>
+        <p class="mb-4">This page shows the Status for Classifications on the system</a>.</p>
+
+        <div class="row">
+            <div class="col-md-12">
+                <a href="{% url "add_status" %}" class="btn btn-success">Add a new Status</a><br>
+                <br>
+            </div>
+        </div>
+
+        <!-- DataTales Example -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-2">
+                <h6 class="m-0 font-weight-bold text-primary text-center">Status Table</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover table-sm" id="dataTable" width="100%" cellspacing="0">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Code</th>
+                                <th>Name</th>
+                                <th style="width:20%">Ações</th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <th>Code</th>
+                                <th>Name</th>
+                                <th style="width:20%">Ações</th>
+                            </tr>
+                        </tfoot>
+                        <tbody>
+
+                        {% for s in status %}
+                            <tr>
+                                <td class="align-middle p-2"><a href="{% url "view_status" s.pk %}">{{ s.code }}</a></th>
+                                <td class="align-middle p-2"><a href="{% url "view_status" s.pk %}">{{ s.name }}</a></td>
+                                <td>
+                                    <a href="{% url "view_status" s.pk %}" class="btn btn-sm btn-info">View - Edit</a>
+                                    <a href="#" name="delete_status" data-id="{{ s.pk }}" class="btn btn-sm btn-danger">Delete</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+{% endblock %}

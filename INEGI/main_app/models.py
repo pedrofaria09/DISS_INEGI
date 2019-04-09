@@ -231,6 +231,25 @@ class EquipmentConfig(models.Model):
         return "%s %s %s %s" % (self.height, self.calibration.slope, self.conf_period.begin_date, self.conf_period.end_date)
 
 
+class Status(models.Model):
+    code = models.FloatField(unique=True)
+    name = models.CharField(max_length=100)
+
+    class Meta:
+        unique_together = (("code", "name"),)
+
+    def __str__(self):
+        return "%s %s" % (self.code, self.name)
+
+
+class ClassificationPeriod(models.Model):
+    begin_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    equipment_configuration = models.ForeignKey('EquipmentConfig', on_delete=models.DO_NOTHING)
+    status = models.ForeignKey('Status', on_delete=models.DO_NOTHING)
+    user = models.ForeignKey('MyUser', on_delete=models.DO_NOTHING)
+
+
 class PeriodConfiguration(models.Model):
     begin_date = models.DateTimeField()
     end_date = models.DateTimeField(null=True, blank=True)

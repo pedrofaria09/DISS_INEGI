@@ -17,6 +17,7 @@ urlpatterns =[
     url(r'^add_calibration/(?P<equipment_id>[0-9]+)$', views.add_calibration, name='add_calibration'),
     url(r'^add_associate_towers/$', views.add_associate_towers, name='add_associate_towers'),
     url(r'^add_equipment_config/(?P<tower_id>[0-9]+)/(?P<period_id>[0-9]+)$', views.add_equipment_config, name='add_equipment_config'),
+    url(r'^add_status/?$', views.add_status, name='add_status'),
 
     url(r'^list_towers/?$', views.list_towers, name='list_towers'),
     url(r'^list_users/?$', views.list_users, name='list_users'),
@@ -25,6 +26,7 @@ urlpatterns =[
     url(r'^list_type/(?P<type>([\w ]+))$', views.list_type, name='list_type'),
     url(r'^list_machines/?$', views.list_machines, name='list_machines'),
     url(r'^list_associate_towers/$', views.list_associate_towers, name='list_associate_towers'),
+    url(r'^list_status/?$', views.list_status, name='list_status'),
 
     url(r'^view_tower/(?P<tower_id>([\w ]+))$', views.view_tower, name='view_tower'),
     url(r'^view_user/(?P<user_id>[0-9]+)$', views.view_user, name='view_user'),
@@ -36,6 +38,7 @@ urlpatterns =[
     url(r'^view_calibration/(?P<equipment_id>[0-9]+)/(?P<calib_id>[0-9]+)$', views.view_calibration, name='view_calibration'),
     url(r'^view_associate_towers/(?P<association_id>([\w ]+))$', views.view_associate_towers, name='view_associate_towers'),
     url(r'^view_equipment_config/(?P<tower_id>[0-9]+)/(?P<period_id>[0-9]+)/(?P<equi_conf_id>[0-9]+)$', views.view_equipment_config, name='view_equipment_config'),
+    url(r'^view_status/(?P<status_id>[0-9]+)$', views.view_status, name='view_status'),
 
     url(r'^delete_tower/?$', views.delete_tower, name='delete_tower'),
     url(r'^delete_user/?$', views.delete_user, name='delete_user'),
@@ -47,6 +50,7 @@ urlpatterns =[
     url(r'^delete_calibration/?$', views.delete_calibration, name='delete_calibration'),
     url(r'^delete_associate_tower/?$', views.delete_associate_tower, name='delete_associate_tower'),
     url(r'^delete_equipment_config/?$', views.delete_equipment_config, name='delete_equipment_config'),
+    url(r'^delete_status/?$', views.delete_status, name='delete_status'),
 
     url(r'^equipment-type-autocomplete/$', views.EquipmentTypeAutocomplete.as_view(), name='equipment-type-autocomplete'),
     url(r'^equipment-autocomplete/$', views.EquipmentAutocomplete.as_view(), name='equipment-autocomplete'),

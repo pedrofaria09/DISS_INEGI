@@ -1297,7 +1297,7 @@ def view_equipment_config(request, tower_id, period_id, equi_conf_id):
 
     if request.method == 'GET':
         form = EquipmentConfigForm(instance=equipment_config)
-    elif request.method == 'POST':
+    else:
         form = EquipmentConfigForm(request.POST, instance=equipment_config)
         if form.is_valid():
             if EquipmentConfig.objects.filter(conf_period=period_id, calibration=form.cleaned_data.get('calibration')).exclude(pk=equi_conf_id):
@@ -1324,6 +1324,66 @@ def delete_equipment_config(request):
         messages.success(request, 'Equipment Configuration was deleted successfully!')
         return HttpResponse('ok')
     messages.error(request, 'An error occurred when deleting the Equipment Configuration!')
+    return HttpResponse("not ok")
+
+
+# ========================================= STATUS =========================================
+
+
+def add_status(request):
+    if request.method == 'POST':
+        form = StatusForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Status added!')
+            return HttpResponseRedirect(reverse("list_status"))
+        else:
+            messages.warning(request, 'Status not added!!!')
+    else:
+        form = StatusForm()
+
+    return render(request, 'add_status.html', {'form': form})
+
+
+def list_status(request):
+    status = Status.objects.all()
+
+    return render(request, 'list_status.html', {'status': status})
+
+
+def view_status(request, status_id):
+    try:
+        status = Status.objects.get(pk=status_id)
+    except Status.DoesNotExist:
+        return HttpResponseRedirect(reverse("list_status"))
+
+    if request.method == 'GET':
+        form = StatusForm(instance=status)
+    else:
+        form = StatusForm(request.POST, instance=status)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Status was edited successfully')
+            return HttpResponseRedirect(reverse("list_status"))
+        else:
+            messages.warning(request, 'Status wasnt edited!!!')
+
+    return render(request, 'view_status.html', {'form': form, 'status_id': status_id, 'status': status})
+
+
+def delete_status(request):
+    if request.is_ajax and request.method == 'POST':
+        status = Status.objects.get(pk=request.POST["id"])
+        try:
+            status.delete()
+        except (TypeError, IntegrityError) as e:
+            messages.error(request, e.__cause__)
+            return HttpResponse("not ok")
+
+        messages.success(request, 'Status was deleted successfully!')
+        return HttpResponse('ok')
+    messages.error(request, 'An error occurred when deleting the Status!')
     return HttpResponse("not ok")
 
 

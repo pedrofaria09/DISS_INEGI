@@ -5,6 +5,13 @@
 {% block content %}
 
     <div class="container-fluid">
+
+        <div class="row">
+            <div class="col-12">
+                <p><a href="{% url "view_tower" tower_id %}">Tower</a> / </p>
+            </div>
+        </div>
+
         <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">View-Edit Tower: {{ tower.code }}</h1>
