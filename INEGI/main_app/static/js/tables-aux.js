@@ -86,3 +86,10 @@ $('#dataTableDimensionType').DataTable( {
     { 'searchable' : false, 'targets' : [4] },
   ]
 });
+
+$('#dataTableDimension').DataTable( {
+"columnDefs": [
+    { "orderable": false, "targets": [5] },
+    { 'searchable' : false, 'targets' : [5] },
+  ]
+});

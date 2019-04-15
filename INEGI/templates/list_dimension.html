@@ -1,0 +1,56 @@
+<!-- DataTales Example -->
+<div class="card shadow mb-4">
+    <div class="card-header py-2">
+        <h6 class="m-0 font-weight-bold text-primary text-center">Dimension Table</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover table-sm" id="dataTableDimension" width="100%" cellspacing="0">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Column</th>
+                        <th>Unit</th>
+                        <th>Statistic</th>
+                        <th>Metric</th>
+                        <th>Component</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr>
+                        <th>Column</th>
+                        <th>Unit</th>
+                        <th>Statistic</th>
+                        <th>Metric</th>
+                        <th>Component</th>
+                        <th>Action</th>
+                    </tr>
+                </tfoot>
+                <tbody>
+
+                {% for d in dimension %}
+                    <tr>
+                        <td class="align-middle p-2"><a href={% url "view_dimension" tower_id period_id equi_conf_id d.pk %}>{{ d.column }}</a></td>
+                        <td class="align-middle p-2"><a href={% url "view_dimension" tower_id period_id equi_conf_id d.pk %}>{{ d.dimension_type.unit }}</a></td>
+                        <td class="align-middle p-2"><a href={% url "view_dimension" tower_id period_id equi_conf_id d.pk %}>{{ d.dimension_type.statistic }}</a></td>
+                        <td class="align-middle p-2"><a href={% url "view_dimension" tower_id period_id equi_conf_id d.pk %}>{{ d.dimension_type.metric }}</a></td>
+                        <td class="align-middle p-2"><a href={% url "view_dimension" tower_id period_id equi_conf_id d.pk %}>{{ d.dimension_type.component }}</a></td>
+                        <td class="align-middle p-2">
+                            <a href="#" name="delete_dimension" data-id="{{ d.pk }}" class="btn btn-sm btn-danger">Delete</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- THE MODAL WE WILL BE USING -->
+    <div class="modal fade" id="modal-type">
+        <div class="modal-dialog">
+            <div class="modal-content"></div>
+        </div>
+    </div>
+
+</div>

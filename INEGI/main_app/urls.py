@@ -2,7 +2,7 @@ from django.conf.urls import url
 
 from . import views
 
-urlpatterns =[
+urlpatterns = [
     url(r'^$', views.index, name='index'),
     url(r'^login/$', views.login_view, name='login'),
     url(r'^logout/$', views.logout_view, name='logout'),
@@ -16,10 +16,14 @@ urlpatterns =[
     url(r'^add_conf_period/(?P<tower_id>[0-9]+)$', views.add_conf_period, name='add_conf_period'),
     url(r'^add_calibration/(?P<equipment_id>[0-9]+)$', views.add_calibration, name='add_calibration'),
     url(r'^add_associate_towers/$', views.add_associate_towers, name='add_associate_towers'),
-    url(r'^add_equipment_config/(?P<tower_id>[0-9]+)/(?P<period_id>[0-9]+)$', views.add_equipment_config, name='add_equipment_config'),
+    url(r'^add_equipment_config/(?P<tower_id>[0-9]+)/(?P<period_id>[0-9]+)$', views.add_equipment_config,
+        name='add_equipment_config'),
     url(r'^add_status/?$', views.add_status, name='add_status'),
-    url(r'^add_classification_period/(?P<tower_id>[0-9]+)/(?P<period_id>[0-9]+)/(?P<equi_conf_id>[0-9]+)$', views.add_classification_period, name='add_classification_period'),
+    url(r'^add_classification_period/(?P<tower_id>[0-9]+)/(?P<period_id>[0-9]+)/(?P<equi_conf_id>[0-9]+)$',
+        views.add_classification_period, name='add_classification_period'),
     url(r'^add_dimension_type/?$', views.add_dimension_type, name='add_dimension_type'),
+    url(r'^add_dimension/(?P<tower_id>[0-9]+)/(?P<period_id>[0-9]+)/(?P<equi_conf_id>[0-9]+)$',
+        views.add_dimension, name='add_dimension'),
 
     url(r'^list_towers/?$', views.list_towers, name='list_towers'),
     url(r'^list_users/?$', views.list_users, name='list_users'),
@@ -37,13 +41,22 @@ urlpatterns =[
     url(r'^view_equipment/(?P<equipment_id>([\w ]+))$', views.view_equipment, name='view_equipment'),
     url(r'^view_type/(?P<equipment_id>([\w ]+))/(?P<type>([\w ]+))$', views.view_type, name='view_type'),
     url(r'^view_machine/(?P<machine_id>([\w ]+))$', views.view_machine, name='view_machine'),
-    url(r'^view_conf_period/(?P<tower_id>[0-9]+)/(?P<period_id>[0-9]+)$', views.view_conf_period, name='view_conf_period'),
-    url(r'^view_calibration/(?P<equipment_id>[0-9]+)/(?P<calib_id>[0-9]+)$', views.view_calibration, name='view_calibration'),
-    url(r'^view_associate_towers/(?P<association_id>([\w ]+))$', views.view_associate_towers, name='view_associate_towers'),
-    url(r'^view_equipment_config/(?P<tower_id>[0-9]+)/(?P<period_id>[0-9]+)/(?P<equi_conf_id>[0-9]+)$', views.view_equipment_config, name='view_equipment_config'),
+    url(r'^view_conf_period/(?P<tower_id>[0-9]+)/(?P<period_id>[0-9]+)$', views.view_conf_period,
+        name='view_conf_period'),
+    url(r'^view_calibration/(?P<equipment_id>[0-9]+)/(?P<calib_id>[0-9]+)$', views.view_calibration,
+        name='view_calibration'),
+    url(r'^view_associate_towers/(?P<association_id>([\w ]+))$', views.view_associate_towers,
+        name='view_associate_towers'),
+    url(r'^view_equipment_config/(?P<tower_id>[0-9]+)/(?P<period_id>[0-9]+)/(?P<equi_conf_id>[0-9]+)$',
+        views.view_equipment_config, name='view_equipment_config'),
     url(r'^view_status/(?P<status_id>[0-9]+)$', views.view_status, name='view_status'),
-    url(r'^view_classification_period/(?P<tower_id>[0-9]+)/(?P<period_id>[0-9]+)/(?P<equi_conf_id>[0-9]+)/(?P<classification_id>[0-9]+)$',views.view_classification_period, name='view_classification_period'),
+    url(
+        r'^view_classification_period/(?P<tower_id>[0-9]+)/(?P<period_id>[0-9]+)/(?P<equi_conf_id>[0-9]+)/(?P<classification_id>[0-9]+)$',
+        views.view_classification_period, name='view_classification_period'),
     url(r'^view_dimension_type/(?P<dimension_type_id>[0-9]+)$', views.view_dimension_type, name='view_dimension_type'),
+    url(
+        r'^view_dimension/(?P<tower_id>[0-9]+)/(?P<period_id>[0-9]+)/(?P<equi_conf_id>[0-9]+)/(?P<dimension_id>[0-9]+)$',
+        views.view_dimension, name='view_dimension'),
 
     url(r'^delete_tower/?$', views.delete_tower, name='delete_tower'),
     url(r'^delete_user/?$', views.delete_user, name='delete_user'),
@@ -58,8 +71,10 @@ urlpatterns =[
     url(r'^delete_status/?$', views.delete_status, name='delete_status'),
     url(r'^delete_classification_period/?$', views.delete_classification_period, name='delete_classification_period'),
     url(r'^delete_dimension_type/?$', views.delete_dimension_type, name='delete_dimension_type'),
+    url(r'^delete_dimension/?$', views.delete_dimension, name='delete_dimension'),
 
-    url(r'^equipment-type-autocomplete/$', views.EquipmentTypeAutocomplete.as_view(), name='equipment-type-autocomplete'),
+    url(r'^equipment-type-autocomplete/$', views.EquipmentTypeAutocomplete.as_view(),
+        name='equipment-type-autocomplete'),
     url(r'^equipment-autocomplete/$', views.EquipmentAutocomplete.as_view(), name='equipment-autocomplete'),
     url(r'^tower-autocomplete/$', views.TowerAutocomplete.as_view(), name='tower-autocomplete'),
     url(r'^group-autocomplete/$', views.GroupAutocomplete.as_view(), name='group-autocomplete'),
@@ -71,6 +86,7 @@ urlpatterns =[
     url(r'^statistic-autocomplete/$', views.StatisticAutocomplete.as_view(), name='statistic-autocomplete'),
     url(r'^metric-autocomplete/$', views.MetricAutocomplete.as_view(), name='metric-autocomplete'),
     url(r'^component-autocomplete/$', views.ComponentAutocomplete.as_view(), name='component-autocomplete'),
+    url(r'^dimension-type-autocomplete/$', views.DimensionTypeAutocomplete.as_view(), name='dimension-type-autocomplete'),
 
     url(r'^ban_user/?$', views.ban_user, name='ban_user'),
 

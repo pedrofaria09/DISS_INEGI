@@ -10,26 +10,35 @@
             <div class="col-12">
                 <p> <a href="{% url "view_tower" tower_id %}">Tower</a> /
                     <a href="{% url "view_conf_period" tower_id period_id %}">Period of Configuration</a> /
-                    <a href="{% url "view_equipment_config" tower_id period_id equi_conf_id %}">Equipment Configuration</a> / Classification Period
+                    <a href="{% url "view_equipment_config" tower_id period_id equi_conf_id%}">Equipment Configuration</a> /
+                    Add Dimension
                 </p>
             </div>
         </div>
 
         <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">
-                View-Edit Classification Period: {{ classification.begin_date|date:'d/m/Y H:i' }} -
-                {% if classification.end_date %}
-                    {{ classification.end_date|date:'d/m/Y H:i' }}
+            <h1 class="h4 mb-0 text-gray-800">Add a new Dimension:
+                <p class="h5 mb-0 text-gray-800">Period:
+                {{ period.begin_date|date:'d/m/Y H:i' }} -
+                {% if period.end_date %}
+                    {{ period.end_date|date:'d/m/Y H:i' }}
                 {% else %}
                     None
                 {% endif %}
+                <br>
+                {% if equipment_config.calibration.equipment.model.designation %}
+                    Equipment Designation: {{ equipment_config.calibration.equipment.model.designation }}
+                {% else %}
+                    Equipment Ref: {{ equipment_config.calibration.equipment.sn }}
+                {% endif %}
+                </p>
             </h1>
         </div>
 
         <div class="row">
             <div class="col-12">
-                <form action="{% url "view_classification_period" tower_id period_id equi_conf_id classification_id %}" method="POST">
+                <form action="{% url "add_dimension" tower_id period_id equi_conf_id%}" method="POST">
 
                     {% csrf_token %}
 
@@ -47,26 +56,27 @@
                         <div class="form-group">
                             {% if field.field.is_checkbox %}
                                 <div class="form-check">
-                                    {{ field }}{% if field.field.required %} *{% endif %}
+                                    {{ field }} {% if field.field.required %} *{% endif %}
                                     {{ field.label_tag }}
                                 </div>
                             {% else %}
                                 {{ field.label_tag }}{% if field.field.required %} *{% endif %}
-                                {% if field.name == "status" %}
-                                    <a href="#" class="js-create-type related-widget-wrapper-link add-related" data-type="status" id="add_id_type" title="Add another Status"><img src="/static/admin/img/icon-addlink.svg" alt="Add"></a>
+                                {% if field.name == "dimension_type" %}
+                                    <a href="#" class="js-create-type related-widget-wrapper-link add-related" data-type="dimension_type" id="add_id_type" title="Add another Dimension"><img src="/static/admin/img/icon-addlink.svg" alt="Add"></a>
                                 {% endif %}
-                                {% render_field field placeholder=field.label %}
+                                {% render_field  field placeholder=field.label %}
                             {% endif %}
                         </div>
+
                     {% endfor %}
 
                     <div class="form-group">
                         <div class="form-row">
                             <div class="col-md-6">
-                                <input type="submit" class="btn btn-primary btn-block" value="Edit">
+                                <input type="submit" class="btn btn-primary btn-block" value="Create">
                             </div>
                             <div class="col-md-6">
-                                <a href="#" name="delete_classification_period" data-id="{{ classification_id }}" class="btn btn-danger btn-block">Delete</a>
+                                <button id="reset" type="reset" class="btn btn-warning btn-block"> Clean</button>
                             </div>
                         </div>
                     </div>
@@ -74,14 +84,13 @@
                 </form>
             </div>
         </div>
+    </div>
 
-        <!-- THE MODAL WE WILL BE USING -->
-        <div class="modal fade" id="modal-type">
-            <div class="modal-dialog">
-                <div class="modal-content"></div>
-            </div>
+    <!-- THE MODAL WE WILL BE USING -->
+    <div class="modal fade" id="modal-type">
+        <div class="modal-dialog">
+            <div class="modal-content"></div>
         </div>
-
     </div>
 
 {% endblock %}

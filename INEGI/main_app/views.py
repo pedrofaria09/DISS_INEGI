@@ -30,10 +30,6 @@ def get_obj_or_404_2(klass, *args, **kwargs):
 
 def index(request):
 
-    tu = UserTowerDates.objects.all()
-    for t in tu:
-        print(t)
-
     if request.user.id is None:
         form = LoginForm()
         return render(request, 'home.html', {'form': form})
@@ -1380,7 +1376,6 @@ def view_calibration(request, equipment_id, calib_id):
 
 def delete_calibration(request):
     if request.is_ajax and request.method == 'POST':
-        print(request.POST["id"])
         calib = Calibration.objects.get(pk=request.POST["id"])
         try:
             calib.delete()
@@ -1466,8 +1461,9 @@ def view_equipment_config(request, tower_id, period_id, equi_conf_id):
             messages.warning(request, 'Equipment Configuration wasnt edited successfully!!!')
 
     classification = ClassificationPeriod.objects.filter(equipment_configuration=equipment_config)
+    dimension = Dimension.objects.filter(equipment_configuration=equipment_config)
 
-    return render(request, 'view_equipment_config.html', {'form': form, 'tower_id': tower_id, 'period_id': period_id, 'equi_conf_id': equi_conf_id, 'equipment_config': equipment_config, 'classification': classification})
+    return render(request, 'view_equipment_config.html', {'form': form, 'tower_id': tower_id, 'period_id': period_id, 'equi_conf_id': equi_conf_id, 'equipment_config': equipment_config, 'classification': classification, 'dimension': dimension})
 
 
 def delete_equipment_config(request):
@@ -1738,6 +1734,94 @@ def delete_dimension_type(request):
     return HttpResponse("not ok")
 
 
+# ========================================= DIMENSION =========================================
+
+
+def add_dimension(request, tower_id, period_id, equi_conf_id):
+    try:
+        Tower.objects.get(pk=tower_id)
+    except Tower.DoesNotExist:
+        return HttpResponseRedirect(reverse("list_towers"))
+
+    try:
+        period = PeriodConfiguration.objects.get(pk=period_id)
+    except PeriodConfiguration.DoesNotExist:
+        return HttpResponseRedirect(reverse("view_tower", kwargs={'tower_id': tower_id}))
+
+    try:
+        equipment_config = EquipmentConfig.objects.get(pk=equi_conf_id)
+    except EquipmentConfig.DoesNotExist:
+        return HttpResponseRedirect(reverse("view_conf_period", kwargs={'tower_id': tower_id, 'period_id': period_id}))
+
+    if request.method == 'POST':
+        form = DimensionForm(request.POST)
+
+        if form.is_valid():
+            dimension = form.save(commit=False)
+            dimension.equipment_configuration = equipment_config
+            dimension.save()
+            messages.success(request, 'Dimension added!')
+            return HttpResponseRedirect(reverse("view_equipment_config", kwargs={'tower_id': tower_id, 'period_id': period_id, 'equi_conf_id': equi_conf_id}))
+        else:
+            messages.warning(request, 'Dimension not added!!!')
+    else:
+        form = DimensionForm()
+
+    return render(request, 'add_dimension.html', {'form': form, 'tower_id': tower_id, 'period_id': period_id, 'equi_conf_id': equi_conf_id, 'period': period, 'equipment_config': equipment_config})
+
+
+def view_dimension(request, tower_id, period_id, equi_conf_id, dimension_id):
+    try:
+        Tower.objects.get(pk=tower_id)
+    except Tower.DoesNotExist:
+        return HttpResponseRedirect(reverse("list_towers"))
+
+    try:
+        PeriodConfiguration.objects.get(pk=period_id)
+    except PeriodConfiguration.DoesNotExist:
+        return HttpResponseRedirect(reverse("view_tower", kwargs={'tower_id': tower_id}))
+
+    try:
+        equipment_config = EquipmentConfig.objects.get(pk=equi_conf_id)
+    except EquipmentConfig.DoesNotExist:
+        return HttpResponseRedirect(reverse("view_conf_period", kwargs={'tower_id': tower_id, 'period_id': period_id}))
+
+    try:
+        dimension = Dimension.objects.get(pk=dimension_id)
+    except Dimension.DoesNotExist:
+        return HttpResponseRedirect(reverse("view_equipment_config", kwargs={'tower_id': tower_id, 'period_id': period_id, 'equi_conf_id': equi_conf_id}))
+
+    if request.method == 'GET':
+        form = DimensionForm(instance=dimension)
+    else:
+        form = DimensionForm(request.POST, instance=dimension)
+        if form.is_valid():
+            dimension = form.save(commit=False)
+            dimension.equipment_configuration = equipment_config
+            dimension.save()
+            messages.success(request, 'Dimension was edited successfully')
+            return HttpResponseRedirect(reverse("view_equipment_config", kwargs={'tower_id': tower_id, 'period_id': period_id, 'equi_conf_id': equi_conf_id}))
+        else:
+            messages.warning(request, 'Dimension wasnt edited successfully!!!')
+
+    return render(request, 'view_dimension.html', {'form': form, 'tower_id': tower_id, 'period_id': period_id, 'equi_conf_id': equi_conf_id, 'dimension_id': dimension_id, 'dimension': dimension})
+
+
+def delete_dimension(request):
+    if request.is_ajax and request.method == 'POST':
+        dimension = Dimension.objects.get(pk=request.POST["id"])
+        try:
+            dimension.delete()
+        except (TypeError, IntegrityError) as e:
+            messages.error(request, e.__cause__)
+            return HttpResponse("not ok")
+
+        messages.success(request, 'Dimension was deleted successfully!')
+        return HttpResponse('ok')
+    messages.error(request, 'An error occurred when deleting the Dimension!')
+    return HttpResponse("not ok")
+
+
 # ========================================= AUTOCOMPLETES =========================================
 
 
@@ -1862,5 +1946,15 @@ class ComponentAutocomplete(autocomplete.Select2QuerySetView):
 
         if self.q:
             qs = qs.filter(name__istartswith=self.q)
+
+        return qs
+
+
+class DimensionTypeAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = DimensionType.objects.all().order_by('-id')
+
+        if self.q:
+            qs = qs.filter(QD(unit__name__istartswith=self.q) | QD(statistic__name__istartswith=self.q) | QD(metric__name__istartswith=self.q) | QD(component__name__istartswith=self.q))
 
         return qs

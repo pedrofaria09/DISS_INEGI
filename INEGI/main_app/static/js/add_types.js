@@ -26,6 +26,9 @@ $(function () {
         if(type_data === "component" )
             string_url = '/add_type_component';
 
+        if(type_data === "dimension_type" )
+            string_url = '/add_type_dimension';
+
         console.log(string_url);
 
         $.ajax({
@@ -53,6 +56,7 @@ $(function () {
                     alert("Type created!");
                     $("#modal-type").modal("hide");  // <-- Close the modal
                 } else {
+                    alert("Problem creating type! Maybe it already exists?");
                     $("#modal-type .modal-content").html(data.html_form);
                 }
             }

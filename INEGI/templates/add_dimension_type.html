@@ -35,6 +35,15 @@
                                 </div>
                             {% else %}
                                 {{ field.label_tag }}{% if field.field.required %} *{% endif %}
+                                {% if field.name == "unit" %}
+                                    <a href="#" class="js-create-type related-widget-wrapper-link add-related" data-type="unit" id="add_id_type" title="Add another Unit Type"><img src="/static/admin/img/icon-addlink.svg" alt="Add"></a>
+                                {% elif field.name == "statistic" %}
+                                    <a href="#" class="js-create-type related-widget-wrapper-link add-related" data-type="statistic" id="add_id_type" title="Add another Statistic Type"><img src="/static/admin/img/icon-addlink.svg" alt="Add"></a>
+                                {% elif field.name == "metric" %}
+                                    <a href="#" class="js-create-type related-widget-wrapper-link add-related" data-type="metric" id="add_id_type" title="Add another Metric Type"><img src="/static/admin/img/icon-addlink.svg" alt="Add"></a>
+                                {% elif field.name == "component" %}
+                                    <a href="#" class="js-create-type related-widget-wrapper-link add-related" data-type="component" id="add_id_type" title="Add another Component Type"><img src="/static/admin/img/icon-addlink.svg" alt="Add"></a>
+                                {% endif %}
                                 {% render_field  field placeholder=field.label %}
                             {% endif %}
                         </div>
@@ -55,6 +64,14 @@
                 </form>
             </div>
         </div>
+
+        <!-- THE MODAL WE WILL BE USING -->
+        <div class="modal fade" id="modal-type">
+            <div class="modal-dialog">
+                <div class="modal-content"></div>
+            </div>
+        </div>
+
     </div>
 
 {% endblock %}

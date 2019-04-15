@@ -9,7 +9,8 @@
         <div class="row">
             <div class="col-12">
                 <p> <a href="{% url "view_tower" tower_id %}">Tower</a> /
-                    <a href="{% url "view_conf_period" tower_id period_id %}">Period of Configuration</a> / Equipment Configuration
+                    <a href="{% url "view_conf_period" tower_id period_id %}">Period of Configuration</a> /
+                    <a href="{% url "view_equipment_config" tower_id period_id equi_conf_id %}">Equipment Configuration</a> / Dimension
                 </p>
             </div>
         </div>
@@ -17,16 +18,13 @@
         <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">
-                <a href="#" class="collapsed" data-toggle="collapse" data-target="#collapseForm" aria-expanded="true" aria-controls="collapseTwo">
-                    View-Edit Equipment Configuration: Height - {{ equipment_config.height }} SN - {{ equipment_config.calibration.equipment.sn }}
-                    <i class="fas fa-angle-double-down fa-xs"></i>
-                </a>
+                View-Edit Dimension: {{ dimension.column }}
             </h1>
         </div>
 
-        <div class="row collapse" id="collapseForm" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+        <div class="row">
             <div class="col-12">
-                <form action="{% url "view_equipment_config" tower_id period_id equi_conf_id %}" method="POST">
+                <form action="{% url "view_dimension" tower_id period_id equi_conf_id dimension_id %}" method="POST">
 
                     {% csrf_token %}
 
@@ -49,6 +47,9 @@
                                 </div>
                             {% else %}
                                 {{ field.label_tag }}{% if field.field.required %} *{% endif %}
+                                {% if field.name == "dimension_type" %}
+                                    <a href="#" class="js-create-type related-widget-wrapper-link add-related" data-type="dimension_type" id="add_id_type" title="Add another Dimension"><img src="/static/admin/img/icon-addlink.svg" alt="Add"></a>
+                                {% endif %}
                                 {% render_field field placeholder=field.label %}
                             {% endif %}
                         </div>
@@ -60,7 +61,7 @@
                                 <input type="submit" class="btn btn-primary btn-block" value="Edit">
                             </div>
                             <div class="col-md-6">
-                                <a href="#" name="delete_equipment_config" data-id="{{ equi_conf_id }}" class="btn btn-danger btn-block">Delete</a>
+                                <a href="#" name="delete_dimension" data-id="{{ dimension_id }}" class="btn btn-danger btn-block">Delete</a>
                             </div>
                         </div>
                     </div>
@@ -69,35 +70,13 @@
             </div>
         </div>
 
-        <hr>
-
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h2 class="h3 mb-0 text-gray-800">Classifications Periods</h2>
-        </div>
-
-        <div class="row">
-            <div class="col-12">
-                <a href="{% url "add_classification_period" tower_id period_id equi_conf_id %}" class="btn btn-success">Add a new Classification Period</a>
-                <br><br>
-
-                {% include "list_classification_period.html" %}
+        <!-- THE MODAL WE WILL BE USING -->
+        <div class="modal fade" id="modal-type">
+            <div class="modal-dialog">
+                <div class="modal-content"></div>
             </div>
         </div>
 
-        <hr>
-
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h2 class="h3 mb-0 text-gray-800">Dimensions</h2>
-        </div>
-
-        <div class="row">
-            <div class="col-12">
-                <a href="{% url "add_dimension" tower_id period_id equi_conf_id %}" class="btn btn-success">Add a new Dimension</a>
-                <br><br>
-
-                {% include "list_dimension.html" %}
-            </div>
-        </div>
     </div>
 
 {% endblock %}

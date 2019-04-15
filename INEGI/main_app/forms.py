@@ -410,3 +410,19 @@ class DimensionTypeForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(DimensionTypeForm, self).__init__(*args, **kwargs)
+
+
+class DimensionForm(ModelForm):
+    dimension_type = forms.ModelChoiceField(
+        queryset=DimensionType.objects.all().order_by('-id'),
+        widget=autocomplete.ModelSelect2(url='dimension-type-autocomplete', attrs={'style': 'width:100%'})
+    )
+
+    class Meta:
+        model = Dimension
+        fields = '__all__'
+        exclude = ('equipment_configuration', )
+
+    def __init__(self, *args, **kwargs):
+        super(DimensionForm, self).__init__(*args, **kwargs)
+        self.fields['column'].widget.attrs.update({'class': 'form-control mandatory', 'autocomplete': 'off'})

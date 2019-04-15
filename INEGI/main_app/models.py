@@ -316,7 +316,7 @@ class DimensionType(models.Model):
     unit = models.ForeignKey('UnitType', on_delete=models.DO_NOTHING)
     statistic = models.ForeignKey('StatisticType', on_delete=models.DO_NOTHING)
     metric = models.ForeignKey('MetricType', on_delete=models.DO_NOTHING)
-    component = models.ForeignKey('ComponentType', on_delete=models.DO_NOTHING)
+    component = models.ForeignKey('ComponentType', on_delete=models.DO_NOTHING, null=True, blank=True)
 
     class Meta:
         unique_together = (("unit", "statistic", "metric", "component"),)
