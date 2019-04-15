@@ -132,9 +132,17 @@
                 <div id="collapseTwoEnum" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <a class="collapse-item" href="{% url "list_type" type="equipment" %}">Equipments Types</a>
-                        <a class="collapse-item" href="{% url "list_type" type="user_group" %}">Users Groups Types</a>
                         <a class="collapse-item" href="{% url "list_type" type="model" %}">Models Types</a>
+                        <hr>
+                        <a class="collapse-item" href="{% url "list_dimensions_type"%}">Dimensions Types</a>
+                        <a class="collapse-item" href="{% url "list_type" type="unit" %}">Unit Types</a>
+                        <a class="collapse-item" href="{% url "list_type" type="statistic" %}">Statistic Types</a>
+                        <a class="collapse-item" href="{% url "list_type" type="metric" %}">Metric Types</a>
+                        <a class="collapse-item" href="{% url "list_type" type="component" %}">Component Types</a>
+                        <hr>
                         <a class="collapse-item" href="{% url "list_status" %}">Status</a>
+                        <hr>
+                        <a class="collapse-item" href="{% url "list_type" type="user_group" %}">Users Groups Types</a>
                     </div>
                 </div>
             </li>

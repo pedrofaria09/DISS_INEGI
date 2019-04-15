@@ -549,6 +549,18 @@ def list_type(request, type):
     elif type == 'model':
         type_obj = EquipmentCharacteristic.objects.all()
         name = "Equipment Models"
+    elif type == 'unit':
+        type_obj = UnitType.objects.all()
+        name = "Unit Type"
+    elif type == 'statistic':
+        type_obj = StatisticType.objects.all()
+        name = "Statistic Type"
+    elif type == 'metric':
+        type_obj = MetricType.objects.all()
+        name = "Metric Type"
+    elif type == 'component':
+        type_obj = ComponentType.objects.all()
+        name = "Component Type"
 
     return render(request, 'list_type.html', {'type_obj': type_obj, 'type': type, 'name': name})
 
@@ -560,6 +572,14 @@ def add_type(request, type):
         name = "User Group Type"
     elif type == 'model':
         name = "Equipment Models"
+    elif type == 'unit':
+        name = "Unit Type"
+    elif type == 'statistic':
+        name = "Statistic Type"
+    elif type == 'metric':
+        name = "Metric Type"
+    elif type == 'component':
+        name = "Component Type"
 
     if request.method == 'POST':
         if type == 'equipment':
@@ -568,6 +588,14 @@ def add_type(request, type):
             form = UserGroupTypeForm(request.POST)
         elif type == 'model':
             form = EquipmentCharacteristicForm(request.POST)
+        elif type == 'unit':
+            form = UnitTypeForm(request.POST)
+        elif type == 'statistic':
+            form = StatisticTypeForm(request.POST)
+        elif type == 'metric':
+            form = MetricTypeForm(request.POST)
+        elif type == 'component':
+            form = ComponentTypeForm(request.POST)
 
         if form.is_valid():
             form.save()
@@ -582,6 +610,14 @@ def add_type(request, type):
             form = UserGroupTypeForm()
         elif type == 'model':
             form = EquipmentCharacteristicForm()
+        elif type == 'unit':
+            form = UnitTypeForm()
+        elif type == 'statistic':
+            form = StatisticTypeForm()
+        elif type == 'metric':
+            form = MetricTypeForm()
+        elif type == 'component':
+            form = ComponentTypeForm()
 
     return render(request, 'add_type.html', {'form': form, 'type': type, 'name': name})
 
@@ -622,6 +658,78 @@ def add_type_model(request):
     return JsonResponse(data)
 
 
+def add_type_unit(request):
+    data = dict()
+
+    if request.method == 'POST':
+        form = UnitTypeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            data['form_is_valid'] = True
+        else:
+            data['form_is_valid'] = False
+    else:
+        form = UnitTypeForm()
+
+    context = {'form': form}
+    data['html_form'] = render_to_string('add_type_unit.html', context, request=request)
+    return JsonResponse(data)
+
+
+def add_type_statistic(request):
+    data = dict()
+
+    if request.method == 'POST':
+        form = StatisticTypeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            data['form_is_valid'] = True
+        else:
+            data['form_is_valid'] = False
+    else:
+        form = StatisticTypeForm()
+
+    context = {'form': form}
+    data['html_form'] = render_to_string('add_type_statistic.html', context, request=request)
+    return JsonResponse(data)
+
+
+def add_type_metric(request):
+    data = dict()
+
+    if request.method == 'POST':
+        form = MetricType(request.POST)
+        if form.is_valid():
+            form.save()
+            data['form_is_valid'] = True
+        else:
+            data['form_is_valid'] = False
+    else:
+        form = MetricType()
+
+    context = {'form': form}
+    data['html_form'] = render_to_string('add_type_metric.html', context, request=request)
+    return JsonResponse(data)
+
+
+def add_type_component(request):
+    data = dict()
+
+    if request.method == 'POST':
+        form = ComponentTypeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            data['form_is_valid'] = True
+        else:
+            data['form_is_valid'] = False
+    else:
+        form = ComponentTypeForm()
+
+    context = {'form': form}
+    data['html_form'] = render_to_string('add_type_component.html', context, request=request)
+    return JsonResponse(data)
+
+
 def view_type(request, equipment_id, type):
     if type == 'equipment':
         name = "Equipment Type"
@@ -641,6 +749,30 @@ def view_type(request, equipment_id, type):
             obj = EquipmentCharacteristic.objects.get(pk=equipment_id)
         except EquipmentCharacteristic.DoesNotExist:
             return HttpResponseRedirect(reverse("list_type", kwargs={'type': type}))
+    elif type == 'unit':
+        name = "Unit Type"
+        try:
+            obj = UnitType.objects.get(pk=equipment_id)
+        except UnitType.DoesNotExist:
+            return HttpResponseRedirect(reverse("list_type", kwargs={'type': type}))
+    elif type == 'statistic':
+        name = "Statistic Type"
+        try:
+            obj = StatisticType.objects.get(pk=equipment_id)
+        except StatisticType.DoesNotExist:
+            return HttpResponseRedirect(reverse("list_type", kwargs={'type': type}))
+    elif type == 'metric':
+        name = "Metric Type"
+        try:
+            obj = MetricType.objects.get(pk=equipment_id)
+        except MetricType.DoesNotExist:
+            return HttpResponseRedirect(reverse("list_type", kwargs={'type': type}))
+    elif type == 'component':
+        name = "Component Type"
+        try:
+            obj = ComponentType.objects.get(pk=equipment_id)
+        except ComponentType.DoesNotExist:
+            return HttpResponseRedirect(reverse("list_type", kwargs={'type': type}))
 
     if request.method == 'GET':
         if type == 'equipment':
@@ -649,6 +781,14 @@ def view_type(request, equipment_id, type):
             form = UserGroupTypeForm(instance=obj)
         elif type == 'model':
             form = EquipmentCharacteristicForm(instance=obj)
+        elif type == 'unit':
+            form = UnitTypeForm(instance=obj)
+        elif type == 'statistic':
+            form = StatisticTypeForm(instance=obj)
+        elif type == 'metric':
+            form = MetricTypeForm(instance=obj)
+        elif type == 'component':
+            form = ComponentTypeForm(instance=obj)
 
     elif request.method == 'POST':
         if type == 'equipment':
@@ -657,6 +797,14 @@ def view_type(request, equipment_id, type):
             form = UserGroupTypeForm(request.POST, instance=obj)
         elif type == 'model':
             form = EquipmentCharacteristicForm(request.POST, instance=obj)
+        elif type == 'unit':
+            form = UnitTypeForm(request.POST, instance=obj)
+        elif type == 'statistic':
+            form = StatisticTypeForm(request.POST, instance=obj)
+        elif type == 'metric':
+            form = MetricTypeForm(request.POST, instance=obj)
+        elif type == 'component':
+            form = ComponentTypeForm(request.POST, instance=obj)
 
         if form.is_valid():
             form.save()
@@ -676,6 +824,14 @@ def delete_type(request):
             obj = UserGroupType.objects.get(pk=request.POST["id"])
         elif request.POST["typex"] == 'model':
             obj = EquipmentCharacteristic.objects.get(pk=request.POST["id"])
+        elif request.POST["typex"] == 'unit':
+            obj = UnitType.objects.get(pk=request.POST["id"])
+        elif request.POST["typex"] == 'statistic':
+            obj = StatisticType.objects.get(pk=request.POST["id"])
+        elif request.POST["typex"] == 'metric':
+            obj = MetricType.objects.get(pk=request.POST["id"])
+        elif request.POST["typex"] == 'component':
+            obj = ComponentType.objects.get(pk=request.POST["id"])
 
         try:
             obj.delete()
@@ -1448,6 +1604,47 @@ def add_classification_period(request, tower_id, period_id, equi_conf_id):
     return render(request, 'add_classification_period.html', {'form': form, 'tower_id': tower_id, 'period_id': period_id, 'equi_conf_id': equi_conf_id, 'period': period, 'equipment_config': equipment_config})
 
 
+def view_classification_period(request, tower_id, period_id, equi_conf_id, classification_id):
+    try:
+        Tower.objects.get(pk=tower_id)
+    except Tower.DoesNotExist:
+        return HttpResponseRedirect(reverse("list_towers"))
+
+    try:
+        period = PeriodConfiguration.objects.get(pk=period_id)
+    except PeriodConfiguration.DoesNotExist:
+        return HttpResponseRedirect(reverse("view_tower", kwargs={'tower_id': tower_id}))
+
+    try:
+        equipment_config = EquipmentConfig.objects.get(pk=equi_conf_id)
+    except EquipmentConfig.DoesNotExist:
+        return HttpResponseRedirect(reverse("view_conf_period", kwargs={'tower_id': tower_id, 'period_id': period_id}))
+
+    try:
+        classification = ClassificationPeriod.objects.get(pk=classification_id)
+    except ClassificationPeriod.DoesNotExist:
+        return HttpResponseRedirect(reverse("view_equipment_config", kwargs={'tower_id': tower_id, 'period_id': period_id, 'equi_conf_id': equi_conf_id}))
+
+    if request.method == 'GET':
+        form = ClassificationPeriodForm(instance=classification)
+    else:
+        form = ClassificationPeriodForm(request.POST, instance=classification)
+        if form.is_valid():
+            if form.cleaned_data.get('begin_date') < period.begin_date or form.cleaned_data.get('end_date') > period.end_date:
+                messages.error(request, 'Data must be between the Period Configuration')
+            else:
+                classification = form.save(commit=False)
+                classification.user = request.user
+                classification.equipment_configuration = equipment_config
+                classification.save()
+                messages.success(request, 'Classification was edited successfully')
+                return HttpResponseRedirect(reverse("view_equipment_config", kwargs={'tower_id': tower_id, 'period_id': period_id, 'equi_conf_id': equi_conf_id}))
+        else:
+            messages.warning(request, 'Classification wasnt edited successfully!!!')
+
+    return render(request, 'view_classification_period.html', {'form': form, 'tower_id': tower_id, 'period_id': period_id, 'equi_conf_id': equi_conf_id, 'classification_id': classification_id, 'classification': classification})
+
+
 def delete_classification_period(request):
     if request.is_ajax and request.method == 'POST':
         classification = ClassificationPeriod.objects.get(pk=request.POST["id"])
@@ -1461,6 +1658,85 @@ def delete_classification_period(request):
         return HttpResponse('ok')
     messages.error(request, 'An error occurred when deleting the Classification Period!')
     return HttpResponse("not ok")
+
+
+# ========================================= DIMENSIONS TYPES =========================================
+
+
+def add_dimension_type(request):
+    if request.method == 'POST':
+        form = DimensionTypeForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Dimension type added!')
+            return HttpResponseRedirect(reverse("list_dimensions_type"))
+        else:
+            messages.warning(request, 'There is already a Dimension type with that values')
+    else:
+        form = DimensionTypeForm()
+
+    return render(request, 'add_dimension_type.html', {'form': form})
+
+
+def add_type_dimension(request):
+    data = dict()
+
+    if request.method == 'POST':
+        form = DimensionTypeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            data['form_is_valid'] = True
+        else:
+            data['form_is_valid'] = False
+    else:
+        form = DimensionTypeForm()
+
+    context = {'form': form}
+    data['html_form'] = render_to_string('add_type_dimension.html', context, request=request)
+    return JsonResponse(data)
+
+
+def list_dimensions_type(request):
+    dimensions = DimensionType.objects.all()
+
+    return render(request, 'list_dimensions_type.html', {'dimensions': dimensions})
+
+
+def view_dimension_type(request, dimension_type_id):
+    try:
+        dimension_type = DimensionType.objects.get(pk=dimension_type_id)
+    except DimensionType.DoesNotExist:
+        return HttpResponseRedirect(reverse("list_dimensions_type"))
+
+    if request.method == 'GET':
+        form = DimensionTypeForm(instance=dimension_type)
+    else:
+        form = DimensionTypeForm(request.POST, instance=dimension_type)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Dimension type was edited successfully')
+            return HttpResponseRedirect(reverse("list_status"))
+        else:
+            messages.warning(request, 'Dimension type wasnt edited!!! Maybe there is already a Dimension type with that values')
+
+    return render(request, 'view_dimension_type.html', {'form': form, 'dimension_type_id': dimension_type_id, 'dimension_type': dimension_type})
+
+
+def delete_dimension_type(request):
+    if request.is_ajax and request.method == 'POST':
+        status = DimensionType.objects.get(pk=request.POST["id"])
+        try:
+            status.delete()
+        except (TypeError, IntegrityError) as e:
+            messages.error(request, e.__cause__)
+            return HttpResponse("not ok")
+
+        messages.success(request, 'Dimension Type was deleted successfully!')
+        return HttpResponse('ok')
+    messages.error(request, 'An error occurred when deleting the Dimension Type!')
+    return HttpResponse("not ok")
+
 
 # ========================================= AUTOCOMPLETES =========================================
 
@@ -1546,5 +1822,45 @@ class StatusAutocomplete(autocomplete.Select2QuerySetView):
 
         if self.q:
             qs = qs.filter(code__istartswith=self.q)
+
+        return qs
+
+
+class UnitAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = UnitType.objects.all().order_by('-id')
+
+        if self.q:
+            qs = qs.filter(name__istartswith=self.q)
+
+        return qs
+
+
+class StatisticAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = StatisticType.objects.all().order_by('-id')
+
+        if self.q:
+            qs = qs.filter(name__istartswith=self.q)
+
+        return qs
+
+
+class MetricAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = MetricType.objects.all().order_by('-id')
+
+        if self.q:
+            qs = qs.filter(name__istartswith=self.q)
+
+        return qs
+
+
+class ComponentAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = ComponentType.objects.all().order_by('-id')
+
+        if self.q:
+            qs = qs.filter(name__istartswith=self.q)
 
         return qs

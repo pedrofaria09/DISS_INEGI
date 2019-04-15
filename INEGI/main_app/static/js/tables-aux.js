@@ -79,3 +79,10 @@ $('#dataTableClassification').DataTable( {
     { 'searchable' : false, 'targets' : [4] },
   ]
 });
+
+$('#dataTableDimensionType').DataTable( {
+"columnDefs": [
+    { "orderable": false, "targets": [4] },
+    { 'searchable' : false, 'targets' : [4] },
+  ]
+});

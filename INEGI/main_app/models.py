@@ -124,6 +124,46 @@ class EquipmentType(models.Model):
         return "%s" % self.name
 
 
+class UnitType(models.Model):
+    name = models.CharField(unique=True, max_length=100)
+
+    class Meta:
+        ordering = ['-id']
+
+    def __str__(self):
+        return "%s" % self.name
+
+
+class StatisticType(models.Model):
+    name = models.CharField(unique=True, max_length=100)
+
+    class Meta:
+        ordering = ['-id']
+
+    def __str__(self):
+        return "%s" % self.name
+
+
+class MetricType(models.Model):
+    name = models.CharField(unique=True, max_length=100)
+
+    class Meta:
+        ordering = ['-id']
+
+    def __str__(self):
+        return "%s" % self.name
+
+
+class ComponentType(models.Model):
+    name = models.CharField(unique=True, max_length=100)
+
+    class Meta:
+        ordering = ['-id']
+
+    def __str__(self):
+        return "%s" % self.name
+
+
 class UserTowerDates(models.Model):
     tower = models.ManyToManyField('Tower', blank=True)
     user = models.ForeignKey('MyUser', on_delete=models.DO_NOTHING)
@@ -179,6 +219,32 @@ class Cluster(models.Model):
         return "%s" % self.name
 
 
+class PeriodConfiguration(models.Model):
+    begin_date = models.DateTimeField()
+    end_date = models.DateTimeField(null=True, blank=True)
+    wind_rss = models.BooleanField(default=False)
+    solar_rss = models.BooleanField(default=False)
+    raw_freq = models.CharField(max_length=20, default="10m")
+    time_zone = models.CharField(max_length=20, default="+0h")
+    tower = models.ForeignKey('Tower', on_delete=models.DO_NOTHING)
+
+    def __str__(self):
+        return "%s %s" % (self.begin_date, self.end_date)
+
+
+class EquipmentConfig(models.Model):
+    height = models.FloatField()
+    height_label = models.CharField(max_length=20, null=True, blank=True)
+    orientation = models.FloatField(null=True, blank=True)
+    boom_length = models.FloatField(null=True, blank=True)
+    boom_var_height = models.FloatField(null=True, blank=True)
+    calibration = models.ForeignKey('Calibration', on_delete=models.DO_NOTHING)
+    conf_period = models.ForeignKey('PeriodConfiguration', on_delete=models.DO_NOTHING)
+
+    def __str__(self):
+        return "%s %s %s %s" % (self.height, self.calibration.slope, self.conf_period.begin_date, self.conf_period.end_date)
+
+
 class Equipment(models.Model):
     sn = models.CharField(unique=True, max_length=100)
     model = models.ForeignKey('EquipmentCharacteristic', on_delete=models.DO_NOTHING)
@@ -218,19 +284,6 @@ class Calibration(models.Model):
         return "SN:%s Ref:%s OF:%s SL:%s" % (self.equipment, self.ref, self.offset, self.slope)
 
 
-class EquipmentConfig(models.Model):
-    height = models.FloatField()
-    height_label = models.CharField(max_length=20, null=True, blank=True)
-    orientation = models.FloatField(null=True, blank=True)
-    boom_length = models.FloatField(null=True, blank=True)
-    boom_var_height = models.FloatField(null=True, blank=True)
-    calibration = models.ForeignKey('Calibration', on_delete=models.DO_NOTHING)
-    conf_period = models.ForeignKey('PeriodConfiguration', on_delete=models.DO_NOTHING)
-
-    def __str__(self):
-        return "%s %s %s %s" % (self.height, self.calibration.slope, self.conf_period.begin_date, self.conf_period.end_date)
-
-
 class Status(models.Model):
     code = models.FloatField(unique=True)
     name = models.CharField(max_length=100)
@@ -250,17 +303,26 @@ class ClassificationPeriod(models.Model):
     user = models.ForeignKey('MyUser', on_delete=models.DO_NOTHING)
 
 
-class PeriodConfiguration(models.Model):
-    begin_date = models.DateTimeField()
-    end_date = models.DateTimeField(null=True, blank=True)
-    wind_rss = models.BooleanField(default=False)
-    solar_rss = models.BooleanField(default=False)
-    raw_freq = models.CharField(max_length=20, default="10m")
-    time_zone = models.CharField(max_length=20, default="+0h")
-    tower = models.ForeignKey('Tower', on_delete=models.DO_NOTHING)
+class Dimension(models.Model):
+    column = models.IntegerField()
+    dimension_type = models.ForeignKey('DimensionType', on_delete=models.DO_NOTHING)
+    equipment_configuration = models.ForeignKey('EquipmentConfig', on_delete=models.DO_NOTHING)
 
     def __str__(self):
-        return "%s %s" % (self.begin_date, self.end_date)
+        return "%s %s" % (self.column, self.dimension_type)
+
+
+class DimensionType(models.Model):
+    unit = models.ForeignKey('UnitType', on_delete=models.DO_NOTHING)
+    statistic = models.ForeignKey('StatisticType', on_delete=models.DO_NOTHING)
+    metric = models.ForeignKey('MetricType', on_delete=models.DO_NOTHING)
+    component = models.ForeignKey('ComponentType', on_delete=models.DO_NOTHING)
+
+    class Meta:
+        unique_together = (("unit", "statistic", "metric", "component"),)
+
+    def __str__(self):
+        return "%s %s %s %s" % (self.unit, self.statistic, self.metric, self.component)
 
 
 class DataSetPG(models.Model):

@@ -264,6 +264,50 @@ class UserGroupTypeForm(ModelForm):
         self.fields['name'].widget.attrs.update({'class': 'form-control mandatory'})
 
 
+class UnitTypeForm(ModelForm):
+    class Meta:
+        model = UnitType
+        fields = ('name',)
+
+    def __init__(self, *args, **kwargs):
+        super(UnitTypeForm, self).__init__(*args, **kwargs)
+        self.fields['name'].label = "Unit Type Name"
+        self.fields['name'].widget.attrs.update({'class': 'form-control mandatory'})
+
+
+class StatisticTypeForm(ModelForm):
+    class Meta:
+        model = StatisticType
+        fields = ('name',)
+
+    def __init__(self, *args, **kwargs):
+        super(StatisticTypeForm, self).__init__(*args, **kwargs)
+        self.fields['name'].label = "Statistic Type Name"
+        self.fields['name'].widget.attrs.update({'class': 'form-control mandatory'})
+
+
+class MetricTypeForm(ModelForm):
+    class Meta:
+        model = MetricType
+        fields = ('name',)
+
+    def __init__(self, *args, **kwargs):
+        super(MetricTypeForm, self).__init__(*args, **kwargs)
+        self.fields['name'].label = "Metric Type Name"
+        self.fields['name'].widget.attrs.update({'class': 'form-control mandatory'})
+
+
+class ComponentTypeForm(ModelForm):
+    class Meta:
+        model = ComponentType
+        fields = ('name',)
+
+    def __init__(self, *args, **kwargs):
+        super(ComponentTypeForm, self).__init__(*args, **kwargs)
+        self.fields['name'].label = "Component Type Name"
+        self.fields['name'].widget.attrs.update({'class': 'form-control mandatory'})
+
+
 class PeriodConfigForm(ModelForm):
     begin_date = forms.DateTimeField(input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M", attrs={'autocomplete': 'off'}))
     end_date = forms.DateTimeField(required=False, input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M", attrs={'autocomplete': 'off'}))
@@ -337,3 +381,32 @@ class ClassificationPeriodForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ClassificationPeriodForm, self).__init__(*args, **kwargs)
+
+
+class DimensionTypeForm(ModelForm):
+    unit = forms.ModelChoiceField(
+        queryset=UnitType.objects.all().order_by('-id'),
+        widget=autocomplete.ModelSelect2(url='unit-autocomplete', attrs={'style': 'width:100%'})
+    )
+
+    statistic = forms.ModelChoiceField(
+        queryset=StatisticType.objects.all().order_by('-id'),
+        widget=autocomplete.ModelSelect2(url='statistic-autocomplete', attrs={'style': 'width:100%'})
+    )
+
+    metric = forms.ModelChoiceField(
+        queryset=MetricType.objects.all().order_by('-id'),
+        widget=autocomplete.ModelSelect2(url='metric-autocomplete', attrs={'style': 'width:100%'})
+    )
+
+    component = forms.ModelChoiceField(
+        queryset=ComponentType.objects.all().order_by('-id'),
+        widget=autocomplete.ModelSelect2(url='component-autocomplete', attrs={'style': 'width:100%'})
+    )
+
+    class Meta:
+        model = DimensionType
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super(DimensionTypeForm, self).__init__(*args, **kwargs)

@@ -19,6 +19,7 @@ urlpatterns =[
     url(r'^add_equipment_config/(?P<tower_id>[0-9]+)/(?P<period_id>[0-9]+)$', views.add_equipment_config, name='add_equipment_config'),
     url(r'^add_status/?$', views.add_status, name='add_status'),
     url(r'^add_classification_period/(?P<tower_id>[0-9]+)/(?P<period_id>[0-9]+)/(?P<equi_conf_id>[0-9]+)$', views.add_classification_period, name='add_classification_period'),
+    url(r'^add_dimension_type/?$', views.add_dimension_type, name='add_dimension_type'),
 
     url(r'^list_towers/?$', views.list_towers, name='list_towers'),
     url(r'^list_users/?$', views.list_users, name='list_users'),
@@ -28,6 +29,7 @@ urlpatterns =[
     url(r'^list_machines/?$', views.list_machines, name='list_machines'),
     url(r'^list_associate_towers/$', views.list_associate_towers, name='list_associate_towers'),
     url(r'^list_status/?$', views.list_status, name='list_status'),
+    url(r'^list_dimensions_type/?$', views.list_dimensions_type, name='list_dimensions_type'),
 
     url(r'^view_tower/(?P<tower_id>([\w ]+))$', views.view_tower, name='view_tower'),
     url(r'^view_user/(?P<user_id>[0-9]+)$', views.view_user, name='view_user'),
@@ -40,6 +42,8 @@ urlpatterns =[
     url(r'^view_associate_towers/(?P<association_id>([\w ]+))$', views.view_associate_towers, name='view_associate_towers'),
     url(r'^view_equipment_config/(?P<tower_id>[0-9]+)/(?P<period_id>[0-9]+)/(?P<equi_conf_id>[0-9]+)$', views.view_equipment_config, name='view_equipment_config'),
     url(r'^view_status/(?P<status_id>[0-9]+)$', views.view_status, name='view_status'),
+    url(r'^view_classification_period/(?P<tower_id>[0-9]+)/(?P<period_id>[0-9]+)/(?P<equi_conf_id>[0-9]+)/(?P<classification_id>[0-9]+)$',views.view_classification_period, name='view_classification_period'),
+    url(r'^view_dimension_type/(?P<dimension_type_id>[0-9]+)$', views.view_dimension_type, name='view_dimension_type'),
 
     url(r'^delete_tower/?$', views.delete_tower, name='delete_tower'),
     url(r'^delete_user/?$', views.delete_user, name='delete_user'),
@@ -53,6 +57,7 @@ urlpatterns =[
     url(r'^delete_equipment_config/?$', views.delete_equipment_config, name='delete_equipment_config'),
     url(r'^delete_status/?$', views.delete_status, name='delete_status'),
     url(r'^delete_classification_period/?$', views.delete_classification_period, name='delete_classification_period'),
+    url(r'^delete_dimension_type/?$', views.delete_dimension_type, name='delete_dimension_type'),
 
     url(r'^equipment-type-autocomplete/$', views.EquipmentTypeAutocomplete.as_view(), name='equipment-type-autocomplete'),
     url(r'^equipment-autocomplete/$', views.EquipmentAutocomplete.as_view(), name='equipment-autocomplete'),
@@ -62,6 +67,10 @@ urlpatterns =[
     url(r'^user-autocomplete/$', views.UserAutocomplete.as_view(), name='user-autocomplete'),
     url(r'^calibration-autocomplete/$', views.CalibrationAutocomplete.as_view(), name='calibration-autocomplete'),
     url(r'^status-autocomplete/$', views.StatusAutocomplete.as_view(), name='status-autocomplete'),
+    url(r'^unit-autocomplete/$', views.UnitAutocomplete.as_view(), name='unit-autocomplete'),
+    url(r'^statistic-autocomplete/$', views.StatisticAutocomplete.as_view(), name='statistic-autocomplete'),
+    url(r'^metric-autocomplete/$', views.MetricAutocomplete.as_view(), name='metric-autocomplete'),
+    url(r'^component-autocomplete/$', views.ComponentAutocomplete.as_view(), name='component-autocomplete'),
 
     url(r'^ban_user/?$', views.ban_user, name='ban_user'),
 
@@ -79,5 +88,10 @@ urlpatterns =[
     url(r'^add_type_equipment/$', views.add_type_equipment, name='add_type_equipment'),
     url(r'^add_type_model/$', views.add_type_model, name='add_type_model'),
     url(r'^add_type_status/$', views.add_type_status, name='add_type_status'),
+    url(r'^add_type_unit/$', views.add_type_unit, name='add_type_unit'),
+    url(r'^add_type_statistic/$', views.add_type_statistic, name='add_type_statistic'),
+    url(r'^add_type_metric/$', views.add_type_metric, name='add_type_metric'),
+    url(r'^add_type_component/$', views.add_type_component, name='add_type_component'),
+    url(r'^add_type_dimension/$', views.add_type_dimension, name='add_type_dimension'),
 
 ]

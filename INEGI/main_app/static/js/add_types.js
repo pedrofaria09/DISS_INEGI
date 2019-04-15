@@ -14,6 +14,18 @@ $(function () {
         if(type_data === "status" )
             string_url = '/add_type_status';
 
+        if(type_data === "unit" )
+            string_url = '/add_type_unit';
+
+        if(type_data === "statistic" )
+            string_url = '/add_type_statistic';
+
+        if(type_data === "metric" )
+            string_url = '/add_type_metric';
+
+        if(type_data === "component" )
+            string_url = '/add_type_component';
+
         console.log(string_url);
 
         $.ajax({
