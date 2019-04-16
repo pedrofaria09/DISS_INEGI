@@ -53,10 +53,10 @@ $(function () {
             dataType: 'json',
             success: function (data) {
                 if (data.form_is_valid) {
-                    alert("Type created!");
+                    alert("Successfully created!");
                     $("#modal-type").modal("hide");  // <-- Close the modal
                 } else {
-                    alert("Problem creating type! Maybe it already exists?");
+                    alert("Problem creating! Maybe it already exists?");
                     $("#modal-type .modal-content").html(data.html_form);
                 }
             }

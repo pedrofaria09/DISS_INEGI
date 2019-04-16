@@ -44,40 +44,40 @@ else:
 #         return "%s %s %s" % (self.column, self.unit, self.sensorsconfiguration)
 #
 #
-class TestConfPeriod(models.Model):
-    begin_date = models.DateField()
-    end_date = models.DateField(null=True)
-
-    def __str__(self):
-        return "%s %s" % (self.begin_date, self.end_date)
-
-
-class TestSensorConfig(models.Model):
-    height = models.FloatField()
-    orientation = models.FloatField()
-    calibrations = models.ForeignKey('TestCalibration', on_delete=models.DO_NOTHING)
-    confperiods = models.ForeignKey('TestConfPeriod', on_delete=models.DO_NOTHING)
-
-    def __str__(self):
-        return "%s %s %s %s" % (self.height, self.orientation, self.calibrations, self.confperiods)
-
-
-class TestCalibration(models.Model):
-    offset = models.FloatField()
-    slope = models.FloatField(null=True)
-    equipment = models.ForeignKey('TestEquipment', on_delete=models.DO_NOTHING)
-
-    def __str__(self):
-        return "%s %s %s" % (self.offset,self.offset, self.equipment)
-
-
-class TestEquipment(models.Model):
-    sn = models.CharField(unique=True, max_length=100)
-    calibrations = models.ManyToManyField('TestCalibration', blank=True)
-
-    def __str__(self):
-        return "%s" % self.sn
-
+# class TestConfPeriod(models.Model):
+#     begin_date = models.DateField()
+#     end_date = models.DateField(null=True)
+#
+#     def __str__(self):
+#         return "%s %s" % (self.begin_date, self.end_date)
+#
+#
+# class TestSensorConfig(models.Model):
+#     height = models.FloatField()
+#     orientation = models.FloatField()
+#     calibrations = models.ForeignKey('TestCalibration', on_delete=models.DO_NOTHING)
+#     confperiods = models.ForeignKey('TestConfPeriod', on_delete=models.DO_NOTHING)
+#
+#     def __str__(self):
+#         return "%s %s %s %s" % (self.height, self.orientation, self.calibrations, self.confperiods)
+#
+#
+# class TestCalibration(models.Model):
+#     offset = models.FloatField()
+#     slope = models.FloatField(null=True)
+#     equipment = models.ForeignKey('TestEquipment', on_delete=models.DO_NOTHING)
+#
+#     def __str__(self):
+#         return "%s %s %s" % (self.offset,self.offset, self.equipment)
+#
+#
+# class TestEquipment(models.Model):
+#     sn = models.CharField(unique=True, max_length=100)
+#     calibrations = models.ManyToManyField('TestCalibration', blank=True)
+#
+#     def __str__(self):
+#         return "%s" % self.sn
+#
 #
 # class TestTower(models.Model):
 #     name = models.CharField(max_length=128)
@@ -102,6 +102,27 @@ class TestEquipment(models.Model):
 #
 #     def __str__(self):
 #         return "Tower:%s User:%s" % (self.tower.name, self.user)
+#
+#
+# class TestComment(models.Model):
+#     begin_date = models.DateTimeField()
+#     end_date = models.DateTimeField()
+#     comment_date = models.DateTimeField(default=datetime.now, blank=True)
+#     user = models.ForeignKey('MyUser', on_delete=models.DO_NOTHING)
+#     internal_comment = models.TextField(null=True, blank=True)
+#     compact_comment = models.TextField(null=True, blank=True)
+#     detailed_comment = models.TextField(null=True, blank=True)
+#
+#     class Meta:
+#         abstract = True
+#
+#
+# class TestCommentTower(TestComment):
+#     tower = models.ForeignKey('Tower', on_delete=models.DO_NOTHING)
+#
+#
+# class TestCommentClassification(TestComment):
+#     classification = models.ForeignKey('ClassificationPeriod', on_delete=models.DO_NOTHING)
 
 
 class UserGroupType(models.Model):
@@ -323,6 +344,29 @@ class DimensionType(models.Model):
 
     def __str__(self):
         return "%s %s %s %s" % (self.unit, self.statistic, self.metric, self.component)
+
+
+class Comment(models.Model):
+    comment_date = models.DateTimeField(default=datetime.now, blank=True)
+    user = models.ForeignKey('MyUser', on_delete=models.DO_NOTHING)
+    internal_comment = models.TextField(null=True, blank=True)
+    compact_comment = models.TextField(null=True, blank=True)
+    detailed_comment = models.TextField(null=True, blank=True)
+
+    class Meta:
+        abstract = True
+
+
+class CommentTower(Comment):
+    begin_date = models.DateTimeField(default=datetime.now)
+    end_date = models.DateTimeField(default=datetime.now)
+    tower = models.ForeignKey('Tower', on_delete=models.DO_NOTHING)
+
+
+class CommentClassification(Comment):
+    begin_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    classification = models.ForeignKey('ClassificationPeriod', on_delete=models.DO_NOTHING)
 
 
 class DataSetPG(models.Model):

@@ -28,12 +28,12 @@
 
                 {% for c in classification %}
                     <tr>
-                        <td class="align-middle p-2"><a href={% url "view_classification_period" tower_id period_id equi_conf_id c.pk %}>{{ c.begin_date|date:'d/m/Y H:i' }}</a></td>
-                        <td class="align-middle p-2"><a href={% url "view_classification_period" tower_id period_id equi_conf_id c.pk %}>{{ c.end_date|date:'d/m/Y H:i' }}</a></td>
+                        <td class="align-middle p-2"><a href={% url "view_classification_period" tower_id period_id equi_conf_id c.pk %}>{{ c.begin_date|date:'Y/m/d H:i' }}</a></td>
+                        <td class="align-middle p-2"><a href={% url "view_classification_period" tower_id period_id equi_conf_id c.pk %}>{{ c.end_date|date:'Y/m/d H:i' }}</a></td>
                         <td class="align-middle p-2"><a href={% url "view_classification_period" tower_id period_id equi_conf_id c.pk %}>{{ c.status }}</a></td>
                         <td class="align-middle p-2"><a href={% url "view_user" c.user.pk %}>{{ c.user.username }}</a></td>
                         <td class="align-middle p-2">
-                            <a href="#" class="js-create-type related-widget-wrapper-link add-related btn btn-sm btn-success" data-type="comment_classification" data-id="{{ c.pk }}" id="add_id_type" title="Add a comment" >Add Comment</a>
+                            <a href="{% url "add_comment_classification" tower_id period_id equi_conf_id c.pk %}" class="btn btn-sm btn-success">Add Comment</a>
                             <a href="#" name="delete_classification_period" data-id="{{ c.pk }}" class="btn btn-sm btn-danger">Delete</a>
                         </td>
                     </tr>

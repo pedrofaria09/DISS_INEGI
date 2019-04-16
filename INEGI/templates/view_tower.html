@@ -68,6 +68,21 @@
             </div>
         </div>
 
+        <hr>
+
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h2 class="h3 mb-0 text-gray-800">Comments</h2>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <a href="{% url "add_comment_tower" tower_id %}" class="btn btn-success">Add a Tower Comment</a>
+                <br><br>
+
+                {% include "list_comments_tower.html" %}
+            </div>
+        </div>
+
     </div>
 
 {% endblock %}

@@ -22,10 +22,10 @@
 
                 {% for p in periods %}
                     <tr>
-                        <td class="align-middle p-2"><a href="{% url "view_conf_period" tower_id p.pk %}">{{ p.begin_date|date:'d/m/Y H:i' }}</a></td>
+                        <td class="align-middle p-2"><a href="{% url "view_conf_period" tower_id p.pk %}">{{ p.begin_date|date:'Y/m/d H:i' }}</a></td>
                         <td class="align-middle p-2"><a href="{% url "view_conf_period" tower_id p.pk %}">
                             {% if p.end_date %}
-                                {{ p.end_date|date:'d/m/Y H:i' }}
+                                {{ p.end_date|date:'Y/m/d H:i' }}
                             {% else %}
                                 None
                             {% endif %}

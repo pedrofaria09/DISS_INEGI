@@ -331,6 +331,29 @@ $(function () {
         }
     })
 
+    $('a[name=delete_comment]').on('click', function () {
+
+        if (window.confirm("Do you really want to delete this Comment?")) {
+            var csrftoken = getCookie('csrftoken');
+            $.ajaxSetup({
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                }
+            });
+
+            $.post('/delete_comment',
+                {
+                    id: $(this).attr('data-id'),
+                    typex: $(this).attr('data-typex'),
+                },
+                function (data, status) {
+                    location.reload();
+                });
+        }
+    })
+
 });
 
 

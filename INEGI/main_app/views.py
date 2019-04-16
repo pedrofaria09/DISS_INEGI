@@ -240,7 +240,13 @@ def view_tower(request, tower_id):
 
     periods = PeriodConfiguration.objects.filter(tower=tower_id).order_by('-begin_date')
 
-    return render(request, 'view_tower.html', {'form': form, 'tower_id': tower_id, 'tower': tower, 'periods': periods})
+    # To get comments on each classification period for this tower
+    equipment_configuration = EquipmentConfig.objects.filter(conf_period__in=periods)
+    classifications = ClassificationPeriod.objects.filter(equipment_configuration__in=equipment_configuration)
+    comments_classification = CommentClassification.objects.filter(classification__in=classifications).order_by('-begin_date')
+
+    comments_tower = CommentTower.objects.filter(tower=tower)
+    return render(request, 'view_tower.html', {'form': form, 'tower_id': tower_id, 'tower': tower, 'periods': periods, 'comments_classification': comments_classification, 'comments_tower': comments_tower})
 
 
 def delete_tower(request):
@@ -1821,6 +1827,125 @@ def delete_dimension(request):
     messages.error(request, 'An error occurred when deleting the Dimension!')
     return HttpResponse("not ok")
 
+
+# ========================================= COMMENT =========================================
+
+
+def add_comment_classification(request, tower_id, period_id, equi_conf_id, classification_id):
+    try:
+        Tower.objects.get(pk=tower_id)
+    except Tower.DoesNotExist:
+        return HttpResponseRedirect(reverse("list_towers"))
+
+    try:
+        period = PeriodConfiguration.objects.get(pk=period_id)
+    except PeriodConfiguration.DoesNotExist:
+        return HttpResponseRedirect(reverse("view_tower", kwargs={'tower_id': tower_id}))
+
+    try:
+        equipment_config = EquipmentConfig.objects.get(pk=equi_conf_id)
+    except EquipmentConfig.DoesNotExist:
+        return HttpResponseRedirect(reverse("view_conf_period", kwargs={'tower_id': tower_id, 'period_id': period_id}))
+
+    try:
+        classification = ClassificationPeriod.objects.get(pk=classification_id)
+    except EquipmentConfig.DoesNotExist:
+        return HttpResponseRedirect(reverse("view_conf_period", kwargs={'tower_id': tower_id, 'period_id': period_id}))
+
+    if request.method == 'POST':
+        form = CommentClassificationForm(request.POST)
+
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.classification = classification
+            comment.user = request.user
+            comment.save()
+            messages.success(request, 'Comment added!')
+            return HttpResponseRedirect(reverse("view_equipment_config", kwargs={'tower_id': tower_id, 'period_id': period_id, 'equi_conf_id': equi_conf_id}))
+        else:
+            messages.warning(request, 'Comment not added!!!')
+    else:
+        comment = CommentClassification(begin_date=period.begin_date, end_date=period.end_date)
+        form = CommentClassificationForm(instance=comment)
+
+    return render(request, 'add_comment_classification.html', {'form': form, 'tower_id': tower_id, 'period_id': period_id, 'equi_conf_id': equi_conf_id, 'classification_id': classification_id, 'classification': classification})
+
+
+def add_comment_tower(request, tower_id):
+    try:
+        tower = Tower.objects.get(pk=tower_id)
+    except Tower.DoesNotExist:
+        return HttpResponseRedirect(reverse("list_towers"))
+
+    if request.method == 'POST':
+        form = CommentTowerForm(request.POST)
+
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.tower = tower
+            comment.user = request.user
+            comment.save()
+            messages.success(request, 'Comment added!')
+            return HttpResponseRedirect(reverse("view_tower", kwargs={'tower_id': tower_id}))
+        else:
+            messages.warning(request, 'Comment not added!!!')
+    else:
+        form = CommentTowerForm()
+
+    return render(request, 'add_comment_tower.html', {'form': form, 'tower_id': tower_id, 'tower': tower})
+
+
+def view_comment(request, tower_id, comment_id, type):
+
+    if type == 'classification':
+        try:
+            comment = CommentClassification.objects.get(pk=comment_id)
+        except CommentClassification.DoesNotExist:
+            return HttpResponseRedirect(reverse("view_tower", kwargs={'tower_id': tower_id}))
+    elif type == 'tower':
+        try:
+            comment = CommentTower.objects.get(pk=comment_id)
+        except CommentTower.DoesNotExist:
+            return HttpResponseRedirect(reverse("view_tower", kwargs={'tower_id': tower_id}))
+
+    if request.method == 'GET':
+        if type == 'classification':
+            form = CommentClassificationForm(instance=comment)
+        elif type == 'tower':
+            form = CommentTowerForm(instance=comment)
+    else:
+        if type == 'classification':
+            form = CommentClassificationForm(request.POST, instance=comment)
+        elif type == 'tower':
+            form = CommentTowerForm(request.POST, instance=comment)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.user = request.user
+            comment.save()
+            messages.success(request, 'Comment was edited successfully')
+            return HttpResponseRedirect(reverse("view_tower", kwargs={'tower_id': tower_id}))
+        else:
+            messages.warning(request, 'Comment wasnt edited successfully!!!')
+
+    return render(request, 'view_comment.html', {'form': form, 'tower_id': tower_id, 'comment_id': comment_id, 'type': type})
+
+
+def delete_comment(request):
+    if request.is_ajax and request.method == 'POST':
+        if request.POST["typex"] == 'classification':
+            obj = CommentClassification.objects.get(pk=request.POST["id"])
+        elif request.POST["typex"] == 'tower':
+            obj = CommentTower.objects.get(pk=request.POST["id"])
+        try:
+            obj.delete()
+        except (TypeError, IntegrityError) as e:
+            messages.error(request, e.__cause__)
+            return HttpResponse("not ok")
+
+        messages.success(request, 'Comment was deleted successfully!')
+        return HttpResponse('ok')
+    messages.error(request, 'An error occurred when deleting the Comment!')
+    return HttpResponse("not ok")
 
 # ========================================= AUTOCOMPLETES =========================================
 

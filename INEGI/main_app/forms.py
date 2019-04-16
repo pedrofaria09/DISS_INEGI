@@ -426,3 +426,39 @@ class DimensionForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(DimensionForm, self).__init__(*args, **kwargs)
         self.fields['column'].widget.attrs.update({'class': 'form-control mandatory', 'autocomplete': 'off'})
+
+
+class CommentClassificationForm(ModelForm):
+    begin_date = forms.DateTimeField(input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M", attrs={'autocomplete': 'off'}))
+    end_date = forms.DateTimeField(input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M", attrs={'autocomplete': 'off'}))
+
+    class Meta:
+        model = CommentClassification
+        fields = '__all__'
+        exclude = ('comment_date', 'user', 'classification',)
+
+    def __init__(self, *args, **kwargs):
+        super(CommentClassificationForm, self).__init__(*args, **kwargs)
+        self.fields['internal_comment'].widget.attrs.update({'class': 'form-control mandatory', 'rows': 4})
+        self.fields['compact_comment'].widget.attrs.update({'class': 'form-control mandatory', 'rows': 4})
+        self.fields['detailed_comment'].widget.attrs.update({'class': 'form-control mandatory', 'rows': 4})
+
+    field_order = ['begin_date', 'end_date', 'internal_comment', 'compact_comment', 'detailed_comment']
+
+
+class CommentTowerForm(ModelForm):
+    begin_date = forms.DateTimeField(input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M", attrs={'autocomplete': 'off'}))
+    end_date = forms.DateTimeField(input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M", attrs={'autocomplete': 'off'}))
+
+    class Meta:
+        model = CommentTower
+        fields = '__all__'
+        exclude = ('comment_date', 'user', 'tower',)
+
+    def __init__(self, *args, **kwargs):
+        super(CommentTowerForm, self).__init__(*args, **kwargs)
+        self.fields['internal_comment'].widget.attrs.update({'class': 'form-control mandatory', 'rows': 4})
+        self.fields['compact_comment'].widget.attrs.update({'class': 'form-control mandatory', 'rows': 4})
+        self.fields['detailed_comment'].widget.attrs.update({'class': 'form-control mandatory', 'rows': 4})
+
+    field_order = ['begin_date', 'end_date', 'internal_comment', 'compact_comment', 'detailed_comment']
