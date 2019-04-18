@@ -11,7 +11,7 @@ from .models import *
 from .forms import *
 from datetime import *
 from django.db import IntegrityError
-from .aux_functions import parsedate, check_if_period_is_valid, check_if_period_is_valid_2
+from .aux_functions import parsedate, check_if_period_is_valid, check_if_period_is_valid_2, get_date
 from formtools.wizard.views import SessionWizardView
 from dal import autocomplete
 from django.utils.html import format_html
@@ -246,7 +246,33 @@ def view_tower(request, tower_id):
     comments_classification = CommentClassification.objects.filter(classification__in=classifications).order_by('-begin_date')
 
     comments_tower = CommentTower.objects.filter(tower=tower)
-    return render(request, 'view_tower.html', {'form': form, 'tower_id': tower_id, 'tower': tower, 'periods': periods, 'comments_classification': comments_classification, 'comments_tower': comments_tower})
+
+    filter = DateTowerFilter(request.GET, queryset=comments_tower)
+    filter.flag = 0
+    if filter.form['begin_date'].value() and filter.form['end_date'].value():
+        begin_date = filter.form['begin_date'].value()
+        end_date = filter.form['end_date'].value()
+
+        begin_date = get_date(begin_date)
+        end_date = get_date(end_date)
+
+        if end_date < begin_date:
+            messages.error(request, "Begin date can't be higher than End date")
+        else:
+
+            comments_tower = CommentTower.objects.filter(QD(tower=tower) & (QD(begin_date__range=(begin_date, end_date)) |
+                                                                            QD(end_date__range=(begin_date, end_date))))
+            comments_classification = CommentClassification.objects.filter(QD(classification__in=classifications) & (QD(begin_date__range=(begin_date, end_date)) |
+                                                                            QD(end_date__range=(begin_date, end_date))))
+            filter = DateTowerFilter(request.GET, queryset=comments_tower)
+
+        filter.flag = 1
+    elif filter.form['begin_date'].value() == '' or filter.form['end_date'].value() == '':
+        filter.flag = 1
+    else:
+        filter.form._errors = ""
+
+    return render(request, 'view_tower.html', {'form': form, 'tower_id': tower_id, 'tower': tower, 'periods': periods, 'comments_classification': comments_classification, 'comments_tower': comments_tower, 'filter': filter})
 
 
 def delete_tower(request):
@@ -1280,6 +1306,7 @@ def add_conf_period(request, tower_id):
             messages.warning(request, 'Period was not added!!!')
     else:
         form = PeriodConfigForm()
+    print(form.as_p())
 
     return render(request, 'add_conf_period.html', {'form': form, 'tower': tower, 'tower_id': tower_id})
 

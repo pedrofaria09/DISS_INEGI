@@ -93,3 +93,10 @@ $('#dataTableDimension').DataTable( {
     { 'searchable' : false, 'targets' : [5] },
   ]
 });
+
+$('#dataTableComments').DataTable( {
+"columnDefs": [
+    { "orderable": false, "targets": [7] },
+    { 'searchable' : false, 'targets' : [7] },
+  ], "order": [2]
+});

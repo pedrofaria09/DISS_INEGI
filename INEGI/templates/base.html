@@ -20,9 +20,17 @@
 
     <!-- Custom styles for this template-->
     <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/default.css' %}" rel="stylesheet">
 
     <!-- Custom styles for Tables -->
     <link href="{% static 'vendor/datatables/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
+
+    {% load bootstrap4 %} {# import bootstrap4/bootstrap3 #}
+{#    {% bootstrap_css %} {# Embed Bootstrap CSS#}
+    {% bootstrap_javascript jquery='full' %} {# Embed Bootstrap JS+jQuery #}
+    {% block extrahead %}       {# Extra Resources Start #}
+        {{ form.media }}
+    {% endblock %}
 
 </head>
 
@@ -290,21 +298,12 @@
     </div>
 
     <!-- Bootstrap core JavaScript-->
-    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
-
-    {% load bootstrap4 %} {# import bootstrap4/bootstrap3 #}
-{#    {% bootstrap_css %} {# Embed Bootstrap CSS#}
-    {% bootstrap_javascript jquery='full' %} {# Embed Bootstrap JS+jQuery #}
-    {% block extrahead %}       {# Extra Resources Start #}
-        {{ form.media }}            {# Form required JS and CSS #}
-    {% endblock %}
-
+    {% comment %}<script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
 
     <!-- Core plugin JavaScript-->
     <script src="{% static 'vendor/jquery-easing/jquery.easing.min.js' %}"></script>
 
-
-    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>{% endcomment %}
 
     <!-- Custom scripts for all pages-->
     <script src="{% static 'js/sb-admin-2.min.js' %}"></script>
@@ -323,17 +322,17 @@
     <!-- Page level custom scripts -->
     <script src="{% static 'js/demo/datatables-demo.js' %}"></script>
 
-    <!-- Delets -->
+    <!-- Deletes -->
     <script src="{% static 'js/deletes.js' %}"></script>
 
-    <!-- Tables sort and searc -->
+    <!-- Tables sort and search -->
     <script src="{% static 'js/tables-aux.js' %}"></script>
 
     <script src="{% static 'js/add_types.js' %}"></script>
 
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
-            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-            crossorigin="anonymous"></script>
+{#    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"#}
+{#            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"#}
+{#            crossorigin="anonymous"></script>#}
 
     </body>
 {% else %}

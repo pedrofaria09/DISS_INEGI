@@ -1,4 +1,5 @@
 from .views import *
+import pytz
 
 def parsedate(request, file, mylist, i):
 
@@ -127,3 +128,12 @@ def check_if_period_is_valid_2(tower, user, begin_date, end_date, association_id
     except UserTowerDates.DoesNotExist:
         return 0
     return 2
+
+
+def get_date(date):
+    year = int(date[0:4])
+    month = int(date[5:7])
+    day = int(date[8:10])
+    hour = int(date[11:13])
+    minute = int(date[14:16])
+    return datetime(year, month, day, hour, minute, tzinfo=pytz.UTC)

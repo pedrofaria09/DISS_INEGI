@@ -1,4 +1,5 @@
 from django.conf.urls import url
+from django.views.generic import RedirectView
 
 from . import views
 
@@ -102,4 +103,5 @@ urlpatterns = [
     url(r'^add_type_component/$', views.add_type_component, name='add_type_component'),
     url(r'^add_type_dimension/$', views.add_type_dimension, name='add_type_dimension'),
 
+    url(r'^favicon\.ico$',RedirectView.as_view(url='/static/img/favicon.ico')),
 ]

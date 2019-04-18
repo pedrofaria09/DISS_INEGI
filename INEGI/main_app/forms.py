@@ -4,6 +4,7 @@ from .models import *
 from django.contrib.auth.forms import UserCreationForm
 from bootstrap_datepicker_plus import DatePickerInput
 from dal import autocomplete
+import django_filters
 
 
 class LoginForm(forms.Form):
@@ -462,3 +463,18 @@ class CommentTowerForm(ModelForm):
         self.fields['detailed_comment'].widget.attrs.update({'class': 'form-control mandatory', 'rows': 4})
 
     field_order = ['begin_date', 'end_date', 'internal_comment', 'compact_comment', 'detailed_comment']
+
+
+class DateTowerFilter(django_filters.FilterSet):
+    begin_date = django_filters.DateFilter(input_formats=["%Y-%m-%d %H:%M"], widget=DatePickerInput(format="%Y-%m-%d %H:%M"))
+    end_date = django_filters.DateFilter(input_formats=["%Y-%m-%d %H:%M"], widget=DatePickerInput(format="%Y-%m-%d %H:%M"))
+
+    class Meta:
+        model = CommentTower
+        fields = ['begin_date', 'end_date', ]
+
+
+class DateRangeChooseForm(forms.Form):
+    begin_date = forms.DateTimeField(input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M", attrs={'autocomplete': 'off'}))
+    end_date = forms.DateTimeField(input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M", attrs={'autocomplete': 'off'}))
+

@@ -7,10 +7,15 @@
     <div class="container-fluid">
         <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4" >
-            <h1 class="h3 mb-0 text-gray-800">
-                <a href="#" class="collapsed" data-toggle="collapse" data-target="#collapseForm" aria-expanded="true" aria-controls="collapseTwo">
-                    View-Edit Tower: {{ tower.code }}
-                    <i class="fas fa-angle-double-down fa-xs"></i>
+            <h1 class="h2 mb-0 text-gray-800">Tower: {{ tower.code }}
+            </h1>
+        </div>
+
+        <div class="d-sm-flex align-items-center justify-content-between mb-4" >
+            <h1 class="h4 mb-0 text-gray-800">
+                <a href="#" class="collapsed clickable" data-toggle="collapse" data-target="#collapseForm" aria-expanded="true" aria-controls="collapseTwo">
+                    View Tower Information
+                <i class="fas fa-angle-double-down fa-sm"></i>
                 </a>
             </h1>
         </div>
@@ -52,34 +57,77 @@
                 </form>
             </div>
         </div>
-
         <hr>
-
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h2 class="h3 mb-0 text-gray-800">Configurations of Periods</h2>
+        <div class="d-sm-flex align-items-center justify-content-between mb-4" >
+            <h1 class="h4 mb-0 text-gray-800">
+                <a href="#collapseForm2" class="collapsed clickable" data-toggle="collapse" data-target="#collapseForm2" aria-expanded="true" aria-controls="collapseTwo">
+                    View Periods
+                <i class="fas fa-angle-double-down fa-sm"></i>
+                </a>
+            </h1>
         </div>
 
-        <div class="row">
+        <div class="row collapse" id="collapseForm2" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
             <div class="col-12">
-                <a href="{% url "add_conf_period" tower_id %}" class="btn btn-success">Add a new Period</a>
-                <br><br>
+                <div class="row">
+                    <div class="col-12">
+                        <a href="{% url "add_conf_period" tower_id %}" class="btn btn-success">Add a new Period</a>
+                        <br><br>
 
-                {% include "list_conf_periods.html" %}
+                        {% include "list_conf_periods.html" %}
+                    </div>
+                </div>
             </div>
         </div>
 
         <hr>
 
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h2 class="h3 mb-0 text-gray-800">Comments</h2>
+        <div class="d-sm-flex align-items-center justify-content-between mb-4" >
+            <h1 class="h4 mb-0 text-gray-800">
+                <a href="#collapseForm3" class="collapsed clickable" data-toggle="collapse" data-target="#collapseForm3" aria-expanded="true" aria-controls="collapseTwo">
+                    View Comments
+                <i class="fas fa-angle-double-down fa-sm"></i>
+                </a>
+            </h1>
         </div>
 
-        <div class="row">
+        <div class="row collapse {% if filter.flag %}show{% endif %}" id="collapseForm3" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
             <div class="col-12">
-                <a href="{% url "add_comment_tower" tower_id %}" class="btn btn-success">Add a Tower Comment</a>
-                <br><br>
+                <div class="row">
+                    <div class="col-12">
+                        <a href="{% url "add_comment_tower" tower_id %}" class="btn btn-success">Add a Tower Comment</a>
+                        <br><br>
+                        <form action="#collapseForm3" method="GET">
 
-                {% include "list_comments_tower.html" %}
+                            {% if filter.form.errors %}
+                                {% for field in filter.form %}
+                                    {% for error in field.errors %}
+                                        <div class="alert alert-danger">
+                                            <strong>{{ error|escape }}</strong>
+                                        </div>
+                                    {% endfor %}
+                                {% endfor %}
+                            {% endif %}
+                            {{ filter.form.media }}
+                            {% for field in filter.form %}
+                                <div class="form-group">
+                                    {{ field.label_tag }}{% if field.field.required %} *{% endif %}
+                                    {% render_field field class="form-control" %}
+                                </div>
+                            {% endfor %}
+
+                            <div class="form-group">
+                                <div class="form-row">
+                                    <div class="col-md-4">
+                                        <input type="submit" class="btn btn-primary btn-block" value="Search">
+                                    </div>
+                                </div>
+                            </div>
+
+                        </form>
+                        {% include "list_comments_tower.html" %}
+                    </div>
+                </div>
             </div>
         </div>
 
