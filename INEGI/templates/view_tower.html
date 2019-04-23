@@ -20,7 +20,7 @@
             </h1>
         </div>
 
-        <div class="row collapse" id="collapseForm" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+        <div class="row collapse show" id="collapseForm" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
             <div class="col-12">
                 <form action="{% url "view_tower" tower_id %}" method="POST">
 
@@ -110,10 +110,16 @@
                             {% endif %}
                             {{ filter.form.media }}
                             {% for field in filter.form %}
-                                <div class="form-group">
-                                    {{ field.label_tag }}{% if field.field.required %} *{% endif %}
-                                    {% render_field field class="form-control" %}
-                                </div>
+                                {% if field.name != "tower" and field.name != "classifications" %}
+                                    <div class="form-group">
+                                        {{ field.label_tag }}{% if field.field.required %} *{% endif %}
+                                        {% render_field field placeholder=field.label %}
+                                    </div>
+                                {% elif field.name == "tower" %}
+                                    {% render_field field %}
+                                {% elif field.name == "classifications" %}
+                                    {% render_field field %}
+                                {% endif %}
                             {% endfor %}
 
                             <div class="form-group">
@@ -125,7 +131,7 @@
                             </div>
 
                         </form>
-                        {% include "list_comments_tower.html" %}
+                        {% include "list_comments.html" %}
                     </div>
                 </div>
             </div>

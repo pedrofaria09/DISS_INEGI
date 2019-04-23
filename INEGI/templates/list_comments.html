@@ -9,6 +9,7 @@
                 <thead class="thead-light">
                     <tr>
                         <th>Type</th>
+                        <th>Item</th>
                         <th>Period Date</th>
                         <th>Comment Date</th>
                         <th>Internal Comment</th>
@@ -21,6 +22,7 @@
                 <tfoot>
                     <tr>
                         <th>Type</th>
+                        <th>Item</th>
                         <th>Period Date</th>
                         <th>Comment Date</th>
                         <th>Internal Comment</th>
@@ -35,6 +37,7 @@
                 {% for c in comments_classification %}
                     <tr>
                         <td class="align-middle p-2"><a href="{% url "view_comment" tower_id c.pk "classification" %}">Classification</a></td>
+                        <td class="align-middle p-2"><a href="{% url "view_equipment_config" tower_id c.classification.equipment_configuration.conf_period.pk c.classification.equipment_configuration.pk %}">{{ c.classification.equipment_configuration.calibration.equipment.model.type.initials }}@{{ c.classification.equipment_configuration.height_label }}</a></td>
                         <td class="align-middle p-2"><a href="{% url "view_comment" tower_id c.pk "classification" %}">{{ c.begin_date|date:'Y-m-d H:i' }} - {{ c.end_date|date:'Y-m-d H:i' }}</a></td>
                         <td class="align-middle p-2"><a href="{% url "view_comment" tower_id c.pk "classification" %}">{{ c.comment_date|date:'Y-m-d H:i' }}</a></td>
                         <td class="align-middle p-2"><a href="{% url "view_comment" tower_id c.pk "classification" %}">{{ c.internal_comment|slice:":20" }}</a></td>
@@ -51,6 +54,7 @@
                 {% for c in comments_tower %}
                     <tr>
                         <td class="align-middle p-2"><a href="{% url "view_comment" tower_id c.pk "tower" %}">Tower</a></td>
+                        <td class="align-middle p-2"><a href="{% url "view_comment" tower_id c.pk "tower" %}">{{ c.tower.code }}</a></td>
                         <td class="align-middle p-2"><a href="{% url "view_comment" tower_id c.pk "tower" %}">{{ c.begin_date|date:'Y-m-d H:i' }} - {{ c.end_date|date:'Y-m-d H:i' }}</a></td>
                         <td class="align-middle p-2"><a href="{% url "view_comment" tower_id c.pk "tower" %}">{{ c.comment_date|date:'Y-m-d H:i' }}</a></td>
                         <td class="align-middle p-2"><a href="{% url "view_comment" tower_id c.pk "tower" %}">{{ c.internal_comment|slice:":20" }}</a></td>

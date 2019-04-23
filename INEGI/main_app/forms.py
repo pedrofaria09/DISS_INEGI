@@ -5,6 +5,7 @@ from django.contrib.auth.forms import UserCreationForm
 from bootstrap_datepicker_plus import DatePickerInput
 from dal import autocomplete
 import django_filters
+from django.forms.widgets import HiddenInput
 
 
 class LoginForm(forms.Form):
@@ -246,12 +247,15 @@ class CalibrationForm(ModelForm):
 class EquipmentTypeForm(ModelForm):
     class Meta:
         model = EquipmentType
-        fields = ('name',)
+        fields = '__all__'
 
     def __init__(self, *args, **kwargs):
         super(EquipmentTypeForm, self).__init__(*args, **kwargs)
         self.fields['name'].label = "Equipment Type Name"
         self.fields['name'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['initials'].label = "Equipment Type Initials"
+        self.fields['initials'].widget.attrs.update({'class': 'form-control mandatory'})
+
 
 
 class UserGroupTypeForm(ModelForm):
@@ -469,12 +473,32 @@ class DateTowerFilter(django_filters.FilterSet):
     begin_date = django_filters.DateFilter(input_formats=["%Y-%m-%d %H:%M"], widget=DatePickerInput(format="%Y-%m-%d %H:%M"))
     end_date = django_filters.DateFilter(input_formats=["%Y-%m-%d %H:%M"], widget=DatePickerInput(format="%Y-%m-%d %H:%M"))
 
+    # tower = django_filters.ModelChoiceFilter(required=False, queryset=None, widget=HiddenInput())
+    # classifications = django_filters.ModelChoiceFilter(required=False, queryset=None, widget=HiddenInput())
+    #
+    # comment_tower = django_filters.ModelMultipleChoiceFilter(
+    #     required=False,
+    #     queryset=CommentTower.objects.all().order_by('-id'),
+    #     widget=autocomplete.ModelSelect2Multiple(url='comment-tower-autocomplete', forward=['begin_date', 'end_date', 'tower'], attrs={'style': 'width:100%'})
+    # )
+    #
+    # comment_classification = django_filters.ModelMultipleChoiceFilter(
+    #     required=False,
+    #     queryset=CommentClassification.objects.all().order_by('-id'),
+    #     widget=autocomplete.ModelSelect2Multiple(url='comment-classification-autocomplete', forward=['begin_date', 'end_date', 'tower', 'classifications'],
+    #                                      attrs={'style': 'width:100%'})
+    # )
+
     class Meta:
         model = CommentTower
         fields = ['begin_date', 'end_date', ]
+
+    # def __init__(self, *args, **kwargs):
+    #     super(DateTowerFilter, self).__init__(*args, **kwargs)
+    #     self.filters['comment_tower'].label = "Comments Tower Selection"
+    #     self.filters['comment_classification'].label = "Comments Classification Selection"
 
 
 class DateRangeChooseForm(forms.Form):
     begin_date = forms.DateTimeField(input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M", attrs={'autocomplete': 'off'}))
     end_date = forms.DateTimeField(input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M", attrs={'autocomplete': 'off'}))
-

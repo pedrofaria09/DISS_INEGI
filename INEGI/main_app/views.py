@@ -247,8 +247,15 @@ def view_tower(request, tower_id):
 
     comments_tower = CommentTower.objects.filter(tower=tower)
 
+    # get_query = request.GET.copy()
+    # if 'tower' not in get_query:
+    #     get_query['tower'] = tower_id
+    # if 'classifications' not in get_query:
+    #     get_query['classifications'] = comments_classification
+
     filter = DateTowerFilter(request.GET, queryset=comments_tower)
     filter.flag = 0
+
     if filter.form['begin_date'].value() and filter.form['end_date'].value():
         begin_date = filter.form['begin_date'].value()
         end_date = filter.form['end_date'].value()
@@ -258,6 +265,15 @@ def view_tower(request, tower_id):
 
         if end_date < begin_date:
             messages.error(request, "Begin date can't be higher than End date")
+        # if filter.form['comment_tower'].value() and filter.form['comment_classification'].value():
+        #     comments_tower = CommentTower.objects.filter(pk__in=filter.form['comment_tower'].value())
+        #     comments_classification = CommentClassification.objects.filter(classification__in=classifications)
+        # elif filter.form['comment_tower'].value():
+        #     comments_tower = CommentTower.objects.filter(pk__in=filter.form['comment_tower'].value())
+        #     comments_classification = None
+        # elif filter.form['comment_classification'].value():
+        #     comments_tower = None
+        #     comments_classification = CommentClassification.objects.filter(classification__in=classifications)
         else:
 
             comments_tower = CommentTower.objects.filter(QD(tower=tower) & (QD(begin_date__range=(begin_date, end_date)) |
@@ -267,8 +283,10 @@ def view_tower(request, tower_id):
             filter = DateTowerFilter(request.GET, queryset=comments_tower)
 
         filter.flag = 1
+        # filter.form._errors = ""
     elif filter.form['begin_date'].value() == '' or filter.form['end_date'].value() == '':
         filter.flag = 1
+        # filter.form._errors = ""
     else:
         filter.form._errors = ""
 
@@ -2108,5 +2126,51 @@ class DimensionTypeAutocomplete(autocomplete.Select2QuerySetView):
 
         if self.q:
             qs = qs.filter(QD(unit__name__istartswith=self.q) | QD(statistic__name__istartswith=self.q) | QD(metric__name__istartswith=self.q) | QD(component__name__istartswith=self.q))
+
+        return qs
+
+
+class CommentTowerTypeAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+
+        qs = CommentTower.objects.all().order_by('-id')
+
+        begin_date = self.forwarded.get('begin_date', None)
+        end_date = self.forwarded.get('end_date', None)
+        tower_id = self.forwarded.get('tower', None)
+
+        if begin_date and end_date:
+            begin_date = get_date(begin_date)
+            end_date = get_date(end_date)
+            qs = qs.filter(QD(tower__pk=tower_id) & (QD(begin_date__range=(begin_date, end_date)) | QD(end_date__range=(begin_date, end_date))))
+        if self.q:
+            qs = qs.filter(tower__istartswith=self.q)
+
+        return qs
+
+
+class CommentClassificationTypeAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        tower_id = self.forwarded.get('tower', None)
+
+        periods = PeriodConfiguration.objects.filter(tower=tower_id).order_by('-begin_date')
+
+        # To get comments on each classification period for this tower
+        equipment_configuration = EquipmentConfig.objects.filter(conf_period__in=periods)
+        classifications = ClassificationPeriod.objects.filter(equipment_configuration__in=equipment_configuration)
+        comments_classification = CommentClassification.objects.filter(classification__in=classifications).order_by('-begin_date')
+
+        qs = comments_classification
+
+        begin_date = self.forwarded.get('begin_date', None)
+        end_date = self.forwarded.get('end_date', None)
+        classifications = self.forwarded.get('classifications', None)
+
+        if begin_date and end_date:
+            begin_date = get_date(begin_date)
+            end_date = get_date(end_date)
+            qs = qs.filter((QD(begin_date__range=(begin_date, end_date)) | QD(end_date__range=(begin_date, end_date))))
+        if self.q:
+            qs = qs.filter(tower__istartswith=self.q)
 
         return qs

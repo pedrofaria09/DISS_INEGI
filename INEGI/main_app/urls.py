@@ -80,6 +80,8 @@ urlpatterns = [
     url(r'^metric-autocomplete/$', views.MetricAutocomplete.as_view(), name='metric-autocomplete'),
     url(r'^component-autocomplete/$', views.ComponentAutocomplete.as_view(), name='component-autocomplete'),
     url(r'^dimension-type-autocomplete/$', views.DimensionTypeAutocomplete.as_view(), name='dimension-type-autocomplete'),
+    url(r'^comment-tower-autocomplete/$', views.CommentTowerTypeAutocomplete.as_view(), name='comment-tower-autocomplete'),
+    url(r'^comment-classification-autocomplete/$', views.CommentClassificationTypeAutocomplete.as_view(),name='comment-classification-autocomplete'),
 
     url(r'^ban_user/?$', views.ban_user, name='ban_user'),
 
