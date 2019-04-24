@@ -366,7 +366,7 @@ class PeriodConfigForm(ModelForm):
 
     class Meta:
         model = PeriodConfiguration
-        fields = ('begin_date', 'end_date', 'wind_rss', 'solar_rss', 'raw_freq', 'time_zone')
+        fields = ('begin_date', 'end_date', 'active', 'wind_rss', 'solar_rss', 'raw_freq', 'time_zone')
 
         # widgets = {'begin_date': DatePickerInput(format='%Y/%m/%d %H:%M'),
         #            'end_date': DatePickerInput(format='%Y/%m/%d %H:%M'), }
@@ -375,6 +375,7 @@ class PeriodConfigForm(ModelForm):
         super(PeriodConfigForm, self).__init__(*args, **kwargs)
         self.fields['begin_date'].label = "Start Date"
         self.fields['end_date'].label = "End Date"
+        self.fields['active'].label = "Is this a Tower active?"
         self.fields['wind_rss'].label = "Is this a Wind RSS Tower Period?"
         self.fields['solar_rss'].label = "Is this a Solar RSS Tower Period?"
         self.fields['raw_freq'].label = "Raw Frequency"

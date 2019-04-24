@@ -211,7 +211,7 @@
 
                     <form class="search input-group col-4" action="{% url 'search' %}" method='post'>
                         {% csrf_token %}
-                        <input type="text" class="form-control" name="value" placeholder="Search for anything">
+                        <input type="text" class="form-control" name="value" placeholder="Search for towers, calibrations and equipments">
                         <div class="input-group-append">
                             <button class="btn btn-secondary" type="submit">
                                 <i class="fa fa-search"></i>
@@ -342,6 +342,8 @@
     <script src="{% static 'js/tables-aux.js' %}"></script>
 
     <script src="{% static 'js/add_types.js' %}"></script>
+    <script src="{% static 'js/defult.js' %}"></script>
+
 
 {#    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"#}
 {#            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"#}

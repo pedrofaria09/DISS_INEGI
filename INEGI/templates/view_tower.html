@@ -17,10 +17,13 @@
                     View Tower Information
                 <i class="fas fa-angle-double-down fa-sm"></i>
                 </a>
+                <span class="clickable" data-toggle="tooltip" data-placement="right" title="Shows the static tower information">
+                    <i class="fa fa-question-circle fa-sm"></i>
+                </span>
             </h1>
         </div>
 
-        <div class="row collapse show" id="collapseForm" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+        <div class="row collapse" id="collapseForm" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
             <div class="col-12">
                 <form action="{% url "view_tower" tower_id %}" method="POST">
 
@@ -39,6 +42,9 @@
                     {% for field in form %}
                         <div class="form-group">
                             {{ field.label_tag }}{% if field.field.required %} *{% endif %}
+                            {% if field.name == "client" %}
+                                <a href="#" class="js-create-type related-widget-wrapper-link add-related" data-type="affiliation" id="add_id_type" title="Add another Affiliation/Client"><img src="/static/admin/img/icon-addlink.svg" alt="Add"></a>
+                            {% endif %}
                             {% render_field field placeholder=field.label %}
                         </div>
                     {% endfor %}
@@ -60,10 +66,13 @@
         <hr>
         <div class="d-sm-flex align-items-center justify-content-between mb-4" >
             <h1 class="h4 mb-0 text-gray-800">
-                <a href="#collapseForm2" class="collapsed clickable" data-toggle="collapse" data-target="#collapseForm2" aria-expanded="true" aria-controls="collapseTwo">
+                <a href="#" class="collapsed clickable" data-toggle="collapse" data-target="#collapseForm2" aria-expanded="true" aria-controls="collapseTwo">
                     View Periods
                 <i class="fas fa-angle-double-down fa-sm"></i>
                 </a>
+                <span class="clickable" data-toggle="tooltip" data-placement="right" title="Shows a list of all configurations periods from a tower">
+                    <i class="fa fa-question-circle fa-sm"></i>
+                </span>
             </h1>
         </div>
 
@@ -84,10 +93,13 @@
 
         <div class="d-sm-flex align-items-center justify-content-between mb-4" >
             <h1 class="h4 mb-0 text-gray-800">
-                <a href="#collapseForm3" class="collapsed clickable" data-toggle="collapse" data-target="#collapseForm3" aria-expanded="true" aria-controls="collapseTwo">
+                <a href="#" class="collapsed clickable" data-toggle="collapse" data-target="#collapseForm3" aria-expanded="true" aria-controls="collapseTwo">
                     View Comments
                 <i class="fas fa-angle-double-down fa-sm"></i>
                 </a>
+                <span class="clickable" data-toggle="tooltip" data-placement="right" title="Shows all comments for all equipments on this tower - It's also possible to comment a tower">
+                    <i class="fa fa-question-circle fa-sm"></i>
+                </span>
             </h1>
         </div>
 
@@ -134,6 +146,13 @@
                         {% include "list_comments.html" %}
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- THE MODAL WE WILL BE USING -->
+        <div class="modal fade" id="modal-type">
+            <div class="modal-dialog">
+                <div class="modal-content"></div>
             </div>
         </div>
 

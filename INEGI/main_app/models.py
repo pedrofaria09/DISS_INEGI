@@ -169,6 +169,7 @@ class Cluster(models.Model):
 class PeriodConfiguration(models.Model):
     begin_date = models.DateTimeField()
     end_date = models.DateTimeField(null=True, blank=True)
+    active = models.BooleanField(default=True)
     wind_rss = models.BooleanField(default=False)
     solar_rss = models.BooleanField(default=False)
     raw_freq = models.CharField(max_length=20, default="10m")
