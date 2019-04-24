@@ -66,6 +66,25 @@ def logout_view(request):
     return redirect('/')
 
 
+def search(request):
+    if request.method == 'POST' and request.POST['value']:
+        value = request.POST['value']
+
+        clusters = Cluster.objects.filter(name__icontains=value)
+
+        towers = Tower.objects.filter(code__icontains=value)
+        #QD(code__icontains=value)| QD(owner__icontains=value) | QD(designation__icontains=value)
+        calibrations = Calibration.objects.filter(QD(offset__icontains=value) | QD(slope__icontains=value) | QD(ref__icontains=value))
+
+        equipments = Equipment.objects.filter(sn__icontains=value)
+        if equipments:
+            equipments.calibrations = Calibration.objects.filter(equipment__in=equipments)
+
+        return render(request, 'search.html', {'clusters': clusters, 'towers': towers, 'calibrations': calibrations, 'equipments': equipments})
+    else:
+        return HttpResponseRedirect(reverse("index"))
+
+
 # ========================================= USERS =========================================
 
 
@@ -2000,7 +2019,7 @@ class EquipmentTypeAutocomplete(autocomplete.Select2QuerySetView):
         qs = EquipmentType.objects.all().order_by('-id')
 
         if self.q:
-            qs = qs.filter(name__istartswith=self.q)
+            qs = qs.filter(name__icontains=self.q)
 
         return qs
 
@@ -2010,7 +2029,7 @@ class EquipmentAutocomplete(autocomplete.Select2QuerySetView):
         qs = Equipment.objects.all().order_by('-id')
 
         if self.q:
-            qs = qs.filter(sn__istartswith=self.q)
+            qs = qs.filter(sn__icontains=self.q)
 
         return qs
 
@@ -2020,7 +2039,7 @@ class TowerAutocomplete(autocomplete.Select2QuerySetView):
         qs = Tower.objects.all().order_by('-id')
 
         if self.q:
-            qs = qs.filter(code__istartswith=self.q)
+            qs = qs.filter(code__icontains=self.q)
 
         return qs
 
@@ -2030,7 +2049,7 @@ class GroupAutocomplete(autocomplete.Select2QuerySetView):
         qs = UserGroupType.objects.all().order_by('-id')
 
         if self.q:
-            qs = qs.filter(name__istartswith=self.q)
+            qs = qs.filter(name__icontains=self.q)
 
         return qs
 
@@ -2040,7 +2059,7 @@ class UserAutocomplete(autocomplete.Select2QuerySetView):
         qs = MyUser.objects.all().order_by('-id')
 
         if self.q:
-            qs = qs.filter(full_name__istartswith=self.q)
+            qs = qs.filter(full_name__icontains=self.q)
 
         return qs
 
@@ -2055,7 +2074,7 @@ class ModelAutocomplete(autocomplete.Select2QuerySetView):
             qs = qs.filter(type=type)
 
         if self.q:
-            qs = qs.filter(QD(type__name__istartswith=self.q) | QD(model__istartswith=self.q) | QD(version__istartswith=self.q))
+            qs = qs.filter(QD(type__name__icontains=self.q) | QD(model__icontains=self.q) | QD(version__icontains=self.q))
 
         return qs
 
@@ -2065,7 +2084,7 @@ class CalibrationAutocomplete(autocomplete.Select2QuerySetView):
         qs = Calibration.objects.all().order_by('-id')
 
         if self.q:
-            qs = qs.filter(equipment__sn__istartswith=self.q)
+            qs = qs.filter(equipment__sn__icontains=self.q)
 
         return qs
 
@@ -2075,7 +2094,7 @@ class StatusAutocomplete(autocomplete.Select2QuerySetView):
         qs = Status.objects.all().order_by('-id')
 
         if self.q:
-            qs = qs.filter(code__istartswith=self.q)
+            qs = qs.filter(code__icontains=self.q)
 
         return qs
 
@@ -2085,7 +2104,7 @@ class UnitAutocomplete(autocomplete.Select2QuerySetView):
         qs = UnitType.objects.all().order_by('-id')
 
         if self.q:
-            qs = qs.filter(name__istartswith=self.q)
+            qs = qs.filter(name__icontains=self.q)
 
         return qs
 
@@ -2095,7 +2114,7 @@ class StatisticAutocomplete(autocomplete.Select2QuerySetView):
         qs = StatisticType.objects.all().order_by('-id')
 
         if self.q:
-            qs = qs.filter(name__istartswith=self.q)
+            qs = qs.filter(name__icontains=self.q)
 
         return qs
 
@@ -2105,7 +2124,7 @@ class MetricAutocomplete(autocomplete.Select2QuerySetView):
         qs = MetricType.objects.all().order_by('-id')
 
         if self.q:
-            qs = qs.filter(name__istartswith=self.q)
+            qs = qs.filter(name__icontains=self.q)
 
         return qs
 
@@ -2115,7 +2134,7 @@ class ComponentAutocomplete(autocomplete.Select2QuerySetView):
         qs = ComponentType.objects.all().order_by('-id')
 
         if self.q:
-            qs = qs.filter(name__istartswith=self.q)
+            qs = qs.filter(name__icontains=self.q)
 
         return qs
 
@@ -2125,7 +2144,7 @@ class DimensionTypeAutocomplete(autocomplete.Select2QuerySetView):
         qs = DimensionType.objects.all().order_by('-id')
 
         if self.q:
-            qs = qs.filter(QD(unit__name__istartswith=self.q) | QD(statistic__name__istartswith=self.q) | QD(metric__name__istartswith=self.q) | QD(component__name__istartswith=self.q))
+            qs = qs.filter(QD(unit__name__icontains=self.q) | QD(statistic__name__icontains=self.q) | QD(metric__name__icontains=self.q) | QD(component__name__icontains=self.q))
 
         return qs
 
@@ -2144,7 +2163,7 @@ class CommentTowerTypeAutocomplete(autocomplete.Select2QuerySetView):
             end_date = get_date(end_date)
             qs = qs.filter(QD(tower__pk=tower_id) & (QD(begin_date__range=(begin_date, end_date)) | QD(end_date__range=(begin_date, end_date))))
         if self.q:
-            qs = qs.filter(tower__istartswith=self.q)
+            qs = qs.filter(tower__icontains=self.q)
 
         return qs
 
@@ -2171,6 +2190,6 @@ class CommentClassificationTypeAutocomplete(autocomplete.Select2QuerySetView):
             end_date = get_date(end_date)
             qs = qs.filter((QD(begin_date__range=(begin_date, end_date)) | QD(end_date__range=(begin_date, end_date))))
         if self.q:
-            qs = qs.filter(tower__istartswith=self.q)
+            qs = qs.filter(tower__icontains=self.q)
 
         return qs

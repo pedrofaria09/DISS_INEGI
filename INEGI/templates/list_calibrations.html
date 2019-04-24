@@ -28,7 +28,7 @@
 
                 {% for c in calibrations %}
                     <tr>
-                    <td class="align-middle p-2"><a href="{% url "view_calibration" equipment_id c.pk %}">{{ c.calib_date|date:'d/m/Y H:i' }}</a></td>
+                    <td class="align-middle p-2"><a href="{% url "view_calibration" equipment_id c.pk %}">{{ c.calib_date|date:'Y/m/d H:i' }}</a></td>
                     <td class="align-middle p-2"><a href="{% url "view_calibration" equipment_id c.pk %}">{{ c.offset }}</a></td>
                     <td class="align-middle p-2"><a href="{% url "view_calibration" equipment_id c.pk %}">{{ c.slope }}</a></td>
                     <td class="align-middle p-2"><a href="{% url "view_calibration" equipment_id c.pk %}">{{ c.ref }}</a></td>

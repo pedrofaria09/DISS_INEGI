@@ -207,6 +207,18 @@
                         <i class="fa fa-bars"></i>
                     </button>
 
+
+                    <form class="search input-group col-4" action="{% url 'search' %}" method='post'>
+                        {% csrf_token %}
+                        <input type="text" class="form-control" name="value" placeholder="Search for anything">
+                        <div class="input-group-append">
+                            <button class="btn btn-secondary" type="submit">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+
+
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
 

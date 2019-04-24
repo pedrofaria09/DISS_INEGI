@@ -85,6 +85,8 @@ urlpatterns = [
 
     url(r'^ban_user/?$', views.ban_user, name='ban_user'),
 
+    url(r'^search/?$', views.search, name='search'),
+
     url(r'^show_towers_data_mongo/?$', views.show_towers_data_mongo, name='show_towers_data_mongo'),
     url(r'^add_raw_data_mongo/?$', views.add_raw_data_mongo, name='add_raw_data_mongo'),
 
