@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractUser
 from influxdb import InfluxDBClient, SeriesHelper
 from datetime import datetime
 from django.conf import settings
+from django_countries.fields import CountryField
 from django.db.models import Q as QD
 
 # Connection to MongoDB
@@ -107,8 +108,21 @@ class MyUser(AbstractUser):
 
 
 class Station(models.Model):
-    code = models.CharField(unique=True, max_length=20, null=False)
-    name = models.CharField(max_length=30, null=False)
+    code_inegi = models.CharField(unique=True, max_length=20)
+    code_aux_1 = models.CharField(max_length=20, blank=True, null=True)
+    code_aux_2 = models.CharField(max_length=20, blank=True, null=True)
+    code_client = models.CharField(max_length=20, blank=True, null=True)
+    designation = models.CharField(max_length=30, blank=True, null=True)
+    position_x = models.FloatField(default="0")
+    position_y = models.FloatField(default="0")
+    utm_zone = models.CharField(max_length=20, blank=True, null=True)
+    coords_system = models.CharField(max_length=20, default="0")
+    installation_date = models.DateTimeField(null=True, blank=True)
+    project = models.CharField(max_length=30, null=True, blank=True)
+    parish = models.CharField(max_length=30, null=True, blank=True)
+    district = models.CharField(max_length=30, null=True, blank=True)
+    country = CountryField(default="PT")
+    gsm_number = models.IntegerField(null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -117,19 +131,19 @@ class Station(models.Model):
 class Machine(Station):
 
     class Meta:
-        ordering = ["code"]
+        ordering = ["code_inegi"]
 
     def __str__(self):
-        return "%s" % self.code
+        return "%s" % self.code_inegi
 
 
 class Tower(Station):
 
     class Meta:
-        ordering = ["code"]
+        ordering = ["code_inegi"]
 
     def __str__(self):
-        return "%s" % self.code
+        return "%s" % self.code_inegi
 
 
 class Cluster(models.Model):

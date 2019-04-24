@@ -34,8 +34,8 @@
 
                         {% for tower in towers %}
                             <tr>
-                                <td class="align-middle p-2"><a href="{% url "view_tower" tower.pk %}">{{ tower.code }}</a></th>
-                                <td class="align-middle p-2"><a href="{% url "view_tower" tower.pk %}">{{ tower.name }}</a></td>
+                                <td class="align-middle p-2"><a href="{% url "view_tower" tower.pk %}">{{ tower.code_inegi }}</a></th>
+                                <td class="align-middle p-2"><a href="{% url "view_tower" tower.pk %}">{{ tower.designation }}</a></td>
                                 <td>
                                     <a href="{% url "view_tower" tower.pk %}" class="btn btn-sm btn-info">View - Edit</a>
                                     <a href="#" name="delete_tower" data-id="{{ tower.pk }}" class="btn btn-sm btn-danger">Delete</a>

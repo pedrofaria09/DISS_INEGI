@@ -118,33 +118,51 @@ class UserTowersFrom(ModelForm):
 
 
 class TowerForm(ModelForm):
+    installation_date = forms.DateTimeField(required=False, input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M", attrs={'autocomplete': 'off', 'placeholder': 'Installation Date'}))
+
     class Meta:
         model = Tower
-        fields = ('code', 'name')
+        fields = '__all__'
         widgets = {
-            'code': forms.TextInput(attrs={'placeholder': 'Please enter the Tower code', 'style': 'width:100%'}),
-            'name': forms.TextInput(attrs={'placeholder': 'Please enter the Tower name', 'style': 'width:100%'}),
+            'code_inegi': forms.TextInput(attrs={'placeholder': 'Please enter the INEGI code', 'style': 'width:100%'}),
+            'code_aux_1': forms.TextInput(attrs={'placeholder': 'Auxiliar code 1', 'style': 'width:100%'}),
+            'code_aux_2': forms.TextInput(attrs={'placeholder': 'Auxiliar code 2', 'style': 'width:100%'}),
+            'code_client': forms.TextInput(attrs={'placeholder': 'Client code', 'style': 'width:100%'}),
+            'designation': forms.TextInput(attrs={'placeholder': 'Designation', 'style': 'width:100%'}),
+            'utm_zone': forms.TextInput(attrs={'placeholder': 'UTM Zone', 'style': 'width:100%'}),
+            'project': forms.TextInput(attrs={'placeholder': 'Project designation', 'style': 'width:100%'}),
+            'parish': forms.TextInput(attrs={'placeholder': 'Parish', 'style': 'width:100%'}),
+            'district': forms.TextInput(attrs={'placeholder': 'District', 'style': 'width:100%'}),
+            'gsm_number': forms.TextInput(attrs={'placeholder': 'GSM Number', 'style': 'width:100%'}),
         }
 
     def __init__(self, *args, **kwargs):
         super(TowerForm, self).__init__(*args, **kwargs)
-        self.fields['code'].label = "Code"
-        self.fields['name'].label = "Name"
+        self.fields['code_inegi'].label = "INEGI Code"
 
 
 class MachineForm(ModelForm):
+    installation_date = forms.DateTimeField(required=False, input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M", attrs={'autocomplete': 'off',  'placeholder': 'Installation Date'}))
+
     class Meta:
         model = Machine
-        fields = ('code', 'name')
+        fields = '__all__'
         widgets = {
-            'code': forms.TextInput(attrs={'placeholder': 'Please enter the Machine code', 'style': 'width:100%'}),
-            'name': forms.TextInput(attrs={'placeholder': 'Please enter the Machine name', 'style': 'width:100%'}),
+            'code_inegi': forms.TextInput(attrs={'placeholder': 'Please enter the INEGI code', 'style': 'width:100%'}),
+            'code_aux_1': forms.TextInput(attrs={'placeholder': 'Auxiliar code 1', 'style': 'width:100%'}),
+            'code_aux_2': forms.TextInput(attrs={'placeholder': 'Auxiliar code 2', 'style': 'width:100%'}),
+            'code_client': forms.TextInput(attrs={'placeholder': 'Client code', 'style': 'width:100%'}),
+            'designation': forms.TextInput(attrs={'placeholder': 'Designation', 'style': 'width:100%'}),
+            'utm_zone': forms.TextInput(attrs={'placeholder': 'UTM Zone', 'style': 'width:100%'}),
+            'project': forms.TextInput(attrs={'placeholder': 'Project designation', 'style': 'width:100%'}),
+            'parish': forms.TextInput(attrs={'placeholder': 'Parish', 'style': 'width:100%'}),
+            'district': forms.TextInput(attrs={'placeholder': 'District', 'style': 'width:100%'}),
+            'gsm_number': forms.TextInput(attrs={'placeholder': 'GSM Number', 'style': 'width:100%'}),
         }
 
     def __init__(self, *args, **kwargs):
         super(MachineForm, self).__init__(*args, **kwargs)
-        self.fields['code'].label = "Code"
-        self.fields['name'].label = "Name"
+        self.fields['code_inegi'].label = "INEGI Code"
 
 
 class ClusterForm(ModelForm):
@@ -255,7 +273,6 @@ class EquipmentTypeForm(ModelForm):
         self.fields['name'].widget.attrs.update({'class': 'form-control mandatory'})
         self.fields['initials'].label = "Equipment Type Initials"
         self.fields['initials'].widget.attrs.update({'class': 'form-control mandatory'})
-
 
 
 class UserGroupTypeForm(ModelForm):

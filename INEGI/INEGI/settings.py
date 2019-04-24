@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'formtools',
     'dal',
     'dal_select2',
+    'django_countries',
 ]
 
 MIDDLEWARE = [
