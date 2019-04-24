@@ -82,6 +82,7 @@ urlpatterns = [
     url(r'^dimension-type-autocomplete/$', views.DimensionTypeAutocomplete.as_view(), name='dimension-type-autocomplete'),
     url(r'^comment-tower-autocomplete/$', views.CommentTowerTypeAutocomplete.as_view(), name='comment-tower-autocomplete'),
     url(r'^comment-classification-autocomplete/$', views.CommentClassificationTypeAutocomplete.as_view(),name='comment-classification-autocomplete'),
+    url(r'^affiliation-autocomplete/$', views.AffiliationAutocomplete.as_view(), name='affiliation-autocomplete'),
 
     url(r'^ban_user/?$', views.ban_user, name='ban_user'),
 
@@ -106,6 +107,8 @@ urlpatterns = [
     url(r'^add_type_metric/$', views.add_type_metric, name='add_type_metric'),
     url(r'^add_type_component/$', views.add_type_component, name='add_type_component'),
     url(r'^add_type_dimension/$', views.add_type_dimension, name='add_type_dimension'),
+    url(r'^add_type_affiliation/$', views.add_type_affiliation, name='add_type_affiliation'),
+    url(r'^add_type_user_group/$', views.add_type_user_group, name='add_type_user_group'),
 
     url(r'^favicon\.ico$',RedirectView.as_view(url='/static/img/favicon.ico')),
 ]

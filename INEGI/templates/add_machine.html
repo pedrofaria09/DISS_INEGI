@@ -29,7 +29,7 @@
                     {% for field in form %}
                         <div class="form-group">
                             {{ field.label_tag }}{% if field.field.required %} *{% endif %}
-                            {% render_field field class="form-control" %}
+                            {% render_field field placeholder=field.label %}
                         </div>
                     {% endfor %}
 

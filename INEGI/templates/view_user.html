@@ -33,6 +33,12 @@
                                 </div>
                             {% else %}
                                 {{ field.label_tag }}
+                                {% if field.name == "affiliation" %}
+                                    <a href="#" class="js-create-type related-widget-wrapper-link add-related" data-type="affiliation" id="add_id_type" title="Add another Affiliation"><img src="/static/admin/img/icon-addlink.svg" alt="Add"></a>
+                                {% endif %}
+                                {% if field.name == "group_type" %}
+                                    <a href="#" class="js-create-type related-widget-wrapper-link add-related" data-type="user_group" id="add_id_type" title="Add another User Group"><img src="/static/admin/img/icon-addlink.svg" alt="Add"></a>
+                                {% endif %}
                                 {% render_field field placeholder=field.label %}
                             {% endif %}
                         </div>
@@ -107,6 +113,12 @@
             </div>
         </div>
 
+        <!-- THE MODAL WE WILL BE USING -->
+        <div class="modal fade" id="modal-type">
+            <div class="modal-dialog">
+                <div class="modal-content"></div>
+            </div>
+        </div>
 
     </div>
 

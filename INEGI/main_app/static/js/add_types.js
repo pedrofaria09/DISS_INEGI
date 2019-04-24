@@ -29,6 +29,12 @@ $(function () {
         if(type_data === "dimension_type" )
             string_url = '/add_type_dimension';
 
+        if(type_data === "affiliation")
+            string_url = '/add_type_affiliation';
+
+        if(type_data === "user_group")
+            string_url = '/add_type_user_group';
+
         console.log(string_url);
 
         $.ajax({

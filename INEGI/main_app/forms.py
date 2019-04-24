@@ -22,12 +22,13 @@ class LoginForm(forms.Form):
 class RegisterForm(UserCreationForm):
     class Meta:
         model = MyUser
-        fields = ('username', 'password1', 'password2', 'full_name', 'is_client', 'is_manager', 'is_staff', 'group_type')
+        fields = ('username', 'password1', 'password2', 'full_name', 'is_client', 'is_manager', 'is_staff', 'group_type', 'affiliation')
 
         # widgets = {'birthdate': DatePickerInput(format='%d/%m/%Y'),}
 
         widgets = {
-            'group_type': autocomplete.ModelSelect2(url='group-autocomplete', attrs={'style': 'width:100%'})
+            'group_type': autocomplete.ModelSelect2(url='group-autocomplete', attrs={'style': 'width:100%'}),
+            'affiliation': autocomplete.ModelSelect2(url='affiliation-autocomplete', attrs={'style': 'width:100%'})
         }
 
     def clean_username(self):
@@ -62,12 +63,13 @@ class RegisterForm(UserCreationForm):
 class UserForm(ModelForm):
     class Meta:
         model = MyUser
-        fields = ('username', 'full_name', 'is_client', 'is_manager', 'is_staff', 'group_type')
+        fields = ('username', 'full_name', 'is_client', 'is_manager', 'is_staff', 'group_type', 'affiliation')
 
         # widgets = {'birthdate': DatePickerInput(format='%d/%m/%Y'),}
 
         widgets = {
-            'group_type': autocomplete.ModelSelect2(url='group-autocomplete', attrs={'style': 'width:100%'})
+            'group_type': autocomplete.ModelSelect2(url='group-autocomplete', attrs={'style': 'width:100%'}),
+            'affiliation': autocomplete.ModelSelect2(url='affiliation-autocomplete', attrs={'style': 'width:100%'})
         }
 
     def __init__(self, *args, **kwargs):
@@ -92,8 +94,7 @@ class UserTowersFrom(ModelForm):
     tower = forms.ModelMultipleChoiceField(
         queryset=Tower.objects.all(),
         required=False,
-        widget=autocomplete.ModelSelect2Multiple(url='tower-autocomplete',
-                                                 attrs={'style': 'width:100%'})
+        widget=autocomplete.ModelSelect2Multiple(url='tower-autocomplete', attrs={'style': 'width:100%'})
     )
 
     user = forms.ModelChoiceField(
@@ -131,6 +132,7 @@ class TowerForm(ModelForm):
             'designation': forms.TextInput(attrs={'placeholder': 'Designation', 'style': 'width:100%'}),
             'utm_zone': forms.TextInput(attrs={'placeholder': 'UTM Zone', 'style': 'width:100%'}),
             'project': forms.TextInput(attrs={'placeholder': 'Project designation', 'style': 'width:100%'}),
+            'client': autocomplete.ModelSelect2(url='affiliation-autocomplete', attrs={'style': 'width:100%'}),
             'parish': forms.TextInput(attrs={'placeholder': 'Parish', 'style': 'width:100%'}),
             'district': forms.TextInput(attrs={'placeholder': 'District', 'style': 'width:100%'}),
             'gsm_number': forms.TextInput(attrs={'placeholder': 'GSM Number', 'style': 'width:100%'}),
@@ -139,6 +141,22 @@ class TowerForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(TowerForm, self).__init__(*args, **kwargs)
         self.fields['code_inegi'].label = "INEGI Code"
+
+        self.fields['code_inegi'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['code_aux_1'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['code_aux_2'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['code_client'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['designation'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['position_x'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['position_y'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['coords_system'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['utm_zone'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['project'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['parish'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['district'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['country'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['gsm_number'].widget.attrs.update({'class': 'form-control mandatory'})
+
 
 
 class MachineForm(ModelForm):
@@ -155,6 +173,7 @@ class MachineForm(ModelForm):
             'designation': forms.TextInput(attrs={'placeholder': 'Designation', 'style': 'width:100%'}),
             'utm_zone': forms.TextInput(attrs={'placeholder': 'UTM Zone', 'style': 'width:100%'}),
             'project': forms.TextInput(attrs={'placeholder': 'Project designation', 'style': 'width:100%'}),
+            'client': autocomplete.ModelSelect2(url='affiliation-autocomplete', attrs={'style': 'width:100%'}),
             'parish': forms.TextInput(attrs={'placeholder': 'Parish', 'style': 'width:100%'}),
             'district': forms.TextInput(attrs={'placeholder': 'District', 'style': 'width:100%'}),
             'gsm_number': forms.TextInput(attrs={'placeholder': 'GSM Number', 'style': 'width:100%'}),
@@ -270,9 +289,9 @@ class EquipmentTypeForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(EquipmentTypeForm, self).__init__(*args, **kwargs)
         self.fields['name'].label = "Equipment Type Name"
-        self.fields['name'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['name'].widget.attrs.update({'class': 'form-control mandatory', 'placeholder': 'Ex. Anemometer'})
         self.fields['initials'].label = "Equipment Type Initials"
-        self.fields['initials'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['initials'].widget.attrs.update({'class': 'form-control mandatory', 'placeholder': 'Ex. AN'})
 
 
 class UserGroupTypeForm(ModelForm):
@@ -283,7 +302,7 @@ class UserGroupTypeForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(UserGroupTypeForm, self).__init__(*args, **kwargs)
         self.fields['name'].label = "User Group Type Name"
-        self.fields['name'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['name'].widget.attrs.update({'class': 'form-control mandatory', 'placeholder': 'Ex. Field Team'})
 
 
 class UnitTypeForm(ModelForm):
@@ -294,7 +313,7 @@ class UnitTypeForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(UnitTypeForm, self).__init__(*args, **kwargs)
         self.fields['name'].label = "Unit Type Name"
-        self.fields['name'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['name'].widget.attrs.update({'class': 'form-control mandatory', 'placeholder': 'Ex. m/s'})
 
 
 class StatisticTypeForm(ModelForm):
@@ -305,7 +324,7 @@ class StatisticTypeForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(StatisticTypeForm, self).__init__(*args, **kwargs)
         self.fields['name'].label = "Statistic Type Name"
-        self.fields['name'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['name'].widget.attrs.update({'class': 'form-control mandatory', 'placeholder': 'Ex. Average'})
 
 
 class MetricTypeForm(ModelForm):
@@ -316,7 +335,7 @@ class MetricTypeForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(MetricTypeForm, self).__init__(*args, **kwargs)
         self.fields['name'].label = "Metric Type Name"
-        self.fields['name'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['name'].widget.attrs.update({'class': 'form-control mandatory', 'placeholder': 'Ex. Speed'})
 
 
 class ComponentTypeForm(ModelForm):
@@ -327,7 +346,18 @@ class ComponentTypeForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(ComponentTypeForm, self).__init__(*args, **kwargs)
         self.fields['name'].label = "Component Type Name"
-        self.fields['name'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['name'].widget.attrs.update({'class': 'form-control mandatory', 'placeholder': 'Ex. Vertical'})
+
+
+class AffiliationTypeForm(ModelForm):
+    class Meta:
+        model = AffiliationType
+        fields = ('name',)
+
+    def __init__(self, *args, **kwargs):
+        super(AffiliationTypeForm, self).__init__(*args, **kwargs)
+        self.fields['name'].label = "Affiliation Type Name"
+        self.fields['name'].widget.attrs.update({'class': 'form-control mandatory', 'placeholder': 'Ex. EDP'})
 
 
 class PeriodConfigForm(ModelForm):

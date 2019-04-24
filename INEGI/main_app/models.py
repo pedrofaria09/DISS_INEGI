@@ -25,6 +25,16 @@ else:
 # Create your models here.
 
 
+class AffiliationType(models.Model):
+    name = models.CharField(unique=True, max_length=100)
+
+    class Meta:
+        ordering = ['-id']
+
+    def __str__(self):
+        return "%s" % self.name
+
+
 class UserGroupType(models.Model):
     name = models.CharField(unique=True, max_length=100)
 
@@ -100,8 +110,9 @@ class MyUser(AbstractUser):
     full_name = models.CharField(max_length=100)
     is_client = models.BooleanField(default=False)
     is_manager = models.BooleanField(default=False)
-    group_type = models.ForeignKey('UserGroupType', on_delete=models.DO_NOTHING)
+    group_type = models.ForeignKey('UserGroupType', on_delete=models.DO_NOTHING, null=True, blank=True)
     towers = models.ManyToManyField('UserTowerDates', blank=True)
+    affiliation = models.ForeignKey('AffiliationType', on_delete=models.DO_NOTHING, null=True, blank=True)
 
     def __str__(self):
         return "%s %s" % (self.id, self.full_name)
@@ -119,6 +130,7 @@ class Station(models.Model):
     coords_system = models.CharField(max_length=20, default="0")
     installation_date = models.DateTimeField(null=True, blank=True)
     project = models.CharField(max_length=30, null=True, blank=True)
+    client = models.ForeignKey('AffiliationType', on_delete=models.DO_NOTHING, null=True, blank=True)
     parish = models.CharField(max_length=30, null=True, blank=True)
     district = models.CharField(max_length=30, null=True, blank=True)
     country = CountryField(default="PT")

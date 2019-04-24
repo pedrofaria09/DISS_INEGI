@@ -72,8 +72,8 @@ def search(request):
 
         clusters = Cluster.objects.filter(name__icontains=value)
 
-        towers = Tower.objects.filter(code__icontains=value)
-        #QD(code__icontains=value)| QD(owner__icontains=value) | QD(designation__icontains=value)
+        towers = Tower.objects.filter(QD(code_inegi__icontains=value)| QD(client__name__icontains=value) | QD(designation__icontains=value))
+
         calibrations = Calibration.objects.filter(QD(offset__icontains=value) | QD(slope__icontains=value) | QD(ref__icontains=value))
 
         equipments = Equipment.objects.filter(sn__icontains=value)
@@ -626,6 +626,9 @@ def list_type(request, type):
     elif type == 'component':
         type_obj = ComponentType.objects.all()
         name = "Component Type"
+    elif type == 'affiliation':
+        type_obj = AffiliationType.objects.all()
+        name = "Affiliation Type"
 
     return render(request, 'list_type.html', {'type_obj': type_obj, 'type': type, 'name': name})
 
@@ -645,6 +648,8 @@ def add_type(request, type):
         name = "Metric Type"
     elif type == 'component':
         name = "Component Type"
+    elif type == 'affiliation':
+        name = "Affiliation Type"
 
     if request.method == 'POST':
         if type == 'equipment':
@@ -661,6 +666,8 @@ def add_type(request, type):
             form = MetricTypeForm(request.POST)
         elif type == 'component':
             form = ComponentTypeForm(request.POST)
+        elif type == 'affiliation':
+            form = AffiliationTypeForm(request.POST)
 
         if form.is_valid():
             form.save()
@@ -683,6 +690,8 @@ def add_type(request, type):
             form = MetricTypeForm()
         elif type == 'component':
             form = ComponentTypeForm()
+        elif type == 'affiliation':
+            form = AffiliationTypeForm()
 
     return render(request, 'add_type.html', {'form': form, 'type': type, 'name': name})
 
@@ -702,6 +711,24 @@ def add_type_equipment(request):
 
     context = {'form': form}
     data['html_form'] = render_to_string('add_type_equipment.html', context, request=request)
+    return JsonResponse(data)
+
+
+def add_type_user_group(request):
+    data = dict()
+
+    if request.method == 'POST':
+        form = UserGroupTypeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            data['form_is_valid'] = True
+        else:
+            data['form_is_valid'] = False
+    else:
+        form = UserGroupTypeForm()
+
+    context = {'form': form}
+    data['html_form'] = render_to_string('add_type_user_group.html', context, request=request)
     return JsonResponse(data)
 
 
@@ -795,6 +822,24 @@ def add_type_component(request):
     return JsonResponse(data)
 
 
+def add_type_affiliation(request):
+    data = dict()
+
+    if request.method == 'POST':
+        form = AffiliationTypeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            data['form_is_valid'] = True
+        else:
+            data['form_is_valid'] = False
+    else:
+        form = AffiliationTypeForm()
+
+    context = {'form': form}
+    data['html_form'] = render_to_string('add_type_affiliation.html', context, request=request)
+    return JsonResponse(data)
+
+
 def view_type(request, equipment_id, type):
     if type == 'equipment':
         name = "Equipment Type"
@@ -838,6 +883,12 @@ def view_type(request, equipment_id, type):
             obj = ComponentType.objects.get(pk=equipment_id)
         except ComponentType.DoesNotExist:
             return HttpResponseRedirect(reverse("list_type", kwargs={'type': type}))
+    elif type == 'affiliation':
+        name = "Affiliation Type"
+        try:
+            obj = AffiliationType.objects.get(pk=equipment_id)
+        except AffiliationType.DoesNotExist:
+            return HttpResponseRedirect(reverse("list_type", kwargs={'type': type}))
 
     if request.method == 'GET':
         if type == 'equipment':
@@ -854,6 +905,8 @@ def view_type(request, equipment_id, type):
             form = MetricTypeForm(instance=obj)
         elif type == 'component':
             form = ComponentTypeForm(instance=obj)
+        elif type == 'affiliation':
+            form = AffiliationTypeForm(instance=obj)
 
     elif request.method == 'POST':
         if type == 'equipment':
@@ -870,6 +923,8 @@ def view_type(request, equipment_id, type):
             form = MetricTypeForm(request.POST, instance=obj)
         elif type == 'component':
             form = ComponentTypeForm(request.POST, instance=obj)
+        elif type == 'affiliation':
+            form = AffiliationTypeForm(request.POST, instance=obj)
 
         if form.is_valid():
             form.save()
@@ -897,6 +952,8 @@ def delete_type(request):
             obj = MetricType.objects.get(pk=request.POST["id"])
         elif request.POST["typex"] == 'component':
             obj = ComponentType.objects.get(pk=request.POST["id"])
+        elif request.POST["typex"] == 'affiliation':
+            obj = AffiliationType.objects.get(pk=request.POST["id"])
 
         try:
             obj.delete()
@@ -2191,5 +2248,15 @@ class CommentClassificationTypeAutocomplete(autocomplete.Select2QuerySetView):
             qs = qs.filter((QD(begin_date__range=(begin_date, end_date)) | QD(end_date__range=(begin_date, end_date))))
         if self.q:
             qs = qs.filter(tower__icontains=self.q)
+
+        return qs
+
+
+class AffiliationAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = AffiliationType.objects.all().order_by('-id')
+
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
 
         return qs
