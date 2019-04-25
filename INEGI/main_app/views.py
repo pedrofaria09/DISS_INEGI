@@ -840,6 +840,24 @@ def add_type_affiliation(request):
     return JsonResponse(data)
 
 
+def add_equipment_json(request):
+    data = dict()
+
+    if request.method == 'POST':
+        form = EquipmentForm(request.POST)
+        if form.is_valid():
+            form.save()
+            data['form_is_valid'] = True
+        else:
+            data['form_is_valid'] = False
+    else:
+        form = EquipmentForm()
+
+    context = {'form': form}
+    data['html_form'] = render_to_string('add_equipment_json.html', context, request=request)
+    return JsonResponse(data)
+
+
 def view_type(request, equipment_id, type):
     if type == 'equipment':
         name = "Equipment Type"

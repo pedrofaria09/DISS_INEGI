@@ -109,6 +109,7 @@ urlpatterns = [
     url(r'^add_type_dimension/$', views.add_type_dimension, name='add_type_dimension'),
     url(r'^add_type_affiliation/$', views.add_type_affiliation, name='add_type_affiliation'),
     url(r'^add_type_user_group/$', views.add_type_user_group, name='add_type_user_group'),
+    url(r'^add_equipment_json/$', views.add_equipment_json, name='add_equipment_json'),
 
     url(r'^favicon\.ico$',RedirectView.as_view(url='/static/img/favicon.ico')),
 ]

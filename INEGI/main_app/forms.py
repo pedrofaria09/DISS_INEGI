@@ -266,6 +266,12 @@ class CalibrationForm(ModelForm):
         queryset=Equipment.objects.all().order_by('-id'),
         widget=autocomplete.ModelSelect2(url='equipment-autocomplete', attrs={'style': 'width:100%'})
     )
+
+    dimension_type = forms.ModelChoiceField(
+        queryset=DimensionType.objects.all().order_by('-id'),
+        widget=autocomplete.ModelSelect2(url='dimension-type-autocomplete', attrs={'style': 'width:100%'})
+    )
+
     calib_date = forms.DateTimeField(required=False, input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M", attrs={'autocomplete': 'off'}))
 
     class Meta:

@@ -35,6 +35,9 @@ $(function () {
         if(type_data === "user_group")
             string_url = '/add_type_user_group';
 
+        if(type_data === "new_equipment")
+            string_url = '/add_equipment_json';
+
         console.log(string_url);
 
         $.ajax({
