@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404, redirect, render_to_response
 from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -14,9 +14,12 @@ from django.db import IntegrityError
 from .aux_functions import parsedate, check_if_period_is_valid, check_if_period_is_valid_2, get_date
 from formtools.wizard.views import SessionWizardView
 from dal import autocomplete
+
+from django_pandas.io import read_frame
+
 from django.utils.html import format_html
 
-import time, re, io, json, pytz
+import time, re, io, json, pytz, random
 
 # Create your views here.
 
@@ -34,7 +37,47 @@ def index(request):
         form = LoginForm()
         return render(request, 'home.html', {'form': form})
     else:
-        return render(request, 'home.html', {})
+
+        qs = DataSetPG.objects.all()
+        df = read_frame(qs)
+        print(df.head())
+        print(df['value'].values)
+        print(df['value'].tolist())
+        nb_element = 100
+        start_time = int(time.mktime(datetime(2012, 6, 1).timetuple()) * 1000)
+
+        xdata = range(nb_element)
+        xdata = list(map(lambda x: start_time + x * 1000000000, xdata))
+        ydata = [i + random.randint(1, 10) for i in range(nb_element)]
+        ydata2 = list(map(lambda x: x * 2, ydata))
+        ydata3 = list(map(lambda x: x * 3, ydata))
+        ydata4 = df['value'].tolist()
+
+        tooltip_date = "%d %b %Y %H:%M:%S %p"
+        extra_serie = {"tooltip": {"y_start": "There are ", "y_end": " calls"},
+                       "date_format": tooltip_date}
+        chartdata = {
+            'x': xdata,
+            'name1': 'series 1', 'y1': ydata, 'extra1': extra_serie,
+            'name2': 'series 2', 'y2': ydata2, 'extra2': extra_serie,
+            'name3': 'series 3', 'y3': ydata3, 'extra3': extra_serie,
+            'name4': 'series 4', 'y4': ydata4, 'extra4': extra_serie
+        }
+        charttype = "lineChart"
+        chartcontainer = 'lineChart_container'
+        data = {
+            'charttype': charttype,
+            'chartdata': chartdata,
+            'chartcontainer': chartcontainer,
+            'extra': {
+                'x_is_date': True,
+                'x_axis_format': '%d %b %Y %H',
+                'tag_script_js': True,
+                'jquery_on_ready': False,
+            }
+        }
+
+        return render(request, 'home.html', data)
 
 
 def login_view(request):

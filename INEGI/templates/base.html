@@ -1,4 +1,9 @@
 {% load staticfiles %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.4/nv.d3.min.css"/>
+    <script src="{% static 'js/d3.min.js' %}" charset="utf-8"></script>
+    <script src="{% static 'js/nv.d3.min.js' %}"></script>
+
+{% load nvd3_tags %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -32,6 +37,7 @@
         {{ form.media }}
     {% endblock %}
 
+    {% load_chart charttype chartdata chartcontainer extra %}
 </head>
 
 {% if user.is_authenticated %}
