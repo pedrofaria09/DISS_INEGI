@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block content %}
+    {% load_chart charttype chartdata chartcontainer extra %}
+
+    <div class="container-fluid">
+        <!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4 timeline2">
+            <h1 class="h3 mb-0 text-gray-800">Chart</h1>
+        </div>
+
+        <div class="card shadow mb-4">
+            <div class="card-header py-2">
+                <h6 class="m-0 font-weight-bold text-primary text-center">Data</h6>
+            </div>
+            <div class="card-body">
+                {% include_container chartcontainer 450 '100%' %}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

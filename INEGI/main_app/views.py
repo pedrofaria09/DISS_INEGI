@@ -16,6 +16,16 @@ from formtools.wizard.views import SessionWizardView
 from dal import autocomplete
 
 from django_pandas.io import read_frame
+from graphos.sources.simple import SimpleDataSource
+from graphos.renderers.gchart import LineChart
+from graphos.renderers.yui import LineChart as LineChartYUI
+from graphos.renderers.morris import LineChart as LineChartMorris
+from graphos.renderers.flot import LineChart as LineChartFLOT
+from graphos.renderers.highcharts import LineChart as LineChartHIGH
+from graphos.renderers.c3js import LineChart as LineChartC3JS
+
+from graphos.sources.model import ModelDataSource
+from graphos.sources.csv_file import CSVDataSource
 
 from django.utils.html import format_html
 
@@ -31,6 +41,55 @@ def get_obj_or_404_2(klass, *args, **kwargs):
         raise Http404
 
 
+def dt2epoch(value):
+    epoch = int(time.mktime(value.timetuple()) * 1000)
+    return epoch
+
+
+def chart(request):
+    qs = DataSetPG.objects.all().order_by('id')
+    df = read_frame(qs)
+    print(df.head())
+    nb_element = 13
+    start_time = int(time.mktime(datetime(2012, 6, 1).timetuple()) * 1000)
+
+    # xdata = range(nb_element)
+    # xdata = list(map(lambda x: start_time + x * 1000000000, xdata))
+    # ydata = [i + random.randint(1, 10) for i in range(nb_element)]
+    # ydata2 = list(map(lambda x: x * 2, ydata))
+    # ydata3 = list(map(lambda x: x * 3, ydata))
+    # ydata4 = list(map(lambda x: x * 4, ydata))
+
+    # xdata = df['time_stamp'].tolist()
+    ydata1 = df['value'].astype(int).tolist()
+    xdata = df['time_stamp'].apply(dt2epoch).tolist()
+
+    tooltip_date = "%d %b %Y %H:%M:%S %p"
+    extra_serie = {"tooltip": {"y_start": "There are ", "y_end": " calls"},
+                   "date_format": tooltip_date}
+    chartdata = {
+        'x': xdata,
+        'name': 'series 1', 'y1': ydata1, 'extra1': extra_serie
+    }
+    # charttype = "lineChart"
+    # chartcontainer = 'lineChart_container'
+    charttype = "lineWithFocusChart"
+    chartcontainer = 'linewithfocuschart_container'
+    data = {
+        'charttype': charttype,
+        'chartdata': chartdata,
+        'chartcontainer': chartcontainer,
+        'extra': {
+            'x_is_date': True,
+            'x_axis_format': '%d %b %Y %H',
+            'tag_script_js': True,
+            'jquery_on_ready': False,
+            'focus_enable': True,
+        }
+    }
+    return render(request, 'chart.html', data)
+
+
 def index(request):
 
     if request.user.id is None:
@@ -38,46 +97,47 @@ def index(request):
         return render(request, 'home.html', {'form': form})
     else:
 
-        qs = DataSetPG.objects.all()
+        qs = DataSetPG.objects.all().order_by('id')
         df = read_frame(qs)
-        print(df.head())
-        print(df['value'].values)
-        print(df['value'].tolist())
-        nb_element = 100
-        start_time = int(time.mktime(datetime(2012, 6, 1).timetuple()) * 1000)
 
-        xdata = range(nb_element)
-        xdata = list(map(lambda x: start_time + x * 1000000000, xdata))
-        ydata = [i + random.randint(1, 10) for i in range(nb_element)]
-        ydata2 = list(map(lambda x: x * 2, ydata))
-        ydata3 = list(map(lambda x: x * 3, ydata))
-        ydata4 = df['value'].tolist()
 
-        tooltip_date = "%d %b %Y %H:%M:%S %p"
-        extra_serie = {"tooltip": {"y_start": "There are ", "y_end": " calls"},
-                       "date_format": tooltip_date}
-        chartdata = {
-            'x': xdata,
-            'name1': 'series 1', 'y1': ydata, 'extra1': extra_serie,
-            'name2': 'series 2', 'y2': ydata2, 'extra2': extra_serie,
-            'name3': 'series 3', 'y3': ydata3, 'extra3': extra_serie,
-            'name4': 'series 4', 'y4': ydata4, 'extra4': extra_serie
-        }
-        charttype = "lineChart"
-        chartcontainer = 'lineChart_container'
-        data = {
-            'charttype': charttype,
-            'chartdata': chartdata,
-            'chartcontainer': chartcontainer,
-            'extra': {
-                'x_is_date': True,
-                'x_axis_format': '%d %b %Y %H',
-                'tag_script_js': True,
-                'jquery_on_ready': False,
-            }
-        }
+        data = [
+            ['Year', 'Sales', 'Expenses'],
+            ["2004", 1000, 400],
+            ["2005", 1170, 460],
+            ["2006", 660, 1120],
+            ["2007", 1030, 540]
+        ]
+        # DataSource object
+        data_source = SimpleDataSource(data=data)
+        # Chart object
+        # data_source = ModelDataSource(qs, fields=['time_stamp', 'value'])
+        data_source = MyModelDataSource(qs, fields=['time_stamp', 'value'])
+        # print(pd.DataFrame.to_csv(df))
+        # data_source = CSVDataSource(pd.DataFrame.to_csv(self=df , sep=';', float_format='%.2f', index=False, decimal=","))
+        # print(pd.DataFrame.to_csv(self=df , sep=';', float_format='%.2f', index=True, decimal=","))
+        # print(data_source)
+        # print(CSVDataSource(data_source))
+        print(data_source)
+        chart = LineChart(data_source)
+        chart1 = LineChartMorris(data_source, options={'xLabels': 'day', 'resize': True})
+        chart2 = LineChartHIGH(data_source)
 
-        return render(request, 'home.html', data)
+        context = {'chart': chart,  'chart1': chart1, 'chart2': chart2}
+
+        return render(request, 'home.html', context)
+
+
+class MyModelDataSource(ModelDataSource):
+    def get_data(self):
+        data = super(MyModelDataSource, self).get_data()
+        header = data[0]
+        data_without_header = data[1:]
+        for row in data_without_header:
+            # row[0] = datetime(year=row[0].year, month=row[0].month, day=row[0].day, hour=row[0].hour, minute=row[0].minute, second=row[0].second)
+            row[1] = int(row[1])
+        data_without_header.insert(0, header)
+        return data_without_header
 
 
 def login_view(request):

@@ -1,7 +1,7 @@
 {% load staticfiles %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.4/nv.d3.min.css"/>
-    <script src="{% static 'js/d3.min.js' %}" charset="utf-8"></script>
-    <script src="{% static 'js/nv.d3.min.js' %}"></script>
+{#    <script src="{% static 'js/d3.min.js' %}" charset="utf-8"></script>#}
+{#    <script src="{% static 'js/nv.d3.min.js' %}"></script>#}
 
 {% load nvd3_tags %}
 
@@ -30,6 +30,9 @@
     <!-- Custom styles for Tables -->
     <link href="{% static 'vendor/datatables/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.3.13/d3.js" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.0-alpha/nv.d3.js"></script>
+
     {% load bootstrap4 %} {# import bootstrap4/bootstrap3 #}
 {#    {% bootstrap_css %} {# Embed Bootstrap CSS#}
     {% bootstrap_javascript jquery='full' %} {# Embed Bootstrap JS+jQuery #}
@@ -37,7 +40,6 @@
         {{ form.media }}
     {% endblock %}
 
-    {% load_chart charttype chartdata chartcontainer extra %}
 </head>
 
 {% if user.is_authenticated %}
@@ -315,12 +317,13 @@
             </div>
         </div>
     </div>
+    <script src="{% static 'vendor/jquery-easing/jquery.easing.min.js' %}"></script>
 
     <!-- Bootstrap core JavaScript-->
     {% comment %}<script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
 
     <!-- Core plugin JavaScript-->
-    <script src="{% static 'vendor/jquery-easing/jquery.easing.min.js' %}"></script>
+
 
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>{% endcomment %}
 

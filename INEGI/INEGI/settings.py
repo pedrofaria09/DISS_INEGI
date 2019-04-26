@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'dal_select2',
     'django_countries',
     'django_nvd3',
+    'graphos',
 ]
 
 MIDDLEWARE = [
