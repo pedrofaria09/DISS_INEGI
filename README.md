@@ -38,3 +38,19 @@ Access at:
 ```
 http://localhost:8000/
 ```
+
+
+## Backup and restore database
+
+Using package django-dbbackup, gives the user to backup and restore the database
+
+To backup:
+```
+docker-compose run web python manage.py dbbackup
+```
+A backup file will be created at: files/backup
+
+To restore:
+```
+docker-compose run web python manage.py dbrestore
+```
