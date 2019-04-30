@@ -15,7 +15,7 @@ from .aux_functions import parsedate, check_if_period_is_valid, check_if_period_
 from formtools.wizard.views import SessionWizardView
 from dal import autocomplete
 
-from django_pandas.io import read_frame
+from django_pandas.io import *
 from graphos.sources.simple import SimpleDataSource
 from graphos.renderers.gchart import LineChart
 from graphos.renderers.yui import LineChart as LineChartYUI
@@ -53,23 +53,26 @@ def chart(request):
     nb_element = 13
     start_time = int(time.mktime(datetime(2012, 6, 1).timetuple()) * 1000)
 
-    # xdata = range(nb_element)
-    # xdata = list(map(lambda x: start_time + x * 1000000000, xdata))
-    # ydata = [i + random.randint(1, 10) for i in range(nb_element)]
-    # ydata2 = list(map(lambda x: x * 2, ydata))
-    # ydata3 = list(map(lambda x: x * 3, ydata))
-    # ydata4 = list(map(lambda x: x * 4, ydata))
+
 
     # xdata = df['time_stamp'].tolist()
-    ydata1 = df['value'].astype(int).tolist()
-    xdata = df['time_stamp'].apply(dt2epoch).tolist()
+    # ydata1 = df['value'].astype(int).tolist()
+    # xdata = df['time_stamp'].apply(dt2epoch).tolist()
+
+    xdata = range(nb_element)
+    xdata = list(map(lambda x: start_time + x * 1000000000, xdata))
+    ydata = [i + random.randint(1, 10) for i in range(nb_element)]
+    ydata2 = list(map(lambda x: x * 2, ydata))
+    ydata3 = list(map(lambda x: x * 3, ydata))
+    ydata4 = list(map(lambda x: x * 4, ydata))
 
     tooltip_date = "%d %b %Y %H:%M:%S %p"
-    extra_serie = {"tooltip": {"y_start": "There are ", "y_end": " calls"},
+    extra_serie = {"tooltip": {"y_start": "", "y_end": ""},
                    "date_format": tooltip_date}
     chartdata = {
         'x': xdata,
-        'name': 'series 1', 'y1': ydata1, 'extra1': extra_serie
+        'name': 'series 1', 'y1': ydata, 'extra1': extra_serie,
+        'name2': 'series 2', 'y2': ydata2, 'extra2': extra_serie
     }
     # charttype = "lineChart"
     # chartcontainer = 'lineChart_container'
@@ -100,6 +103,32 @@ def index(request):
         qs = DataSetPG.objects.all().order_by('id')
         df = read_frame(qs)
 
+        new_df = df.value.apply(lambda x: pd.Series(str(x).split(",")))
+        del df['value']
+        df = pd.concat([df, new_df], axis=1, sort=False)
+
+        # df = read_frame(qs)
+        #
+        # all_list = df.value.str.split(',').to_list()
+        # del df['value']
+        # new_df = pd.DataFrame(all_list)
+        # df = pd.concat([df, new_df], axis=1, sort=False)
+        del df['id']
+        del df['tower_code']
+
+        print(df)
+        df.fillna(0,inplace=True)
+        print(df)
+
+        for x in df:
+            if df[x].name is not 'time_stamp':
+                print(df[x].name)
+                print(df[x])
+                df[x].astype(int)
+                print(df[x])
+
+        # df.to_csv(path_or_buf='test.csv', float_format='%.2f', index=False, encoding='utf-8')
+        df.to_csv(path_or_buf='test.csv', index=False)
 
         data = [
             ['Year', 'Sales', 'Expenses'],
@@ -108,19 +137,20 @@ def index(request):
             ["2006", 660, 1120],
             ["2007", 1030, 540]
         ]
-        # DataSource object
-        data_source = SimpleDataSource(data=data)
-        # Chart object
+
+        # data_source = SimpleDataSource(data=data)
+        csv_file = open('test.csv')
+        print(csv_file)
+        # data_source = CSVDataSource(csv_file)
+        data_source = MyCSVDataSource(csv_file)
+
         # data_source = ModelDataSource(qs, fields=['time_stamp', 'value'])
-        data_source = MyModelDataSource(qs, fields=['time_stamp', 'value'])
-        # print(pd.DataFrame.to_csv(df))
-        # data_source = CSVDataSource(pd.DataFrame.to_csv(self=df , sep=';', float_format='%.2f', index=False, decimal=","))
+        # data_source = MyModelDataSource(qs, fields=['time_stamp', 'value'])
+
         # print(pd.DataFrame.to_csv(self=df , sep=';', float_format='%.2f', index=True, decimal=","))
-        # print(data_source)
-        # print(CSVDataSource(data_source))
-        print(data_source)
+        print(data_source.data)
         chart = LineChart(data_source)
-        chart1 = LineChartMorris(data_source, options={'xLabels': 'day', 'resize': True})
+        chart1 = LineChartMorris(data_source, options={'xLabels': 'day'})
         chart2 = LineChartHIGH(data_source)
 
         context = {'chart': chart,  'chart1': chart1, 'chart2': chart2}
@@ -128,9 +158,24 @@ def index(request):
         return render(request, 'home.html', context)
 
 
+class MyCSVDataSource(CSVDataSource):
+    def get_data(self):
+        data = super(MyCSVDataSource, self).get_data()
+        print(data)
+        header = data[0]
+        data_without_header = data[1:]
+        for row in data_without_header:
+            # row[0] = datetime(year=row[0].year, month=row[0].month, day=row[0].day, hour=row[0].hour, minute=row[0].minute, second=row[0].second)
+            row[1] = int(row[1])
+            row[2] = int(row[2])
+        data_without_header.insert(0, header)
+        return data_without_header
+
+
 class MyModelDataSource(ModelDataSource):
     def get_data(self):
         data = super(MyModelDataSource, self).get_data()
+        print(data)
         header = data[0]
         data_without_header = data[1:]
         for row in data_without_header:

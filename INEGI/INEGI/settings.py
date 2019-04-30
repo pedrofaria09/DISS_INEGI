@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django_countries',
     'django_nvd3',
     'graphos',
+    'dbbackup',
 ]
 
 MIDDLEWARE = [
@@ -165,3 +166,6 @@ AUTH_USER_MODEL = 'main_app.MyUser'
 BOOTSTRAP4 = {
     'include_jquery': True,
 }
+
+DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
+DBBACKUP_STORAGE_OPTIONS = {'location': 'files/backup'}
