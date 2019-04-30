@@ -3,8 +3,7 @@
 {% load staticfiles %}
 
 {% block content %}
-{#    {% load_chart charttype chartdata chartcontainer extra %}#}
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="{% static 'js/googe_charts.js' %}"></script>
     <script type="text/javascript">
         google.charts.load('current', {'packages':['timeline']});
         google.charts.load('current', {'packages':['corechart']});
@@ -31,17 +30,10 @@
         });
     </script>
 
-
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
-    <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
-
-{#    <script src="http://yui.yahooapis.com/3.18.1/build/yui/yui-min.js"></script>#}
-{##}
-{#    <script src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.js"></script>#}
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highcharts/7.1.1/highcharts.js"></script>
-{#    <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.24/c3.js"></script>#}
+    <link href="{% static 'css/morris.css' %}" rel="stylesheet">
+    <script src="{% static 'js/raphael-min.js' %}"></script>
+    <script src="{% static 'js/morris.min.js' %}"></script>
+    <script src="{% static 'js/highcharts.js' %}"></script>
 
     <div class="container-fluid">
         <!-- Page Heading -->
@@ -66,20 +58,14 @@
         </div>
 
         <div id="timeline" class="timeline" style="height: 180px;"></div>
+
         Google
 {{ chart.as_html }}
         Morris
 {{ chart1.as_html }}
         HighChart
 {{ chart2.as_html }}
-        <div class="card shadow mb-4">
-            <div class="card-header py-2">
-                <h6 class="m-0 font-weight-bold text-primary text-center">Data</h6>
-            </div>
-            <div class="card-body">
-{#                {% include_container chartcontainer 450 '100%' %}#}
-            </div>
-        </div>
+
     </div>
 
 {% endblock %}

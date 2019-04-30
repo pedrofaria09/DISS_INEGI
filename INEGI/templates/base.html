@@ -1,7 +1,10 @@
 {% load staticfiles %}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.4/nv.d3.min.css"/>
-{#    <script src="{% static 'js/d3.min.js' %}" charset="utf-8"></script>#}
-{#    <script src="{% static 'js/nv.d3.min.js' %}"></script>#}
+    <link href="{% static 'css/nv.d3.min.css' %}" rel="stylesheet">
+    <script src="{% static 'js/d3.min.js' %}" charset="utf-8"></script>
+    <script src="{% static 'js/nv.d3.min.js' %}"></script>
+
+{#    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.3.13/d3.js" charset="utf-8"></script>#}
+{#    <script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.0-alpha/nv.d3.js"></script>#}
 
 {% load nvd3_tags %}
 
@@ -29,9 +32,6 @@
 
     <!-- Custom styles for Tables -->
     <link href="{% static 'vendor/datatables/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.3.13/d3.js" charset="utf-8"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.0-alpha/nv.d3.js"></script>
 
     {% load bootstrap4 %} {# import bootstrap4/bootstrap3 #}
 {#    {% bootstrap_css %} {# Embed Bootstrap CSS#}
