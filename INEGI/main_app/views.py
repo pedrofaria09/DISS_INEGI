@@ -47,31 +47,39 @@ def chart(request):
     qs = DataSetPG.objects.all().order_by('id')
     df = read_frame(qs)
     print(df.head())
-    nb_element = 13
-    start_time = int(time.mktime(datetime(2012, 6, 1).timetuple()) * 1000)
 
+    xdata = df['time_stamp'].apply(dt2epoch).tolist()
+    new_df = df.value.apply(lambda x: pd.Series(str(x).split(",")))
+    del df['value']
+    df = pd.concat([df, new_df], axis=1, sort=False)
+    del df['id']
+    del df['tower_code']
 
+    # Convert all other columns rather than time_stamp to float
+    for d in df:
+        if df[d].name is not 'time_stamp':
+            df[d] = df[d].astype(float).tolist()
 
-    # xdata = df['time_stamp'].tolist()
-    # ydata1 = df['value'].astype(int).tolist()
-    # xdata = df['time_stamp'].apply(dt2epoch).tolist()
+    # Replace all NaN with None
+    df = df.where((pd.notnull(df)), None)
 
-    xdata = range(nb_element)
-    xdata = list(map(lambda x: start_time + x * 1000000000, xdata))
-    ydata = [i + random.randint(1, 10) for i in range(nb_element)]
-    ydata2 = list(map(lambda x: x * 2, ydata))
-    ydata3 = list(map(lambda x: x * 3, ydata))
-    ydata4 = list(map(lambda x: x * 4, ydata))
-    ydata2[4] = ''
-    ydata2[5] = ''
+    ydata = []
+    for d in df:
+        if df[d].name is not 'time_stamp':
+            ydata.append(df[d])
+
     tooltip_date = "%d %b %Y %H:%M:%S %p"
-    extra_serie = {"tooltip": {"y_start": "", "y_end": ""},
+    extra_serie = {"tooltip": {"y_start": "value: ", "y_end": " "},
                    "date_format": tooltip_date}
-    chartdata = {
-        'x': xdata,
-        'name': 'series 1', 'y1': ydata, 'extra1': extra_serie,
-        'name2': 'series 2', 'y2': ydata2, 'extra2': extra_serie
-    }
+    chartdata = {'x': xdata}
+    for idx, item in enumerate(ydata):
+        chartdata = {**chartdata, **{'name': item.name, 'y'+str(idx): item, 'extra'+str(idx): extra_serie}}
+
+    # chartdata = {
+    #     'x': xdata,
+    #     'name': 'series 1', 'y1': ydata[0], 'extra1': extra_serie,
+    # }
+
     # charttype = "lineChart"
     # chartcontainer = 'lineChart_container'
     charttype = "lineWithFocusChart"
@@ -135,7 +143,6 @@ def index(request):
 
         # data_source = SimpleDataSource(data=data)
         csv_file = open('test.csv')
-        print(csv_file)
         # data_source = CSVDataSource(csv_file)
         data_source = MyCSVDataSource(csv_file)
 
