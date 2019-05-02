@@ -18,11 +18,8 @@ from dal import autocomplete
 from django_pandas.io import *
 from graphos.sources.simple import SimpleDataSource
 from graphos.renderers.gchart import LineChart
-from graphos.renderers.yui import LineChart as LineChartYUI
 from graphos.renderers.morris import LineChart as LineChartMorris
-from graphos.renderers.flot import LineChart as LineChartFLOT
 from graphos.renderers.highcharts import LineChart as LineChartHIGH
-from graphos.renderers.c3js import LineChart as LineChartC3JS
 
 from graphos.sources.model import ModelDataSource
 from graphos.sources.csv_file import CSVDataSource
@@ -65,7 +62,8 @@ def chart(request):
     ydata2 = list(map(lambda x: x * 2, ydata))
     ydata3 = list(map(lambda x: x * 3, ydata))
     ydata4 = list(map(lambda x: x * 4, ydata))
-
+    ydata2[4] = ''
+    ydata2[5] = ''
     tooltip_date = "%d %b %Y %H:%M:%S %p"
     extra_serie = {"tooltip": {"y_start": "", "y_end": ""},
                    "date_format": tooltip_date}
@@ -116,16 +114,13 @@ def index(request):
         del df['id']
         del df['tower_code']
 
-        print(df)
-        df.fillna(0,inplace=True)
-        print(df)
+        # print(df)
+        # df.fillna(0, inplace=True)
+        # print(df)
 
-        for x in df:
-            if df[x].name is not 'time_stamp':
-                print(df[x].name)
-                print(df[x])
-                df[x].astype(int)
-                print(df[x])
+        # for x in df:
+        #     if df[x].name is not 'time_stamp':
+        #         df[x].astype(float)
 
         # df.to_csv(path_or_buf='test.csv', float_format='%.2f', index=False, encoding='utf-8')
         df.to_csv(path_or_buf='test.csv', index=False)
@@ -150,7 +145,7 @@ def index(request):
         # print(pd.DataFrame.to_csv(self=df , sep=';', float_format='%.2f', index=True, decimal=","))
         print(data_source.data)
         chart = LineChart(data_source)
-        chart1 = LineChartMorris(data_source, options={'xLabels': 'day'})
+        chart1 = LineChartMorris(data_source, options={'xLabels': 'day', 'continuousLine': 'false'})
         chart2 = LineChartHIGH(data_source)
 
         context = {'chart': chart,  'chart1': chart1, 'chart2': chart2}
@@ -165,9 +160,11 @@ class MyCSVDataSource(CSVDataSource):
         header = data[0]
         data_without_header = data[1:]
         for row in data_without_header:
-            # row[0] = datetime(year=row[0].year, month=row[0].month, day=row[0].day, hour=row[0].hour, minute=row[0].minute, second=row[0].second)
-            row[1] = int(row[1])
-            row[2] = int(row[2])
+            for x in range(1, len(row)):
+                try:
+                    row[x] = float(row[x])
+                except (ValueError, TypeError):
+                    row[x] = None
         data_without_header.insert(0, header)
         return data_without_header
 
@@ -179,8 +176,11 @@ class MyModelDataSource(ModelDataSource):
         header = data[0]
         data_without_header = data[1:]
         for row in data_without_header:
-            # row[0] = datetime(year=row[0].year, month=row[0].month, day=row[0].day, hour=row[0].hour, minute=row[0].minute, second=row[0].second)
-            row[1] = int(row[1])
+            for x in range(1, len(row)):
+                try:
+                    row[x] = float(row[x])
+                except (ValueError, TypeError):
+                    row[x] = None
         data_without_header.insert(0, header)
         return data_without_header
 
