@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django_nvd3',
     'graphos',
     'dbbackup',
+    'chartjs',
 ]
 
 MIDDLEWARE = [

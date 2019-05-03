@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load staticfiles %}
+{% block content %}
+
+    <div class="container-fluid">
+        <!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4 timeline2">
+            <h1 class="h3 mb-0 text-gray-800">Chart</h1>
+        </div>
+
+        <div class="card shadow mb-4">
+            <div class="card-header py-2">
+                <h6 class="m-0 font-weight-bold text-primary text-center">HighChart</h6>
+            </div>
+            <div class="card-body">
+                <div id="myHighChart" style="height: 600px;"></div>
+                <button id="button_chart2" class="btn btn-success">Hide series</button>
+
+                <script type="text/javascript" src="{% static 'js/highcharts.js' %}"></script>
+                <script type="text/javascript" src="{% static 'js/highcharts_df.js' %}"></script>
+
+                    {% for field in form %}
+                        <div class="form-group">
+                            {{ field.label_tag }}
+                            {% render_field field placeholder=field.label %}
+                        </div>
+                    {% endfor %}
+
+                    <div class="form-group">
+                        <div class="form-row">
+                            <div class="col-md-4">
+                                <input type="submit" id="submit" class="btn btn-primary btn-block" value="Search">
+                            </div>
+                        </div>
+                    </div>
+
+            </div>
+        </div>
+
+        <div class="card shadow mb-4">
+            <div class="card-header py-2">
+                <h6 class="m-0 font-weight-bold text-primary text-center">ChartJS</h6>
+            </div>
+            <div class="card-body">
+{#                <canvas id="myChart" width="500" height="400"></canvas>#}
+{##}
+{#                <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>#}
+{#                <script type="text/javascript">#}
+{#                    $.get('{% url "line_chart_json" %}', function(data) {#}
+{#                        console.log(data)#}
+{#                        var ctx = $("#myChart").get(0).getContext("2d");#}
+{#                        new Chart(ctx, {#}
+{#                            type: 'line', data: data#}
+{#                        });#}
+{#                    });#}
+{#                </script>#}
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}
