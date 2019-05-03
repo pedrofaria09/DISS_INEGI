@@ -38,10 +38,11 @@
                             <div class="form-group">
                                 {% if field.field.is_checkbox %}
                                     <div class="form-check">
-                                        {{ field }}{{ field.label_tag }}
+                                        {{ field }}{% if field.field.required %} *{% endif %}
+                                        {{ field.label_tag }}
                                     </div>
                                 {% else %}
-                                    {{ field.label_tag }}
+                                    {{ field.label_tag }}{% if field.field.required %} *{% endif %}
                                     {% render_field  field placeholder=field.label %}
                                 {% endif %}
                             </div>

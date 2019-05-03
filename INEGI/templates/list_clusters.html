@@ -35,7 +35,7 @@
                                 <td class="align-middle p-2"><a href="{% url "view_cluster" cluster.pk %}">{{ cluster.name|title }}</a></td>
                                 <td class="align-middle p-2">
                                     {% for tower in cluster.towers.all %}
-                                        <a href="{% url "view_tower" tower.pk %}" class="btn btn-sm btn-light">{{ tower.code|upper }}</a>
+                                        <a href="{% url "view_tower" tower.pk %}" class="btn btn-sm btn-light">{{ tower.code_inegi|upper }}</a>
                                     {% endfor %}
                                 </td>
                             </tr>

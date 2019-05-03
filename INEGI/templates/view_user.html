@@ -29,10 +29,11 @@
                         <div class="form-group">
                             {% if field.field.is_checkbox %}
                                 <div class="form-check">
-                                    {{ field }}{{ field.label_tag }}
+                                    {{ field }}{% if field.field.required %} *{% endif %}
+                                    {{ field.label_tag }}
                                 </div>
                             {% else %}
-                                {{ field.label_tag }}
+                                {{ field.label_tag }}{% if field.field.required %} *{% endif %}
                                 {% if field.name == "affiliation" %}
                                     <a href="#" class="js-create-type related-widget-wrapper-link add-related" data-type="affiliation" id="add_id_type" title="Add another Affiliation"><img src="/static/admin/img/icon-addlink.svg" alt="Add"></a>
                                 {% endif %}

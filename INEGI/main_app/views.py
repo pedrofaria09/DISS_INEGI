@@ -146,7 +146,8 @@ def chart_graphos(request):
     # print(pd.DataFrame.to_csv(self=df , sep=';', float_format='%.2f', index=True, decimal=","))
     chart = LineChart(data_source)
     chart1 = LineChartMorris(data_source, options={'xLabels': 'day', 'continuousLine': 'false'})
-    chart2 = LineChartHIGH(data_source, width=1200, height=600, options={'title': 'Data Visualization', 'chart': {'zoomType': 'xy'}, 'series': {'events': {'click': "function(event) {alert(this.yAxis.toValue(event.x, false));}"}}})
+    chart2 = LineChartHIGH(data_source, width=1200, height=600, options={'title': 'Data Visualization', 'chart': {'zoomType': 'xy'},
+                                                                         'series': {'events': {'click': "function(event) {alert(this.yAxis.toValue(event.x, false));}"}}})
 
     context = {'chart': chart, 'chart1': chart1, 'chart2': chart2}
 
@@ -2271,7 +2272,7 @@ class TowerAutocomplete(autocomplete.Select2QuerySetView):
         qs = Tower.objects.all().order_by('-id')
 
         if self.q:
-            qs = qs.filter(code__icontains=self.q)
+            qs = qs.filter(code_inegi__icontains=self.q)
 
         return qs
 
