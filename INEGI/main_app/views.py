@@ -43,7 +43,7 @@ def dt2epoch(value):
     return epoch
 
 
-def chart(request):
+def chart_nvd3(request):
     qs = DataSetPG.objects.all().order_by('id')
     df = read_frame(qs)
     print(df.head())
@@ -96,7 +96,61 @@ def chart(request):
             'focus_enable': True,
         }
     }
-    return render(request, 'chart.html', data)
+    return render(request, 'chart_nvd3.html', data)
+
+
+def chart_graphos(request):
+    qs = DataSetPG.objects.all().order_by('id')
+    df = read_frame(qs)
+
+    new_df = df.value.apply(lambda x: pd.Series(str(x).split(",")))
+    del df['value']
+    df = pd.concat([df, new_df], axis=1, sort=False)
+
+    # df = read_frame(qs)
+    #
+    # all_list = df.value.str.split(',').to_list()
+    # del df['value']
+    # new_df = pd.DataFrame(all_list)
+    # df = pd.concat([df, new_df], axis=1, sort=False)
+    del df['id']
+    del df['tower_code']
+
+    # print(df)
+    # df.fillna(0, inplace=True)
+    # print(df)
+
+    # for x in df:
+    #     if df[x].name is not 'time_stamp':
+    #         df[x].astype(float)
+
+    # df.to_csv(path_or_buf='test.csv', float_format='%.2f', index=False, encoding='utf-8')
+    df.to_csv(path_or_buf='test.csv', index=False)
+
+    data = [
+        ['Year', 'Sales', 'Expenses'],
+        ["2004", 1000, 400],
+        ["2005", 1170, 460],
+        ["2006", 660, 1120],
+        ["2007", 1030, 540]
+    ]
+
+    # data_source = SimpleDataSource(data=data)
+    csv_file = open('test.csv')
+    # data_source = CSVDataSource(csv_file)
+    data_source = MyCSVDataSource(csv_file)
+
+    # data_source = ModelDataSource(qs, fields=['time_stamp', 'value'])
+    # data_source = MyModelDataSource(qs, fields=['time_stamp', 'value'])
+
+    # print(pd.DataFrame.to_csv(self=df , sep=';', float_format='%.2f', index=True, decimal=","))
+    chart = LineChart(data_source)
+    chart1 = LineChartMorris(data_source, options={'xLabels': 'day', 'continuousLine': 'false'})
+    chart2 = LineChartHIGH(data_source, width=1200, height=600, options={'title': 'Data Visualization', 'chart': {'zoomType': 'xy'}, 'series': {'events': {'click': "function(event) {alert(this.yAxis.toValue(event.x, false));}"}}})
+
+    context = {'chart': chart, 'chart1': chart1, 'chart2': chart2}
+
+    return render(request, 'chart_graphos.html', context)
 
 
 def index(request):
@@ -105,65 +159,13 @@ def index(request):
         form = LoginForm()
         return render(request, 'home.html', {'form': form})
     else:
-
-        qs = DataSetPG.objects.all().order_by('id')
-        df = read_frame(qs)
-
-        new_df = df.value.apply(lambda x: pd.Series(str(x).split(",")))
-        del df['value']
-        df = pd.concat([df, new_df], axis=1, sort=False)
-
-        # df = read_frame(qs)
-        #
-        # all_list = df.value.str.split(',').to_list()
-        # del df['value']
-        # new_df = pd.DataFrame(all_list)
-        # df = pd.concat([df, new_df], axis=1, sort=False)
-        del df['id']
-        del df['tower_code']
-
-        # print(df)
-        # df.fillna(0, inplace=True)
-        # print(df)
-
-        # for x in df:
-        #     if df[x].name is not 'time_stamp':
-        #         df[x].astype(float)
-
-        # df.to_csv(path_or_buf='test.csv', float_format='%.2f', index=False, encoding='utf-8')
-        df.to_csv(path_or_buf='test.csv', index=False)
-
-        data = [
-            ['Year', 'Sales', 'Expenses'],
-            ["2004", 1000, 400],
-            ["2005", 1170, 460],
-            ["2006", 660, 1120],
-            ["2007", 1030, 540]
-        ]
-
-        # data_source = SimpleDataSource(data=data)
-        csv_file = open('test.csv')
-        # data_source = CSVDataSource(csv_file)
-        data_source = MyCSVDataSource(csv_file)
-
-        # data_source = ModelDataSource(qs, fields=['time_stamp', 'value'])
-        # data_source = MyModelDataSource(qs, fields=['time_stamp', 'value'])
-
-        # print(pd.DataFrame.to_csv(self=df , sep=';', float_format='%.2f', index=True, decimal=","))
-        print(data_source.data)
-        chart = LineChart(data_source)
-        chart1 = LineChartMorris(data_source, options={'xLabels': 'day', 'continuousLine': 'false'})
-        chart2 = LineChartHIGH(data_source)
-
-        context = {'chart': chart,  'chart1': chart1, 'chart2': chart2}
-
+        context = {}
         return render(request, 'home.html', context)
 
 
 class MyCSVDataSource(CSVDataSource):
     def get_data(self):
         data = super(MyCSVDataSource, self).get_data()
-        print(data)
         header = data[0]
         data_without_header = data[1:]
         for row in data_without_header:
@@ -179,7 +181,6 @@ class MyCSVDataSource(CSVDataSource):
 class MyModelDataSource(ModelDataSource):
     def get_data(self):
         data = super(MyModelDataSource, self).get_data()
-        print(data)
         header = data[0]
         data_without_header = data[1:]
         for row in data_without_header:
@@ -1642,7 +1643,8 @@ def add_calibration(request, equipment_id):
                                       slope=form.cleaned_data.get('slope'),
                                       calib_date=form.cleaned_data.get('calib_date'),
                                       ref=form.cleaned_data.get('ref'),
-                                      equipment=equipment)
+                                      equipment=equipment,
+                                      dimension_type=form.cleaned_data.get('dimension_type'))
             calibration.save()
             messages.success(request, 'Calibration was added successfully')
             return HttpResponseRedirect(reverse("view_equipment", kwargs={'equipment_id': equipment_id}))

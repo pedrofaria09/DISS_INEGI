@@ -3,49 +3,19 @@
 {% load staticfiles %}
 
 {% block content %}
-    <script src="{% static 'js/googe_charts.js' %}"></script>
-    <script type="text/javascript">
-        google.charts.load('current', {'packages':['timeline']});
-        google.charts.load('current', {'packages':['corechart']});
-        google.load("visualization", "1", {packages:["corechart"]});
-        google.charts.setOnLoadCallback(drawChart);
-        function drawChart() {
-            var container = document.getElementById('timeline');
-            var chart = new google.visualization.Timeline(container);
-            var dataTable = new google.visualization.DataTable();
-
-            dataTable.addColumn({ type: 'string', id: 'President' });
-            dataTable.addColumn({ type: 'date', id: 'Start' });
-            dataTable.addColumn({ type: 'date', id: 'End' });
-            dataTable.addRows([
-                [ 'Washington', new Date(1789, 3, 30), new Date(1797, 2, 4) ],
-                [ 'Adams',      new Date(1789, 2, 4),  new Date(1797, 2, 1) ],
-                [ 'Adams',      new Date(1797, 2, 20),  new Date(1801, 2, 4) ],
-                [ 'Jefferson',  new Date(1801, 2, 4),  new Date(1809, 2, 4) ]]);
-
-            chart.draw(dataTable);
-        }
-        $('.timeline2').click(function(){
-           console.log(this)
-        });
-    </script>
-
-    <link href="{% static 'css/morris.css' %}" rel="stylesheet">
-    <script src="{% static 'js/raphael-min.js' %}"></script>
-    <script src="{% static 'js/morris.min.js' %}"></script>
-
-    <script src="{% static 'js/highcharts.js' %}"></script>
 
     <div class="container-fluid">
         <!-- Page Heading -->
-        <div class="d-sm-flex align-items-center justify-content-between mb-4 timeline2">
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
         </div>
 
         <div class="row">
-            <div class="col-md-12">
-                <a href="{% url "chart" %}" class="btn btn-success">View other chart</a><br>
-                <br>
+            <div class="col-md-2">
+                <a href="{% url "chart_nvd3" %}" class="btn btn-success">View nvd3</a><br>
+            </div>
+            <div class="col-md-2">
+                <a href="{% url "chart_graphos" %}" class="btn btn-success">View graphos</a><br>
             </div>
         </div>
 
@@ -57,15 +27,6 @@
                 <a href="{% url "show_towers_data_pg" %}">Show Towers Data Postgres</a><br>
             </div>
         </div>
-
-        <div id="timeline" class="timeline" style="height: 180px;"></div>
-
-        Google
-{{ chart.as_html }}
-        Morris
-{{ chart1.as_html }}
-        HighChart
-{{ chart2.as_html }}
 
     </div>
 
