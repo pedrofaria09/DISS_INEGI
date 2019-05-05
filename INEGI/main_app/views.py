@@ -24,6 +24,8 @@ from graphos.renderers.highcharts import LineChart as LineChartHIGH
 from graphos.sources.model import ModelDataSource
 from graphos.sources.csv_file import CSVDataSource
 from chartjs.views.lines import BaseLineChartView, HighchartPlotLineChartView
+from django.views import View
+
 
 import time, re, io, json, pytz, random
 
@@ -42,7 +44,7 @@ def dt2epoch(value):
     return epoch
 
 
-class LineChartJSONView(BaseLineChartView):
+class line_chart_json(BaseLineChartView):
     def get_labels(self):
         """Return 7 labels for the x-axis."""
         return ["January", "February", "March", "April", "May", "June", "July"]
@@ -59,32 +61,51 @@ class LineChartJSONView(BaseLineChartView):
                 [87, 21, 94, 3, 90, 13, 65]]
 
 
-class LineHighChartJSONView(HighchartPlotLineChartView):
+class line_highchart_json(HighchartPlotLineChartView):
 
-    qs = DataSetPG.objects.all().order_by('id')
-    df = read_frame(qs)
-    xdata = df['time_stamp'].apply(dt2epoch).tolist()
+    def get(self, request, *args, **kwargs):
+        begin_Date = self.request.GET.get('begin_date', None)
+        end_date = self.request.GET.get('end_date', None)
+        print("GET - Begin: ", begin_Date)
+        print("GET - End: ", end_date)
 
-    new_df = df.value.apply(lambda x: pd.Series(str(x).split(",")))
-    del df['value']
-    df = pd.concat([df, new_df], axis=1, sort=False)
-    del df['id']
-    del df['tower_code']
+        qs = DataSetPG.objects.all().order_by('id')
+        df = read_frame(qs)
+        self.xdata = df['time_stamp'].apply(dt2epoch).tolist()
 
-    # Convert all other columns rather than time_stamp to float
-    for d in df:
-        if df[d].name is not 'time_stamp':
-            df[d] = df[d].astype(float).tolist()
+        new_df = df.value.apply(lambda x: pd.Series(str(x).split(",")))
+        del df['value']
+        df = pd.concat([df, new_df], axis=1, sort=False)
+        del df['id']
+        del df['tower_code']
 
-    # Replace all NaN with None
-    df = df.where((pd.notnull(df)), None)
+        # Convert all other columns rather than time_stamp to float
+        for d in df:
+            if df[d].name is not 'time_stamp':
+                df[d] = df[d].astype(float).tolist()
 
-    ydata = []
-    indexs = []
-    for d in df:
-        if df[d].name is not 'time_stamp':
-            ydata.append(df[d].values.tolist())
-            indexs.append(df[d].name)
+        # Replace all NaN with None
+        df = df.where((pd.notnull(df)), None)
+
+        self.ydata = []
+        self.indexs = []
+        for d in df:
+            if df[d].name is not 'time_stamp':
+                self.ydata.append(df[d].values.tolist())
+                self.indexs.append(df[d].name)
+
+        self.title = 'Data Visualization'
+        self.y_axis_title = 'Values'
+
+        # special - line charts credits are personalized
+        self.credits = {
+            'enabled': True,
+            'href': 'http://google.com',
+            'text': 'INEGI Team',
+        }
+
+        context = self.get_context_data(**kwargs)
+        return self.render_to_response(context)
 
     def get_labels(self):
         """Return labels."""
@@ -98,26 +119,13 @@ class LineHighChartJSONView(HighchartPlotLineChartView):
         """Return dataset to plot."""
         return self.ydata
 
-    title = 'Data Visualization'
-    y_axis_title = 'Values'
-
-    # special - line charts credits are personalized
-    credits = {
-        'enabled': True,
-        'href': 'http://google.com',
-        'text': 'INEGI Team',
-    }
-
-line_chart_json = LineChartJSONView.as_view()
-line_highchart_json = LineHighChartJSONView.as_view()
-
 
 def chart_chartjs(request):
     form = DateRangeChooseForm()
-    return render(request, 'line_chart.html', {'form': form})
+    return render(request, 'chart_chartjs.html', {'form': form})
 
 
-def chart_nvd3(request, ChartFill):
+def chart_nvd3(request):
     qs = DataSetPG.objects.all().order_by('id')
     df = read_frame(qs)
     print(df.head())

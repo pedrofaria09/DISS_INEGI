@@ -6,7 +6,8 @@ $(document).ready(function () {
 $(function () {
     var button = $('#button_chart');
     button.click(function () {
-        var chart = $('#container').highcharts();
+        var chart = $('#chart_container').highcharts();
+        console.log(chart);
         var series = chart.series[0];
         if (series.visible) {
             $(chart.series).each(function () {

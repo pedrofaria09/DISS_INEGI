@@ -1,8 +1,13 @@
 
-
 // Personalization of HighChart
-$.get('/line_highchart_json', function (data) {
+$(document).ready(function () {
+    $.get('/line_highchart_json', function (data) {
+        getgraph(data);
+    });
+});
 
+function getgraph(data) {
+    console.log(data);
     data["chart"] = {type: "line", 'zoomType': 'xy'};
 
     data["responsive"] = {
@@ -40,6 +45,26 @@ $.get('/line_highchart_json', function (data) {
     };
 
     $("#myHighChart").highcharts(data);
+}
+
+$(function () {
+    var button = $('#submit');
+    button.click(function () {
+
+        var begin_date = $("#id_begin_date").val();
+        console.log(begin_date);
+        var end_date = $("#id_end_date").val();
+        console.log(end_date);
+
+        $.ajax({
+            url: "/line_highchart_json",
+            data : { begin_date: begin_date, end_date: end_date},
+            success : function(json) {
+                console.log("requested access complete");
+                getgraph(json);
+            }
+        })
+    });
 });
 
 $(function () {
@@ -62,42 +87,5 @@ $(function () {
             chart.redraw();
             button.html('Hide series');
         }
-    });
-});
-
-
-$(function () {
-    var button = $('#submit');
-    button.click(function () {
-
-        var begin_date = $("#id_begin_date").val();
-        console.log(begin_date);
-        var end_date = $("#id_end_date").val();
-        console.log(end_date);
-
-        var csrftoken = getCookie('csrftoken');
-        $.ajaxSetup({
-            beforeSend: function (xhr, settings) {
-                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                }
-            }
-        });
-
-        $.get('/line_highchart_json',
-            {
-                begin_date: begin_date,
-                end_date: end_date
-            },
-            function (data, status) {
-                console.log("requested access complete");
-            });
-        // $.ajax({
-        //     url: "/line_highchart_json",
-        //     data : { begin_date: begin_date, end_date: end_date},
-        //     success : function(json) {
-        //         console.log("requested access complete");
-        //     }
-        // })
     });
 });
