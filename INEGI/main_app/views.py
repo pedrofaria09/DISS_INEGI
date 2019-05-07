@@ -64,10 +64,12 @@ class line_chart_json(BaseLineChartView):
 class line_highchart_json(HighchartPlotLineChartView):
 
     def get(self, request, *args, **kwargs):
-        begin_Date = self.request.GET.get('begin_date', None)
-        end_date = self.request.GET.get('end_date', None)
+        begin_Date = self.request.GET.get('begin_date', '')
+        end_date = self.request.GET.get('end_date', '')
+        tower_id = self.request.GET.get('tower_id', '')
         print("GET - Begin: ", begin_Date)
         print("GET - End: ", end_date)
+        print("GET - tower_id: ", tower_id)
 
         qs = DataSetPG.objects.all().order_by('id')
         df = read_frame(qs)
@@ -121,8 +123,8 @@ class line_highchart_json(HighchartPlotLineChartView):
 
 
 def chart_chartjs(request):
-    form = DateRangeChooseForm()
-    return render(request, 'chart_chartjs.html', {'form': form})
+    date_form = DateRangeChooseForm()
+    return render(request, 'chart_chartjs.html', {'date_form': date_form})
 
 
 def chart_nvd3(request):
@@ -241,8 +243,21 @@ def index(request):
         form = LoginForm()
         return render(request, 'home.html', {'form': form})
     else:
-        context = {}
+
+        form_tower = TowersDataVFrom()
+        form_date = DateRangeChooseForm()
+        context = {'form_tower': form_tower, 'form_date': form_date}
         return render(request, 'home.html', context)
+
+
+def index2(request):
+
+    if request.user.id is None:
+        form = LoginForm()
+        return render(request, 'home2.html', {'form': form})
+    else:
+        context = {}
+        return render(request, 'home2.html', context)
 
 
 class MyCSVDataSource(CSVDataSource):

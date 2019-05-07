@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load widget_tweaks %}
 {% load staticfiles %}
+
 {% block content %}
 
     <div class="container-fluid">
@@ -20,20 +21,28 @@
                 <script type="text/javascript" src="{% static 'js/highcharts.js' %}"></script>
                 <script type="text/javascript" src="{% static 'js/highcharts_df.js' %}"></script>
 
-                    {% for field in form %}
-                        <div class="form-group">
-                            {{ field.label_tag }}
-                            {% render_field field placeholder=field.label %}
-                        </div>
-                    {% endfor %}
-
+                {{ date_form.media }}
+                {% for field in date_form %}
                     <div class="form-group">
-                        <div class="form-row">
-                            <div class="col-md-4">
-                                <input type="submit" id="submit" class="btn btn-primary btn-block" value="Search">
-                            </div>
+                        {{ field.label_tag }}
+                        {% render_field field placeholder=field.label %}
+                    </div>
+                {% endfor %}
+
+                <div class="form-group">
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <input type="submit" id="submit_date" class="btn btn-primary btn-block" value="Search">
                         </div>
                     </div>
+                </div>
+
+                <!-- THE MODAL WE WILL BE USING -->
+                <div class="modal fade" id="modal-type">
+                    <div class="modal-dialog">
+                        <div class="modal-content"></div>
+                    </div>
+                </div>
 
             </div>
         </div>

@@ -556,3 +556,11 @@ class DateTowerFilter(django_filters.FilterSet):
 class DateRangeChooseForm(forms.Form):
     begin_date = forms.DateTimeField(input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M", attrs={'autocomplete': 'off'}))
     end_date = forms.DateTimeField(input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M", attrs={'autocomplete': 'off'}))
+
+
+class TowersDataVFrom(forms.Form):
+    tower = forms.ModelChoiceField(
+        queryset=Tower.objects.all(),
+        required=False,
+        widget=autocomplete.ModelSelect2(url='tower-autocomplete', attrs={'style': 'width:100%'})
+    )

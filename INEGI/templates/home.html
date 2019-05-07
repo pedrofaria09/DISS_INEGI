@@ -1,34 +1,96 @@
 {% extends 'base.html' %}
-
+{% load widget_tweaks %}
 {% load staticfiles %}
 
 {% block content %}
 
     <div class="container-fluid">
         <!-- Page Heading -->
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+        <div class="d-sm-flex align-items-center justify-content-between mb-4 timeline2">
+            <h1 class="h3 mb-0 text-gray-800">Data Visualization</h1>
+        </div>
+<hr>
+        <div class="d-sm-flex align-items-center justify-content-between mb-4" >
+            <h1 class="h4 mb-0 text-gray-800">
+                <a href="#" class="collapsed clickable" data-toggle="collapse" data-target="#TowerForm" aria-expanded="true" aria-controls="collapseTwo">
+                    Choose Tower
+                <i class="fas fa-angle-double-down fa-sm"></i>
+                </a>
+            </h1>
         </div>
 
-        <div class="row">
-            <div class="col-md-2">
-                <a href="{% url "chart_graphos" %}" class="btn btn-success btn-block">View graphos</a><br>
-
-            </div>
-            <div class="col-md-2">
-                <a href="{% url "chart_nvd3" %}" class="btn btn-success btn-block">View nvd3</a><br>
-            </div>
-            <div class="col-md-2">
-                <a href="{% url "chart_chartjs" %}" class="btn btn-success btn-block">View ChartJS</a><br>
-            </div>
-        </div>
-
-        <div class="row">
+        <div class="row collapse show" id="TowerForm" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
             <div class="col-12">
-                <br>
-                <a href="{% url "show_towers_data_mongo" %}">Show Towers Data Mongo</a><br>
-                <a href="{% url "show_towers_data_influx" %}">Show Towers Data Influx</a><br>
-                <a href="{% url "show_towers_data_pg" %}">Show Towers Data Postgres</a><br>
+                {{ form_tower.media }}
+                {{ form_tower.as_p }}
+                <div class="form-group">
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <input type="submit" id="submit_tower" class="btn btn-primary btn-block" value="View Data">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+<hr>
+        <div class="card shadow mb-4 collapse" id="ChartArea" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+            <div class="card-header py-2">
+                <h6 class="m-0 font-weight-bold text-primary text-center">HighChart</h6>
+            </div>
+            <div class="card-body">
+
+                <div id="myHighChart" style="height: 600px;"></div>
+
+                <div class="form-group">
+                    <div class="form-row">
+                        <div class="col-md-3">
+                            <button id="button_chart2" class="btn btn-success btn-block">Hide series</button>
+                        </div>
+                    </div>
+                </div>
+
+                <script type="text/javascript" src="{% static 'js/highcharts.js' %}"></script>
+                <script type="text/javascript" src="{% static 'js/highcharts_df.js' %}"></script>
+
+            </div>
+        </div>
+
+
+        <div class="collapse" id="FilterForm" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+            <hr>
+
+            <div class="d-sm-flex align-items-center justify-content-between mb-4 timeline2">
+                <h1 class="h3 mb-0 text-gray-800">Options</h1>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    {{ form_date.media }}
+                    {% for field in form_date %}
+                        <div class="form-group">
+                            {{ field.label_tag }}
+                            {% render_field field placeholder=field.label %}
+                        </div>
+                    {% endfor %}
+
+                    <div class="form-group">
+                        <div class="form-row">
+                            <div class="col-md-6">
+                                <input type="submit" id="submit_date" class="btn btn-primary btn-block" value="Search">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr>
+        
+        </div>
+
+        <!-- THE MODAL WE WILL BE USING -->
+        <div class="modal fade" id="modal-type">
+            <div class="modal-dialog">
+                <div class="modal-content"></div>
             </div>
         </div>
 

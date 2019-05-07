@@ -1,11 +1,17 @@
-
-// Personalization of HighChart
+// Ajax call to line_highchart_json to load all data
 $(document).ready(function () {
-    $.get('/line_highchart_json', function (data) {
-        getgraph(data);
-    });
+
+    // $.ajax({
+    //     url: "/line_highchart_json",
+    //     success : function(json) {
+    //         console.log("1st load");
+    //         getgraph(json);
+    //     }
+    // })
+
 });
 
+// Personalization of HighChart
 function getgraph(data) {
     console.log(data);
     data["chart"] = {type: "line", 'zoomType': 'xy'};
@@ -37,7 +43,38 @@ function getgraph(data) {
             point: {
                 events: {
                     click: function (e) {
-                        alert('Date: ' + Highcharts.dateFormat('%d/%m/%Y %H:%M:%S', this.category) + ', value: ' + this.y);
+                        // alert('Date: ' + Highcharts.dateFormat('%d/%m/%Y %H:%M:%S', this.category) + ', value: ' + this.y);
+                        $("#modal-type").modal("show");
+
+                        $("#modal-type .modal-content").html(
+                            "<div class='modal-header'>" +
+                            "<h5 class='modal-title'>You want to add this Date to?</h5>" +
+                            "</div>" +
+                            "<div class='modal-footer'>" +
+                            "<div class='col-md-4'>" +
+                            "<button type='submit' id='begin_date_modal' class='btn btn-primary btn-block'>Begin Date</button>" +
+                            "</div>" +
+                            "<div class='col-md-4'>" +
+                            "<button type='submit' id='end_date_modal' class='btn btn-primary btn-block'>End Date</button>" +
+                            "</div>" +
+                            "<div class='col-md-4'>" +
+                            "<button type='button' class='btn btn-warning btn-block' data-dismiss='modal'>Close</button>" +
+                            "</div>" +
+                            "</div>"
+                        );
+                        var date = Highcharts.dateFormat('%d/%m/%Y %H:%M:%S', this.category);
+
+                        var button1 = $('#begin_date_modal');
+                        button1.click(function () {
+                            $("#id_begin_date").val(date);
+                            $("#modal-type").modal("hide");
+                        });
+
+                        var button2 = $('#end_date_modal');
+                        button2.click(function () {
+                            $("#id_end_date").val(date);
+                            $("#modal-type").modal("hide");
+                        });
                     }
                 }
             }
@@ -48,7 +85,7 @@ function getgraph(data) {
 }
 
 $(function () {
-    var button = $('#submit');
+    var button = $('#submit_date');
     button.click(function () {
 
         var begin_date = $("#id_begin_date").val();
@@ -56,14 +93,43 @@ $(function () {
         var end_date = $("#id_end_date").val();
         console.log(end_date);
 
-        $.ajax({
-            url: "/line_highchart_json",
-            data : { begin_date: begin_date, end_date: end_date},
-            success : function(json) {
-                console.log("requested access complete");
-                getgraph(json);
-            }
-        })
+        if (begin_date > end_date)
+            alert("Begin date is higher than end date");
+        else
+            $.ajax({
+                url: "/line_highchart_json",
+                data : { begin_date: begin_date, end_date: end_date},
+                success : function(json) {
+                    console.log("requested access complete");
+                    getgraph(json);
+                }
+            })
+    });
+});
+
+$(function () {
+    var button = $('#submit_tower');
+    button.click(function () {
+        if ( document.getElementById("TowerForm").classList.contains('show') ){
+
+            var id_tower = $("#id_tower :selected").val();
+
+            if (id_tower){
+                document.getElementById("TowerForm").classList.remove('show');
+                document.getElementById("ChartArea").classList.add('show');
+                document.getElementById("FilterForm").classList.add('show');
+                $.ajax({
+                    url: "/line_highchart_json",
+                    data: {tower_id: id_tower},
+                    success : function(json) {
+                        console.log("loading");
+                        getgraph(json);
+                    }
+                })
+            }else alert("Please choose a tower");
+
+        } else
+            document.getElementById("TowerForm").classList.add('show')
     });
 });
 
