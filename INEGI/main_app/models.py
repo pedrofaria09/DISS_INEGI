@@ -198,7 +198,7 @@ class Equipment(models.Model):
     model = models.ForeignKey('EquipmentCharacteristic', on_delete=models.DO_NOTHING)
 
     def __str__(self):
-        return "%s" % self.sn
+        return "%s - %s" % (self.sn, self.model.type.name)
 
 
 class EquipmentCharacteristic(models.Model):

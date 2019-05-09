@@ -85,23 +85,31 @@ function getgraph(data) {
 }
 
 $(function () {
-    var button = $('#submit_date');
-    button.click(function () {
+    $('#formchart').submit(function() {
 
         var begin_date = $("#id_begin_date").val();
         console.log(begin_date);
         var end_date = $("#id_end_date").val();
         console.log(end_date);
 
+        var id_tower = $("#id_tower :selected").val();
+
+        dataToSend = $(this).serializeArray();
+        dataToSend.push({ name: 'tower_id', value: id_tower });
+
+        console.log(dataToSend);
         if (begin_date > end_date)
             alert("Begin date is higher than end date");
         else
             $.ajax({
-                url: "/line_highchart_json",
-                data : { begin_date: begin_date, end_date: end_date},
+                url: "/classify_from_charts",
+                data : dataToSend,
                 success : function(json) {
-                    console.log("requested access complete");
-                    getgraph(json);
+                    console.log("Can classify");
+                    console.log(json);
+                },
+                failure: function (json) {
+                    console.log("Problem")
                 }
             })
     });

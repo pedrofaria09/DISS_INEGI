@@ -25,7 +25,7 @@ from graphos.sources.model import ModelDataSource
 from graphos.sources.csv_file import CSVDataSource
 from chartjs.views.lines import BaseLineChartView, HighchartPlotLineChartView
 from django.views import View
-
+from django.core import serializers
 
 import time, re, io, json, pytz, random
 
@@ -64,15 +64,20 @@ class line_chart_json(BaseLineChartView):
 class line_highchart_json(HighchartPlotLineChartView):
 
     def get(self, request, *args, **kwargs):
-        begin_Date = self.request.GET.get('begin_date', '')
-        end_date = self.request.GET.get('end_date', '')
         tower_id = self.request.GET.get('tower_id', '')
-        print("GET - Begin: ", begin_Date)
-        print("GET - End: ", end_date)
         print("GET - tower_id: ", tower_id)
 
-        qs = DataSetPG.objects.all().order_by('id')
+        tower = Tower.objects.get(pk=tower_id)
+        today = datetime.now(pytz.utc)
+        less15 = today - timedelta(days=15)
+
+        qs = DataSetPG.objects.filter(QD(tower_code=tower) & QD(time_stamp__range=(less15, today))).order_by('time_stamp')
+
+        conf_periods = PeriodConfiguration.objects.filter(QD(tower=tower) & QD(begin_date__gte=less15, end_date__lte=today))
+        # print(conf_periods)
+
         df = read_frame(qs)
+        # df.set_index('time_stamp')
         self.xdata = df['time_stamp'].apply(dt2epoch).tolist()
 
         new_df = df.value.apply(lambda x: pd.Series(str(x).split(",")))
@@ -80,6 +85,20 @@ class line_highchart_json(HighchartPlotLineChartView):
         df = pd.concat([df, new_df], axis=1, sort=False)
         del df['id']
         del df['tower_code']
+
+        # print(df.head())
+        # for cf in conf_periods:
+            # print("\n", cf.begin_date, cf.end_date, "\n")
+            # temp_df = df[(df['time_stamp'] >= cf.begin_date) & (df['time_stamp'] <= cf.end_date)]
+            # print(temp_df)
+            # equipments_conf = EquipmentConfig.objects.filter(conf_period=cf)
+            # for eq in equipments_conf:
+            #     name = eq.calibration.equipment.model.type.name + str(eq.height)
+            #     dim = Dimension.objects.get(equipment_configuration=eq)
+            #     if dim:
+            #         column = dim.column-1
+            #         temp_df.rename(columns={column: name}, inplace=True)
+            # print(temp_df)
 
         # Convert all other columns rather than time_stamp to float
         for d in df:
@@ -244,7 +263,7 @@ def index(request):
         return render(request, 'home.html', {'form': form})
     else:
 
-        form_tower = TowersDataVFrom()
+        form_tower = TowersDataVForm()
         form_date = DateRangeChooseForm()
         context = {'form_tower': form_tower, 'form_date': form_date}
         return render(request, 'home.html', context)
@@ -1671,7 +1690,6 @@ def add_conf_period(request, tower_id):
             messages.warning(request, 'Period was not added!!!')
     else:
         form = PeriodConfigForm()
-    print(form.as_p())
 
     return render(request, 'add_conf_period.html', {'form': form, 'tower': tower, 'tower_id': tower_id})
 
@@ -2486,7 +2504,7 @@ class CommentTowerTypeAutocomplete(autocomplete.Select2QuerySetView):
         begin_date = self.forwarded.get('begin_date', None)
         end_date = self.forwarded.get('end_date', None)
         tower_id = self.forwarded.get('tower', None)
-
+        print(self.forwarded)
         if begin_date and end_date:
             begin_date = get_date(begin_date)
             end_date = get_date(end_date)
@@ -2532,3 +2550,39 @@ class AffiliationAutocomplete(autocomplete.Select2QuerySetView):
             qs = qs.filter(name__icontains=self.q)
 
         return qs
+
+
+class TowerConfPeriodsAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = PeriodConfiguration.objects.all().order_by('-id')
+        tower = self.forwarded.get('tower', None)
+
+        if tower:
+            qs = qs.filter(tower=tower).distinct()
+            print(qs)
+            if qs:
+                qs = EquipmentConfig.objects.filter(conf_period__in=qs).values_list('calibration', flat=True)
+                qs = Calibration.objects.filter(pk__in=qs).distinct().values_list('equipment', flat=True)
+                qs = Equipment.objects.filter(pk__in=qs).distinct()
+                print(qs)
+
+        if self.q:
+            qs = qs.filter(QD(model__type__name__icontains=self.q))
+
+        return qs
+
+
+def classify_from_charts(request):
+    begin_Date = request.GET.get('begin_date', '')
+    end_date = request.GET.get('end_date', '')
+    tower_id = request.GET.get('tower_id', '')
+    equipments = request.GET.getlist('equipments', '')
+    status = request.GET.get('status', '')
+
+    print("GET - Begin: ", begin_Date)
+    print("GET - End: ", end_date)
+    print("GET - tower_id: ", tower_id)
+    print("GET - equipments: ", equipments)
+    print("GET - status: ", status)
+
+    return HttpResponse("OK")

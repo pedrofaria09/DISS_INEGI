@@ -21,15 +21,24 @@
 
         <div class="row collapse show" id="TowerForm" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
             <div class="col-12">
-                {{ form_tower.media }}
-                {{ form_tower.as_p }}
-                <div class="form-group">
-                    <div class="form-row">
-                        <div class="col-md-6">
-                            <input type="submit" id="submit_tower" class="btn btn-primary btn-block" value="View Data">
+                <form action="javascript:void(0);">
+                    {{ form_tower.media }}
+                    {% for field in form_tower %}
+                        {% if field.name == "tower" %}
+                            <div class="form-group">
+                                {{ field.label_tag }}
+                                {% render_field field placeholder=field.label %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    <div class="form-group">
+                        <div class="form-row">
+                            <div class="col-md-6">
+                                <input type="submit" id="submit_tower" class="btn btn-primary btn-block" value="View Data">
+                            </div>
                         </div>
                     </div>
-                </div>
+                </form>
             </div>
 
         </div>
@@ -66,25 +75,37 @@
 
             <div class="row">
                 <div class="col-12">
-                    {{ form_date.media }}
-                    {% for field in form_date %}
-                        <div class="form-group">
-                            {{ field.label_tag }}
-                            {% render_field field placeholder=field.label %}
-                        </div>
-                    {% endfor %}
+                    <form action="javascript:void(0);" id="formchart">
+                        {{ form_date.media }}
+                        {% for field in form_date %}
+                            <div class="form-group">
+                                {{ field.label_tag }}
+                                {% render_field field placeholder=field.label %}
+                            </div>
+                        {% endfor %}
 
-                    <div class="form-group">
-                        <div class="form-row">
-                            <div class="col-md-6">
-                                <input type="submit" id="submit_date" class="btn btn-primary btn-block" value="Search">
+
+                        {% for field in form_tower %}
+                            {% if field.name != "tower" %}
+                                <div class="form-group">
+                                    {{ field.label_tag }}
+                                    {% render_field field placeholder=field.label %}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+
+                        <div class="form-group">
+                            <div class="form-row">
+                                <div class="col-md-6">
+                                    <input type="submit" id="submit_classification" class="btn btn-primary btn-block" value="Search">
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
             <hr>
-        
+
         </div>
 
         <!-- THE MODAL WE WILL BE USING -->

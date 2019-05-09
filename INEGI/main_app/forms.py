@@ -4,6 +4,7 @@ from .models import *
 from django.contrib.auth.forms import UserCreationForm
 from bootstrap_datepicker_plus import DatePickerInput
 from dal import autocomplete
+
 import django_filters
 from django.forms.widgets import HiddenInput
 
@@ -558,9 +559,21 @@ class DateRangeChooseForm(forms.Form):
     end_date = forms.DateTimeField(input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M", attrs={'autocomplete': 'off'}))
 
 
-class TowersDataVFrom(forms.Form):
+class TowersDataVForm(forms.Form):
     tower = forms.ModelChoiceField(
         queryset=Tower.objects.all(),
         required=False,
         widget=autocomplete.ModelSelect2(url='tower-autocomplete', attrs={'style': 'width:100%'})
+    )
+
+    equipments = forms.ModelMultipleChoiceField(
+        queryset=PeriodConfiguration.objects.all(),
+        required=True,
+        widget=autocomplete.ModelSelect2Multiple(url='tower-conf_periods-autocomplete', forward=['tower'], attrs={'style': 'width:100%'})
+    )
+
+    status = forms.ModelChoiceField(
+        queryset=Status.objects.all(),
+        required=True,
+        widget=autocomplete.ModelSelect2(url='status-autocomplete', attrs={'style': 'width:100%'})
     )

@@ -84,8 +84,11 @@ urlpatterns = [
     url(r'^comment-tower-autocomplete/$', views.CommentTowerTypeAutocomplete.as_view(), name='comment-tower-autocomplete'),
     url(r'^comment-classification-autocomplete/$', views.CommentClassificationTypeAutocomplete.as_view(),name='comment-classification-autocomplete'),
     url(r'^affiliation-autocomplete/$', views.AffiliationAutocomplete.as_view(), name='affiliation-autocomplete'),
+    url(r'^tower-conf_periods-autocomplete/$', views.TowerConfPeriodsAutocomplete.as_view(), name='tower-conf_periods-autocomplete'),
 
     url(r'^ban_user/?$', views.ban_user, name='ban_user'),
+
+    url(r'^classify_from_charts/?$', views.classify_from_charts, name='classify_from_charts'),
 
     url(r'^search/?$', views.search, name='search'),
     url(r'^chart_nvd3/?$', views.chart_nvd3, name='chart_nvd3'),
