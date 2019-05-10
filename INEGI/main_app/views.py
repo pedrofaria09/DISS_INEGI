@@ -61,7 +61,12 @@ class line_chart_json(BaseLineChartView):
                 [87, 21, 94, 3, 90, 13, 65]]
 
 
-class line_highchart_json(HighchartPlotLineChartView):
+class LineHighchartJson(HighchartPlotLineChartView):
+
+    def __init__(self):
+        self.xdata = []
+        self.ydata = []
+        self.indexs = []
 
     def get(self, request, *args, **kwargs):
         tower_id = self.request.GET.get('tower_id', '')
@@ -70,14 +75,14 @@ class line_highchart_json(HighchartPlotLineChartView):
         tower = Tower.objects.get(pk=tower_id)
         today = datetime.now(pytz.utc)
         less15 = today - timedelta(days=15)
+        print(less15, today)
+        # qs = DataSetPG.objects.filter(QD(tower_code=tower)).order_by('time_stamp')
 
         qs = DataSetPG.objects.filter(QD(tower_code=tower) & QD(time_stamp__range=(less15, today))).order_by('time_stamp')
 
         conf_periods = PeriodConfiguration.objects.filter(QD(tower=tower) & QD(begin_date__gte=less15, end_date__lte=today))
-        # print(conf_periods)
 
         df = read_frame(qs)
-        # df.set_index('time_stamp')
         self.xdata = df['time_stamp'].apply(dt2epoch).tolist()
 
         new_df = df.value.apply(lambda x: pd.Series(str(x).split(",")))
@@ -86,19 +91,32 @@ class line_highchart_json(HighchartPlotLineChartView):
         del df['id']
         del df['tower_code']
 
-        # print(df.head())
-        # for cf in conf_periods:
-            # print("\n", cf.begin_date, cf.end_date, "\n")
-            # temp_df = df[(df['time_stamp'] >= cf.begin_date) & (df['time_stamp'] <= cf.end_date)]
-            # print(temp_df)
-            # equipments_conf = EquipmentConfig.objects.filter(conf_period=cf)
-            # for eq in equipments_conf:
-            #     name = eq.calibration.equipment.model.type.name + str(eq.height)
-            #     dim = Dimension.objects.get(equipment_configuration=eq)
-            #     if dim:
-            #         column = dim.column-1
-            #         temp_df.rename(columns={column: name}, inplace=True)
-            # print(temp_df)
+        # df.set_index('time_stamp')
+        new_df = []
+        flag = 1
+        # Need to change columns name and get the correct order from the columns to read in each period in Dimensions
+        for cf in conf_periods:
+            if flag:
+                new_df.append(df[(df['time_stamp'] < cf.begin_date)])
+                flag = 0
+
+            temp_df = df[(df['time_stamp'] >= cf.begin_date) & (df['time_stamp'] <= cf.end_date)]
+            equipments_conf = EquipmentConfig.objects.filter(conf_period=cf)
+            for eq in equipments_conf:
+                name = eq.calibration.equipment.model.type.name + str(eq.height)
+                dim = Dimension.objects.get(equipment_configuration=eq)
+                if dim:
+                    column = dim.column-1
+                    temp_df = temp_df.rename(columns={column: name})
+            if not temp_df.empty:
+                new_df.append(temp_df)
+
+        # add the new_df to the df, if new_df empty, means no periods and dimensions was configured yet.
+        if not df.empty:
+            df = pd.concat(new_df, axis=0, sort=False)
+
+        # Delete columns with empty values
+        df.dropna(axis=1, how='all', inplace=True)
 
         # Convert all other columns rather than time_stamp to float
         for d in df:
@@ -108,8 +126,6 @@ class line_highchart_json(HighchartPlotLineChartView):
         # Replace all NaN with None
         df = df.where((pd.notnull(df)), None)
 
-        self.ydata = []
-        self.indexs = []
         for d in df:
             if df[d].name is not 'time_stamp':
                 self.ydata.append(df[d].values.tolist())

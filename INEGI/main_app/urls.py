@@ -96,7 +96,7 @@ urlpatterns = [
 
     url(r'^chart_chartjs/?$', views.chart_chartjs, name='chart_chartjs'),
     url(r'^line_chart_json/?$', views.line_chart_json.as_view(), name='line_chart_json'),
-    url(r'^line_highchart_json/?$', views.line_highchart_json.as_view(), name='line_highchart_json'),
+    url(r'^line_highchart_json/?$', views.LineHighchartJson.as_view(), name='line_highchart_json'),
 
     url(r'^show_towers_data_mongo/?$', views.show_towers_data_mongo, name='show_towers_data_mongo'),
     url(r'^add_raw_data_mongo/?$', views.add_raw_data_mongo, name='add_raw_data_mongo'),

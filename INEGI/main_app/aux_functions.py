@@ -53,11 +53,11 @@ def parsedate(request, file, mylist, i):
 
     if not flag:
         if hour is 24:
-            hour = 23
-            minute = 50
-            time_value = datetime(year, month, day, hour, minute, second, tzinfo=pytz.UTC)
+            hour = 00
+            minute = 00
+            time_value = datetime(year, month, day, hour, minute, second, tzinfo=pytz.UTC) + timedelta(days=1)
         else:
-            time_value = datetime(year, month, day, hour, minute, second, tzinfo=pytz.UTC) - timedelta(minutes=10)
+            time_value = datetime(year, month, day, hour, minute, second, tzinfo=pytz.UTC)
     else:
         time_value = 0
 

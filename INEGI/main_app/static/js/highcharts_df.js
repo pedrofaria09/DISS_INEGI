@@ -33,7 +33,7 @@ function getgraph(data) {
 
     data['tooltip'] = {xDateFormat: '%Y-%m-%d %H:%M'};
 
-    data['xAxis']['tickInterval'] = 24;
+    // data['xAxis']['tickInterval'] = 24;
     data['xAxis']['type'] = 'datetime';
     data['xAxis']['labels'] = {format: '{value:%Y-%m-%d %H:%M}'};
 
