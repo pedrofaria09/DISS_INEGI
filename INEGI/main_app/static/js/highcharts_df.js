@@ -46,9 +46,11 @@ function getgraph(data) {
                         // alert('Date: ' + Highcharts.dateFormat('%d/%m/%Y %H:%M:%S', this.category) + ', value: ' + this.y);
                         $("#modal-type").modal("show");
 
+                        var date = Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.category);
+
                         $("#modal-type .modal-content").html(
                             "<div class='modal-header'>" +
-                            "<h5 class='modal-title'>You want to add this Date to?</h5>" +
+                            "<h5 class='modal-title'>You want to add this Date ("+ date +") to?</h5>" +
                             "</div>" +
                             "<div class='modal-footer'>" +
                             "<div class='col-md-4'>" +
@@ -62,7 +64,6 @@ function getgraph(data) {
                             "</div>" +
                             "</div>"
                         );
-                        var date = Highcharts.dateFormat('%d/%m/%Y %H:%M:%S', this.category);
 
                         var button1 = $('#begin_date_modal');
                         button1.click(function () {
@@ -100,18 +101,22 @@ $(function () {
         console.log(dataToSend);
         if (begin_date > end_date)
             alert("Begin date is higher than end date");
-        else
-            $.ajax({
-                url: "/classify_from_charts",
-                data : dataToSend,
-                success : function(json) {
-                    console.log("Can classify");
-                    console.log(json);
-                },
-                failure: function (json) {
-                    console.log("Problem")
-                }
-            })
+        else{
+            // if (window.confirm("Do you really want make this classification?")) {
+                $.ajax({
+                    url: "/classify_from_charts",
+                    data : dataToSend,
+                    success : function(json) {
+                        console.log("Can classify");
+                        console.log(json);
+                    },
+                    failure: function (json) {
+                        console.log("Problem")
+                    }
+                })
+            // }
+        }
+
     });
 });
 

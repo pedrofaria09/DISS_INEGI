@@ -190,7 +190,7 @@ class EquipmentConfig(models.Model):
     conf_period = models.ForeignKey('PeriodConfiguration', on_delete=models.DO_NOTHING)
 
     def __str__(self):
-        return "%s %s %s %s" % (self.height, self.calibration.slope, self.conf_period.begin_date, self.conf_period.end_date)
+        return "%s @ %s" % (self.calibration.equipment.model.type.name, self.height)
 
 
 class Equipment(models.Model):

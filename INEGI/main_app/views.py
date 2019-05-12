@@ -11,7 +11,7 @@ from .models import *
 from .forms import *
 from datetime import *
 from django.db import IntegrityError
-from .aux_functions import parsedate, check_if_period_is_valid, check_if_period_is_valid_2, get_date
+from .aux_functions import parsedate, check_if_period_is_valid, check_if_period_is_valid_2, get_date, get_date_secs
 from formtools.wizard.views import SessionWizardView
 from dal import autocomplete
 
@@ -24,8 +24,6 @@ from graphos.renderers.highcharts import LineChart as LineChartHIGH
 from graphos.sources.model import ModelDataSource
 from graphos.sources.csv_file import CSVDataSource
 from chartjs.views.lines import BaseLineChartView, HighchartPlotLineChartView
-from django.views import View
-from django.core import serializers
 
 import time, re, io, json, pytz, random
 
@@ -278,10 +276,9 @@ def index(request):
         form = LoginForm()
         return render(request, 'home.html', {'form': form})
     else:
-
         form_tower = TowersDataVForm()
-        form_date = DateRangeChooseForm()
-        context = {'form_tower': form_tower, 'form_date': form_date}
+
+        context = {'form_tower': form_tower}
         return render(request, 'home.html', context)
 
 
@@ -2570,35 +2567,71 @@ class AffiliationAutocomplete(autocomplete.Select2QuerySetView):
 
 class TowerConfPeriodsAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        qs = PeriodConfiguration.objects.all().order_by('-id')
+        qs = PeriodConfiguration.objects.none()
         tower = self.forwarded.get('tower', None)
+        begin_date = self.forwarded.get('begin_date', None)
+        end_date = self.forwarded.get('end_date', None)
 
-        if tower:
+        if tower and begin_date and end_date:
+            begin_date = get_date_secs(begin_date)
+            end_date = get_date_secs(end_date)
+
+            # qs = PeriodConfiguration.objects.filter((QD(begin_date__range=(begin_date, end_date)) | QD(end_date__range=(begin_date, end_date)))).order_by('-id')
+            qs = PeriodConfiguration.objects.filter((QD(begin_date__lte=begin_date) & QD(end_date__gte=begin_date)) | (QD(begin_date__lte=end_date) & QD(end_date__gte=end_date))).order_by('-id')
             qs = qs.filter(tower=tower).distinct()
             print(qs)
             if qs:
-                qs = EquipmentConfig.objects.filter(conf_period__in=qs).values_list('calibration', flat=True)
-                qs = Calibration.objects.filter(pk__in=qs).distinct().values_list('equipment', flat=True)
-                qs = Equipment.objects.filter(pk__in=qs).distinct()
-                print(qs)
+                qs = EquipmentConfig.objects.filter(conf_period__in=qs).order_by('calibration').distinct('calibration')
+                # qs = EquipmentConfig.objects.filter(conf_period__in=qs).values_list('calibration', flat=True)
+                # qs = Calibration.objects.filter(pk__in=qs).distinct().values_list('equipment', flat=True)
+                # qs = Equipment.objects.filter(pk__in=qs).distinct()
+                # print(qs)
 
         if self.q:
-            qs = qs.filter(QD(model__type__name__icontains=self.q))
+            qs = qs.filter(QD(calibration__equipment__model__type__name__icontains=self.q) | QD(height__icontains=self.q))
 
         return qs
 
 
 def classify_from_charts(request):
-    begin_Date = request.GET.get('begin_date', '')
-    end_date = request.GET.get('end_date', '')
+    begin_date = get_date_secs(request.GET.get('begin_date', ''))
+    end_date = get_date_secs(request.GET.get('end_date', ''))
     tower_id = request.GET.get('tower_id', '')
-    equipments = request.GET.getlist('equipments', '')
+    equipments_config = request.GET.getlist('equipments', '')
     status = request.GET.get('status', '')
+    status = Status.objects.get(pk=status)
 
-    print("GET - Begin: ", begin_Date)
+    print("GET - Begin: ", begin_date)
     print("GET - End: ", end_date)
     print("GET - tower_id: ", tower_id)
-    print("GET - equipments: ", equipments)
+    print("GET - equipments_config: ", equipments_config)
     print("GET - status: ", status)
+
+    eq_to_class = EquipmentConfig.objects.filter(pk__in=equipments_config).values_list('calibration', flat=True)
+    eq_to_class = Calibration.objects.filter(pk__in=eq_to_class).distinct().values_list('equipment', flat=True)
+    eq_to_class = Equipment.objects.filter(pk__in=eq_to_class).distinct()
+    print("\n", eq_to_class, "\n")
+
+    # configuration_periods = PeriodConfiguration.objects.filter((QD(begin_date__range=(begin_date, end_date)) | QD(end_date__range=(begin_date, end_date))))
+    configuration_periods = PeriodConfiguration.objects.filter(QD(tower=tower_id) & ((QD(begin_date__lte=begin_date) & QD(end_date__gte=begin_date)) | (QD(begin_date__lte=end_date) & QD(end_date__gte=end_date))))
+
+    for cp in configuration_periods:
+        print("PERIODS DATES:", cp.begin_date, cp.end_date)
+        equipments_conf = EquipmentConfig.objects.filter(conf_period=cp)
+        print(equipments_conf)
+        for eq in equipments_conf:
+            if eq.calibration.equipment in eq_to_class:
+                print("Vou classificar", eq)
+                if begin_date > cp.begin_date:
+                    begin_date_to_class = begin_date
+                else:
+                    begin_date_to_class = cp.begin_date
+
+                if end_date < cp.end_date:
+                    end_date_to_class = end_date
+                else:
+                    end_date_to_class = cp.end_date
+
+                print("DATE TO CLASS: ", begin_date_to_class, end_date_to_class, "\n")
 
     return HttpResponse("OK")

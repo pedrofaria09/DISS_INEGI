@@ -566,10 +566,13 @@ class TowersDataVForm(forms.Form):
         widget=autocomplete.ModelSelect2(url='tower-autocomplete', attrs={'style': 'width:100%'})
     )
 
+    begin_date = forms.DateTimeField(input_formats=["%Y-%m-%d %H:%M:%S"], widget=DatePickerInput(format="%Y-%m-%d %H:%M:%S", attrs={'autocomplete': 'off'}))
+    end_date = forms.DateTimeField(input_formats=["%Y-%m-%d %H:%M:%S"], widget=DatePickerInput(format="%Y-%m-%d %H:%M:%S", attrs={'autocomplete': 'off'}))
+
     equipments = forms.ModelMultipleChoiceField(
         queryset=PeriodConfiguration.objects.all(),
         required=True,
-        widget=autocomplete.ModelSelect2Multiple(url='tower-conf_periods-autocomplete', forward=['tower'], attrs={'style': 'width:100%'})
+        widget=autocomplete.ModelSelect2Multiple(url='tower-conf_periods-autocomplete', forward=['tower', 'begin_date', 'end_date'], attrs={'style': 'width:100%'})
     )
 
     status = forms.ModelChoiceField(

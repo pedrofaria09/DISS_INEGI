@@ -137,3 +137,13 @@ def get_date(date):
     hour = int(date[11:13])
     minute = int(date[14:16])
     return datetime(year, month, day, hour, minute, tzinfo=pytz.UTC)
+
+
+def get_date_secs(date):
+    year = int(date[0:4])
+    month = int(date[5:7])
+    day = int(date[8:10])
+    hour = int(date[11:13])
+    minute = int(date[14:16])
+    seconds = int(date[17:19])
+    return datetime(year, month, day, hour, minute, seconds, tzinfo=pytz.UTC)
