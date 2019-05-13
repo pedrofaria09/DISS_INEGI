@@ -68,17 +68,24 @@ class LineHighchartJson(HighchartPlotLineChartView):
 
     def get(self, request, *args, **kwargs):
         tower_id = self.request.GET.get('tower_id', '')
+        begin_date = self.request.GET.get('begin_date', '')
+        end_date = self.request.GET.get('end_date', '')
         print("GET - tower_id: ", tower_id)
 
         tower = Tower.objects.get(pk=tower_id)
-        today = datetime.now(pytz.utc)
-        less15 = today - timedelta(days=15)
-        print(less15, today)
+
+        if not (begin_date and end_date):
+            end_date = datetime.now(pytz.utc)
+            begin_date = end_date - timedelta(days=15)
+        else:
+            begin_date = get_date(begin_date)
+            end_date = get_date(end_date)
+
         # qs = DataSetPG.objects.filter(QD(tower_code=tower)).order_by('time_stamp')
 
-        qs = DataSetPG.objects.filter(QD(tower_code=tower) & QD(time_stamp__range=(less15, today))).order_by('time_stamp')
+        qs = DataSetPG.objects.filter(QD(tower_code=tower) & QD(time_stamp__range=(begin_date, end_date))).order_by('time_stamp')
 
-        conf_periods = PeriodConfiguration.objects.filter(QD(tower=tower) & QD(begin_date__gte=less15, end_date__lte=today))
+        conf_periods = PeriodConfiguration.objects.filter(QD(tower=tower) & QD(begin_date__gte=begin_date, end_date__lte=end_date))
 
         df = read_frame(qs)
         self.xdata = df['time_stamp'].apply(dt2epoch).tolist()

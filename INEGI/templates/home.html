@@ -46,24 +46,26 @@
 <hr>
         <div class="card shadow mb-4 collapse" id="ChartArea" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
             <div class="card-header py-2">
-                <h6 class="m-0 font-weight-bold text-primary text-center">HighChart</h6>
+                <h6 class="m-0 font-weight-bold text-primary text-center">Chart Visualization</h6>
             </div>
-
-            <form action="javascript:void(0);">
-                <div class="row justify-content-center">
-                    {{ form_tower.media }}
-                    {% for field in form_tower %}
-                        {% if field.name == "begin_date_search" or field.name == "end_date_search" %}
-                            <div class="col-md">
-                                {% render_field field placeholder=field.label %}
-                            </div>
-                        {% endif %}
-                    {% endfor %}
-                    <div class="col-md">
-                        <input type="submit" id="submit_new_date" class="btn btn-primary btn-block" value="View Data">
+            <div class="container-fluid p-2">
+                <h6 class="text-center">Choose new Dates to Filter</h6>
+                <form action="javascript:void(0);">
+                    <div class="row justify-content-center noPadding">
+                        {{ form_tower.media }}
+                        {% for field in form_tower %}
+                            {% if field.name == "begin_date_search" or field.name == "end_date_search" %}
+                                <div class="col-md">
+                                    {% render_field field placeholder=field.label %}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                        <div class="col-md">
+                            <input type="submit" id="submit_new_date" class="btn btn-primary btn-block" value="Filter">
+                        </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
             <div class="card-body">
 
                 <div id="myHighChart" style="height: 600px;"></div>
@@ -87,7 +89,7 @@
             <hr>
 
             <div class="d-sm-flex align-items-center justify-content-between mb-4 timeline2">
-                <h1 class="h3 mb-0 text-gray-800">Options</h1>
+                <h1 class="h3 mb-0 text-gray-800">Classify and Comment</h1>
             </div>
 
             <div class="row">

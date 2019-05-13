@@ -1,12 +1,9 @@
 $(document).ready(function () {
 
-    // $.ajax({
-    //     url: "/line_highchart_json",
-    //     success : function(json) {
-    //         console.log("1st load");
-    //         getgraph(json);
-    //     }
-    // })
+    $('input[name="begin_date_search"]').val('');
+    $('input[name="begin_date_search"]').attr("placeholder","New Begin Date");
+    $('input[name="end_date_search"]').val('');
+    $('input[name="end_date_search"]').attr("placeholder","New End Date");
 
     $(function () {
         $('#formchart').submit(function() {
@@ -83,6 +80,27 @@ $(document).ready(function () {
 
             } else
                 document.getElementById("TowerForm").classList.add('show')
+        });
+    });
+
+    $(function () {
+        var button = $('#submit_new_date');
+        button.click(function () {
+
+            var id_tower = $("#id_tower :selected").val();
+            var begin_date = $("#id_begin_date_search").val();
+            var end_date = $("#id_end_date_search").val();
+
+            dataToSend = {tower_id: id_tower, begin_date: begin_date, end_date: end_date};
+
+            $.ajax({
+                url: "/line_highchart_json",
+                data: dataToSend,
+                success : function(json) {
+                    console.log("loading");
+                    getgraph(json);
+                }
+            })
         });
     });
 
