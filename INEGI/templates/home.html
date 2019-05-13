@@ -9,6 +9,7 @@
         <div class="d-sm-flex align-items-center justify-content-between mb-4 timeline2">
             <h1 class="h3 mb-0 text-gray-800">Data Visualization</h1>
         </div>
+
 <hr>
         <div class="d-sm-flex align-items-center justify-content-between mb-4" >
             <h1 class="h4 mb-0 text-gray-800">
@@ -47,6 +48,22 @@
             <div class="card-header py-2">
                 <h6 class="m-0 font-weight-bold text-primary text-center">HighChart</h6>
             </div>
+
+            <form action="javascript:void(0);">
+                <div class="row justify-content-center">
+                    {{ form_tower.media }}
+                    {% for field in form_tower %}
+                        {% if field.name == "begin_date_search" or field.name == "end_date_search" %}
+                            <div class="col-md">
+                                {% render_field field placeholder=field.label %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    <div class="col-md">
+                        <input type="submit" id="submit_new_date" class="btn btn-primary btn-block" value="View Data">
+                    </div>
+                </div>
+            </form>
             <div class="card-body">
 
                 <div id="myHighChart" style="height: 600px;"></div>
@@ -77,8 +94,9 @@
                 <div class="col-12">
                     <form action="javascript:void(0);" id="formchart">
                         {{ form_tower.media }}
+                        {% csrf_token %}
                         {% for field in form_tower %}
-                            {% if field.name != "tower" %}
+                            {% if field.name != "tower" and field.name != "begin_date_search" and field.name != "end_date_search" %}
                                 <div class="form-group">
                                     {{ field.label_tag }}
                                     {% render_field field placeholder=field.label %}
@@ -104,6 +122,35 @@
         <div class="modal fade" id="modal-type">
             <div class="modal-dialog">
                 <div class="modal-content"></div>
+            </div>
+        </div>
+
+        <!-- THE MODAL WE WILL BE USING -->
+        <div class="modal fade" id="modal-type2">
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h4 class="modal-title">Add a comment - Not mandatory</h4>
+                    </div>
+                    <div class="modal-body">
+                        {% for field in form_comment %}
+                            <div class="form-group{% if field.errors %} has-error{% endif %}">
+                                <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+                                {% render_field field class="form-control" %}
+                                {% for error in field.errors %}
+                                    <p class="help-block">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="submit" id="submit_comment" class="btn btn-primary">Submit</button>
+                    </div>
+
+                </div>
             </div>
         </div>
 

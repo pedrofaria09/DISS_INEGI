@@ -1,4 +1,3 @@
-// Ajax call to line_highchart_json to load all data
 $(document).ready(function () {
 
     // $.ajax({
@@ -9,6 +8,107 @@ $(document).ready(function () {
     //     }
     // })
 
+    $(function () {
+        $('#formchart').submit(function() {
+
+            var begin_date = $("#id_begin_date").val();
+            var end_date = $("#id_end_date").val();
+
+            var id_tower = $("#id_tower :selected").val();
+
+            dataToSend = $(this).serializeArray();
+            dataToSend.push({ name: 'tower_id', value: id_tower });
+
+            if (begin_date > end_date)
+                alert("Begin date is higher than end date");
+            else
+                $("#modal-type2").modal("show");
+
+        });
+    });
+
+    $(function () {
+        var button = $('#submit_comment');
+        button.click(function () {
+            var internal_comment = $("#id_internal_comment").val();
+            var compact_comment = $("#id_compact_comment").val();
+            var detailed_comment = $("#id_detailed_comment").val();
+
+            dataToSend.push({ name: 'internal_comment', value: internal_comment });
+            dataToSend.push({ name: 'compact_comment', value: compact_comment });
+            dataToSend.push({ name: 'detailed_comment', value: detailed_comment });
+
+            console.log(dataToSend);
+
+            if (window.confirm("Do you really want make this action?")) {
+                $.ajax({
+                    url: "/classify_from_charts",
+                    data: dataToSend,
+                    success: function (data) {
+                        if (data.is_taken) {
+                            alert(data.error);
+                            $("#modal-type2").modal("hide");
+                        } else {
+                            alert(data.message);
+                            $("#modal-type2").modal("hide");
+                        }
+                    }
+                })
+            }
+        });
+    });
+
+
+    $(function () {
+        var button = $('#submit_tower');
+        button.click(function () {
+            if ( document.getElementById("TowerForm").classList.contains('show') ){
+
+                var id_tower = $("#id_tower :selected").val();
+
+                if (id_tower){
+                    document.getElementById("TowerForm").classList.remove('show');
+                    document.getElementById("ChartArea").classList.add('show');
+                    document.getElementById("FilterForm").classList.add('show');
+                    $.ajax({
+                        url: "/line_highchart_json",
+                        data: {tower_id: id_tower},
+                        success : function(json) {
+                            console.log("loading");
+                            getgraph(json);
+                        }
+                    })
+                }else
+                    alert("Please choose a tower");
+
+            } else
+                document.getElementById("TowerForm").classList.add('show')
+        });
+    });
+
+
+    $(function () {
+        var button = $('#button_chart2');
+        button.click(function () {
+            var chart = $('#myHighChart').highcharts();
+            var series = chart.series[0];
+            if (series.visible) {
+                $(chart.series).each(function () {
+                    //this.hide();
+                    this.setVisible(false, false);
+                });
+                chart.redraw();
+                button.html('Show series');
+            } else {
+                $(chart.series).each(function () {
+                    //this.show();
+                    this.setVisible(true, false);
+                });
+                chart.redraw();
+                button.html('Hide series');
+            }
+        });
+    });
 });
 
 // Personalization of HighChart
@@ -84,87 +184,3 @@ function getgraph(data) {
 
     $("#myHighChart").highcharts(data);
 }
-
-$(function () {
-    $('#formchart').submit(function() {
-
-        var begin_date = $("#id_begin_date").val();
-        console.log(begin_date);
-        var end_date = $("#id_end_date").val();
-        console.log(end_date);
-
-        var id_tower = $("#id_tower :selected").val();
-
-        dataToSend = $(this).serializeArray();
-        dataToSend.push({ name: 'tower_id', value: id_tower });
-
-        console.log(dataToSend);
-        if (begin_date > end_date)
-            alert("Begin date is higher than end date");
-        else{
-            // if (window.confirm("Do you really want make this classification?")) {
-                $.ajax({
-                    url: "/classify_from_charts",
-                    data : dataToSend,
-                    success : function(json) {
-                        console.log("Can classify");
-                        console.log(json);
-                    },
-                    failure: function (json) {
-                        console.log("Problem")
-                    }
-                })
-            // }
-        }
-
-    });
-});
-
-$(function () {
-    var button = $('#submit_tower');
-    button.click(function () {
-        if ( document.getElementById("TowerForm").classList.contains('show') ){
-
-            var id_tower = $("#id_tower :selected").val();
-
-            if (id_tower){
-                document.getElementById("TowerForm").classList.remove('show');
-                document.getElementById("ChartArea").classList.add('show');
-                document.getElementById("FilterForm").classList.add('show');
-                $.ajax({
-                    url: "/line_highchart_json",
-                    data: {tower_id: id_tower},
-                    success : function(json) {
-                        console.log("loading");
-                        getgraph(json);
-                    }
-                })
-            }else alert("Please choose a tower");
-
-        } else
-            document.getElementById("TowerForm").classList.add('show')
-    });
-});
-
-$(function () {
-    var button = $('#button_chart2');
-    button.click(function () {
-        var chart = $('#myHighChart').highcharts();
-        var series = chart.series[0];
-        if (series.visible) {
-            $(chart.series).each(function () {
-                //this.hide();
-                this.setVisible(false, false);
-            });
-            chart.redraw();
-            button.html('Show series');
-        } else {
-            $(chart.series).each(function () {
-                //this.show();
-                this.setVisible(true, false);
-            });
-            chart.redraw();
-            button.html('Hide series');
-        }
-    });
-});

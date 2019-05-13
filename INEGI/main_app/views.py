@@ -277,8 +277,8 @@ def index(request):
         return render(request, 'home.html', {'form': form})
     else:
         form_tower = TowersDataVForm()
-
-        context = {'form_tower': form_tower}
+        form_comment = CommentClassificationChartForm()
+        context = {'form_tower': form_tower, 'form_comment': form_comment}
         return render(request, 'home.html', context)
 
 
@@ -2600,28 +2600,34 @@ def classify_from_charts(request):
     equipments_config = request.GET.getlist('equipments', '')
     status = request.GET.get('status', '')
     status = Status.objects.get(pk=status)
+    internal_comment = request.GET.get('internal_comment', '')
+    compact_comment = request.GET.get('compact_comment', '')
+    detailed_comment = request.GET.get('detailed_comment', '')
 
     print("GET - Begin: ", begin_date)
     print("GET - End: ", end_date)
     print("GET - tower_id: ", tower_id)
     print("GET - equipments_config: ", equipments_config)
     print("GET - status: ", status)
+    print("GET - internal_comment: ", internal_comment)
+    print("GET - compact_comment: ", compact_comment)
+    print("GET - detailed_comment: ", detailed_comment)
 
     eq_to_class = EquipmentConfig.objects.filter(pk__in=equipments_config).values_list('calibration', flat=True)
     eq_to_class = Calibration.objects.filter(pk__in=eq_to_class).distinct().values_list('equipment', flat=True)
     eq_to_class = Equipment.objects.filter(pk__in=eq_to_class).distinct()
-    print("\n", eq_to_class, "\n")
+    # print("\n", eq_to_class, "\n")
 
     # configuration_periods = PeriodConfiguration.objects.filter((QD(begin_date__range=(begin_date, end_date)) | QD(end_date__range=(begin_date, end_date))))
     configuration_periods = PeriodConfiguration.objects.filter(QD(tower=tower_id) & ((QD(begin_date__lte=begin_date) & QD(end_date__gte=begin_date)) | (QD(begin_date__lte=end_date) & QD(end_date__gte=end_date))))
 
     for cp in configuration_periods:
-        print("PERIODS DATES:", cp.begin_date, cp.end_date)
+        # print("PERIODS DATES:", cp.begin_date, cp.end_date)
         equipments_conf = EquipmentConfig.objects.filter(conf_period=cp)
-        print(equipments_conf)
+        # print(equipments_conf)
         for eq in equipments_conf:
             if eq.calibration.equipment in eq_to_class:
-                print("Vou classificar", eq)
+                # print("Vou classificar", eq)
                 if begin_date > cp.begin_date:
                     begin_date_to_class = begin_date
                 else:
@@ -2632,6 +2638,42 @@ def classify_from_charts(request):
                 else:
                     end_date_to_class = cp.end_date
 
-                print("DATE TO CLASS: ", begin_date_to_class, end_date_to_class, "\n")
+                # print("DATE TO CLASS: ", begin_date_to_class, end_date_to_class, "\n")
 
-    return HttpResponse("OK")
+                classification = ClassificationPeriod(begin_date=begin_date_to_class,
+                                                      end_date=end_date_to_class,
+                                                      equipment_configuration=eq,
+                                                      status=status,
+                                                      user=request.user)
+                try:
+                    classification.save()
+                except IntegrityError:
+                    data = {}
+                    data['is_taken'] = True
+                    data['error'] = "There are already an Classification equal to that - Same Begin and End Date, Equipment and Status."
+                    return JsonResponse(data)
+
+                if internal_comment or compact_comment or detailed_comment:
+                    now = datetime.now(pytz.utc)
+                    comment_classification = CommentClassification(begin_date=begin_date_to_class,
+                                                                   end_date=end_date_to_class,
+                                                                   comment_date=now,
+                                                                   classification=classification,
+                                                                   user=request.user,
+                                                                   internal_comment=internal_comment,
+                                                                   compact_comment=compact_comment,
+                                                                   detailed_comment=detailed_comment)
+                    try:
+                        comment_classification.save()
+                    except IntegrityError:
+                        data = {}
+                        data['is_taken'] = True
+                        data['error'] = "There are already an Comment equal to that - Same Begin and End Date, and Classification."
+                        return JsonResponse(data)
+                    data = {'message': "Classification and Comments entered successfully."}
+                else:
+                    data = {'message': "Classification entered successfully."}
+                return JsonResponse(data)
+
+    data = {'message': "Nothing to do!!!"}
+    return HttpResponse(data)

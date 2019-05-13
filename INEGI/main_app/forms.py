@@ -566,6 +566,9 @@ class TowersDataVForm(forms.Form):
         widget=autocomplete.ModelSelect2(url='tower-autocomplete', attrs={'style': 'width:100%'})
     )
 
+    begin_date_search = forms.DateTimeField(input_formats=["%Y-%m-%d %H:%M"], widget=DatePickerInput(format="%Y-%m-%d %H:%M", attrs={'autocomplete': 'off'}))
+    end_date_search = forms.DateTimeField(input_formats=["%Y-%m-%d %H:%M"], widget=DatePickerInput(format="%Y-%m-%d %H:%M", attrs={'autocomplete': 'off'}))
+
     begin_date = forms.DateTimeField(input_formats=["%Y-%m-%d %H:%M:%S"], widget=DatePickerInput(format="%Y-%m-%d %H:%M:%S", attrs={'autocomplete': 'off'}))
     end_date = forms.DateTimeField(input_formats=["%Y-%m-%d %H:%M:%S"], widget=DatePickerInput(format="%Y-%m-%d %H:%M:%S", attrs={'autocomplete': 'off'}))
 
@@ -580,3 +583,15 @@ class TowersDataVForm(forms.Form):
         required=True,
         widget=autocomplete.ModelSelect2(url='status-autocomplete', attrs={'style': 'width:100%'})
     )
+
+
+class CommentClassificationChartForm(ModelForm):
+    class Meta:
+        model = CommentClassification
+        fields = ('internal_comment', 'compact_comment', 'detailed_comment',)
+
+    def __init__(self, *args, **kwargs):
+        super(CommentClassificationChartForm, self).__init__(*args, **kwargs)
+        self.fields['internal_comment'].widget.attrs.update({'class': 'form-control mandatory', 'rows': 2})
+        self.fields['compact_comment'].widget.attrs.update({'class': 'form-control mandatory', 'rows': 2})
+        self.fields['detailed_comment'].widget.attrs.update({'class': 'form-control mandatory', 'rows': 2})

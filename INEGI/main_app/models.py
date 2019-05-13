@@ -251,6 +251,9 @@ class ClassificationPeriod(models.Model):
     status = models.ForeignKey('Status', on_delete=models.DO_NOTHING)
     user = models.ForeignKey('MyUser', on_delete=models.DO_NOTHING)
 
+    class Meta:
+        unique_together = (("begin_date", "end_date", "equipment_configuration", "status"),)
+
 
 class Dimension(models.Model):
     column = models.IntegerField()
@@ -290,6 +293,9 @@ class CommentTower(Comment):
     end_date = models.DateTimeField(default=datetime.now)
     tower = models.ForeignKey('Tower', on_delete=models.DO_NOTHING)
 
+    class Meta:
+        unique_together = (("begin_date", "end_date", "tower"),)
+
     def __str__(self):
         return "%s" % self.tower
 
@@ -298,6 +304,9 @@ class CommentClassification(Comment):
     begin_date = models.DateTimeField()
     end_date = models.DateTimeField()
     classification = models.ForeignKey('ClassificationPeriod', on_delete=models.DO_NOTHING)
+
+    class Meta:
+        unique_together = (("begin_date", "end_date", "classification"),)
 
     def __str__(self):
         return "%s" % self.classification.equipment_configuration.calibration.sn
