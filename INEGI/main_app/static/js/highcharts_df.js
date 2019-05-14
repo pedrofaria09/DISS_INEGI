@@ -1,101 +1,105 @@
 $(document).ready(function () {
-    $("#xrange123").highcharts({
-        chart: {
-            type: 'xrange'
-        },
-        title: {
-            text: 'Highcharts X-range'
-        },
-        xAxis: {
-            type: 'datetime'
-        },
-        yAxis: {
-            title: {
-                text: ''
-            },
-            categories: ['Ane100', 'Development', 'Testing'],
-            reversed: true
-        },
-        plotOptions: {
-            series: {
-                dataLabels: {
-                    align: 'center',
-                    enabled: true,
-                    format: "{point.name}"
-                }
-            }
-        },
-        tooltip: {
-            formatter: function () {
-                console.log(this);
-                return this.point.name + ' is in <b>' +
-                    this.yCategory + '</b><br>  from <b>' +
-                    Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.point.x) + ' to ' +
-                    Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.point.x2) ;
-            }
-        },
-        series: [{
-            name: 'Ane100',
-            // pointPadding: 0,
-            // groupPadding: 0,
-            pointWidth: 20,
-            data: [{
-                x: Date.UTC(2014, 10, 21),
-                x2: Date.UTC(2014, 10, 23),
-                y: 0,
-                name: 'OK',
-                colorIndex: 5
-            }, {
-                x: Date.UTC(2014, 11, 1),
-                x2: Date.UTC(2014, 11, 5),
-                y: 0,
-                name: 'NOT OK',
-            }, {
-                x: Date.UTC(2014, 11, 5),
-                x2: Date.UTC(2014, 11, 10),
-                y: 0,
-                name: 'NOT OK',
-            }, {
-                x: Date.UTC(2014, 10, 21),
-                x2: Date.UTC(2014, 10, 25),
-                y: 1,
-                name: 'Dev1',
-            }, {
-                x: Date.UTC(2014, 10, 25),
-                x2: Date.UTC(2014, 11, 5),
-                y: 1,
-                name: 'Dev2',
-            }, {
-                x: Date.UTC(2014, 11, 5),
-                x2: Date.UTC(2014, 11, 10),
-                y: 1,
-                name: 'Dev3'
-            }, {
-                x: Date.UTC(2014, 10, 21),
-                x2: Date.UTC(2014, 11, 1),
-                y: 2,
-                name: 'Test1'
-            }, {
-                x: Date.UTC(2014, 11, 1),
-                x2: Date.UTC(2014, 11, 5),
-                y: 2,
-                name: 'Test2'
-            }, {
-                x: Date.UTC(2014, 11, 5),
-                x2: Date.UTC(2014, 11, 10),
-                y: 2,
-                name: 'Test3'
-            },],
-            dataLabels: {
-                enabled: true
-            }
-        }]
+
+    $(function () {
+        var button = $('#submit_tower');
+        button.click(function () {
+            if (document.getElementById("TowerForm").classList.contains('show')) {
+
+                var id_tower = $("#id_tower :selected").val();
+
+                if (id_tower) {
+                    document.getElementById("TowerForm").classList.remove('show');
+                    document.getElementById("ChartArea").classList.add('show');
+                    document.getElementById("FilterForm").classList.add('show');
+                    $.ajax({
+                        url: "/line_highchart_json",
+                        data: {tower_id: id_tower},
+                        success: function (json) {
+                            console.log("Loading Line Chart");
+                            getgraph(json);
+                        }
+                    });
+
+                    $.ajax({
+                        url: "/x_chart",
+                        // data: dataToSend,
+                        success: function (data) {
+                            console.log("Loading X Chart");
+                            getxgraph(data);
+                        }
+                    })
+                } else
+                    alert("Please choose a tower");
+
+            } else
+                document.getElementById("TowerForm").classList.add('show')
+        });
     });
 
     $('input[name="begin_date_search"]').val('');
     $('input[name="begin_date_search"]').attr("placeholder", "New Begin Date");
     $('input[name="end_date_search"]').val('');
     $('input[name="end_date_search"]').attr("placeholder", "New End Date");
+
+    $(function () {
+        var button = $('#submit_new_date');
+        button.click(function () {
+
+            var id_tower = $("#id_tower :selected").val();
+            var begin_date = $("#id_begin_date_search").val();
+            var end_date = $("#id_end_date_search").val();
+
+            dataToSend = {tower_id: id_tower, begin_date: begin_date, end_date: end_date};
+
+            $.ajax({
+                url: "/line_highchart_json",
+                data: dataToSend,
+                success: function (json) {
+                    console.log("Loading Line Chart");
+                    getgraph(json);
+                }
+            });
+
+            $.ajax({
+                url: "/x_chart",
+                // data: dataToSend,
+                success: function (data) {
+                    console.log("Loading X Chart");
+                    getxgraph(data)
+                }
+            })
+        });
+    });
+
+    $(function () {
+        var button = $('#button_chart2');
+        button.click(function () {
+            var chart = $('#myHighChart').highcharts();
+            var series = chart.series[0];
+            if (series.visible) {
+                $(chart.series).each(function () {
+                    //this.hide();
+                    this.setVisible(false, false);
+                });
+                chart.redraw();
+                button.html('Show series');
+            } else {
+                $(chart.series).each(function () {
+                    //this.show();
+                    this.setVisible(true, false);
+                });
+                chart.redraw();
+                button.html('Hide series');
+            }
+        });
+    });
+
+    $(function () {
+        var button = $('#button_print');
+        button.click(function () {
+            PrintElem("ChartArea2");
+        });
+    });
 
     $(function () {
         $('#formchart').submit(function () {
@@ -147,83 +151,65 @@ $(document).ready(function () {
         });
     });
 
-
-    $(function () {
-        var button = $('#submit_tower');
-        button.click(function () {
-            if (document.getElementById("TowerForm").classList.contains('show')) {
-
-                var id_tower = $("#id_tower :selected").val();
-
-                if (id_tower) {
-                    document.getElementById("TowerForm").classList.remove('show');
-                    document.getElementById("ChartArea").classList.add('show');
-                    document.getElementById("FilterForm").classList.add('show');
-                    $.ajax({
-                        url: "/line_highchart_json",
-                        data: {tower_id: id_tower},
-                        success: function (json) {
-                            console.log("loading");
-                            getgraph(json);
-                        }
-                    })
-                } else
-                    alert("Please choose a tower");
-
-            } else
-                document.getElementById("TowerForm").classList.add('show')
-        });
-    });
-
-    $(function () {
-        var button = $('#submit_new_date');
-        button.click(function () {
-
-            var id_tower = $("#id_tower :selected").val();
-            var begin_date = $("#id_begin_date_search").val();
-            var end_date = $("#id_end_date_search").val();
-
-            dataToSend = {tower_id: id_tower, begin_date: begin_date, end_date: end_date};
-
-            $.ajax({
-                url: "/line_highchart_json",
-                data: dataToSend,
-                success: function (json) {
-                    console.log("loading");
-                    getgraph(json);
-                }
-            })
-        });
-    });
-
-
-    $(function () {
-        var button = $('#button_chart2');
-        button.click(function () {
-            var chart = $('#myHighChart').highcharts();
-            var series = chart.series[0];
-            if (series.visible) {
-                $(chart.series).each(function () {
-                    //this.hide();
-                    this.setVisible(false, false);
-                });
-                chart.redraw();
-                button.html('Show series');
-            } else {
-                $(chart.series).each(function () {
-                    //this.show();
-                    this.setVisible(true, false);
-                });
-                chart.redraw();
-                button.html('Hide series');
-            }
-        });
-    });
 });
+
+// Personalization of XChart
+function getxgraph(data) {
+    dataX = {
+        chart: {
+            type: 'xrange'
+        },
+        title: {
+            text: 'Tower Classifications'
+        },
+        xAxis: {
+            type: 'datetime'
+        },
+        yAxis: {
+            title: {
+                text: ''
+            },
+            categories: data.categories,
+            reversed: true,
+            staticScale: 50
+        },
+        plotOptions: {
+            series: {
+                dataLabels: {
+                    align: 'center',
+                    enabled: true,
+                    format: "{point.name}"
+                }
+            }
+        },
+        tooltip: {
+            formatter: function () {
+                // console.log(this);
+                to_show = '<b><p align="center">' + this.yCategory + '</b> is <b>' + this.point.name + '</p></b><br> from <b>' + Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.point.x) + '</b> to <b>'+Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.point.x2);
+                return to_show;
+            }
+        },
+        series: [{
+            name: 'Classifications',
+            // pointPadding: 0,
+            // groupPadding: 0,
+            pointWidth: 20,
+            data: data.data,
+            dataLabels: {
+                enabled: true
+            }
+        }],
+        credits: {
+            'enabled': true,
+            'href': 'http://google.com',
+            'text': 'INEGI Team',
+        }
+    };
+    $("#xrange123").highcharts(dataX);
+}
 
 // Personalization of HighChart
 function getgraph(data) {
-    console.log(data);
     data["chart"] = {type: "line", 'zoomType': 'xy'};
 
     data["responsive"] = {
@@ -293,4 +279,24 @@ function getgraph(data) {
     };
 
     $("#myHighChart").highcharts(data);
+}
+
+
+function PrintElem(elem)
+{
+    var mywindow = window.open('', 'PRINT', 'height=400,width=600');
+    console.log(elem)
+    mywindow.document.write('<html><head><title>' + document.title  + '</title>');
+    mywindow.document.write('</head><body >');
+    mywindow.document.write('<h1>' + document.title  + '</h1>');
+    mywindow.document.write(document.getElementById(elem).innerHTML);
+    mywindow.document.write('</body></html>');
+
+    mywindow.document.close(); // necessary for IE >= 10
+    mywindow.focus(); // necessary for IE >= 10*/
+
+    mywindow.print();
+    mywindow.close();
+
+    return true;
 }

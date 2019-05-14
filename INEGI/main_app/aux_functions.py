@@ -147,3 +147,12 @@ def get_date_secs(date):
     minute = int(date[14:16])
     seconds = int(date[17:19])
     return datetime(year, month, day, hour, minute, seconds, tzinfo=pytz.UTC)
+
+
+def get_color_index(value):
+    if value == 'OK':
+        return 10
+    elif value == 'NOT OK':
+        return 11
+    else:
+        return 0

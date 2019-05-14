@@ -11,7 +11,7 @@ from .models import *
 from .forms import *
 from datetime import *
 from django.db import IntegrityError
-from .aux_functions import parsedate, check_if_period_is_valid, check_if_period_is_valid_2, get_date, get_date_secs
+from .aux_functions import parsedate, check_if_period_is_valid, check_if_period_is_valid_2, get_date, get_date_secs, get_color_index
 from formtools.wizard.views import SessionWizardView
 from dal import autocomplete
 
@@ -2627,7 +2627,8 @@ def classify_from_charts(request):
 
     # configuration_periods = PeriodConfiguration.objects.filter((QD(begin_date__range=(begin_date, end_date)) | QD(end_date__range=(begin_date, end_date))))
     configuration_periods = PeriodConfiguration.objects.filter(QD(tower=tower_id) & ((QD(begin_date__lte=begin_date) & QD(end_date__gte=begin_date)) | (QD(begin_date__lte=end_date) & QD(end_date__gte=end_date))))
-
+    flag_comment = 0
+    flag_class = 0
     for cp in configuration_periods:
         # print("PERIODS DATES:", cp.begin_date, cp.end_date)
         equipments_conf = EquipmentConfig.objects.filter(conf_period=cp)
@@ -2654,6 +2655,7 @@ def classify_from_charts(request):
                                                       user=request.user)
                 try:
                     classification.save()
+                    flag_class = 1
                 except IntegrityError:
                     data = {}
                     data['is_taken'] = True
@@ -2672,15 +2674,48 @@ def classify_from_charts(request):
                                                                    detailed_comment=detailed_comment)
                     try:
                         comment_classification.save()
+                        flag_comment = 1
                     except IntegrityError:
                         data = {}
                         data['is_taken'] = True
                         data['error'] = "There are already an Comment equal to that - Same Begin and End Date, and Classification."
                         return JsonResponse(data)
-                    data = {'message': "Classification and Comments entered successfully."}
-                else:
-                    data = {'message': "Classification entered successfully."}
-                return JsonResponse(data)
 
-    data = {'message': "Nothing to do!!!"}
-    return HttpResponse(data)
+    if flag_comment:
+        data = {'message': "Classification and Comments entered successfully."}
+    elif flag_class:
+        data = {'message': "Classification entered successfully."}
+    else:
+        data = {'message': "Nothing to do!!!"}
+    return JsonResponse(data)
+
+
+def XChart(request):
+    data = []
+    categories = []
+
+    tower = Tower.objects.get(pk=10)
+    period_conf = PeriodConfiguration.objects.filter(tower=tower).order_by('id')
+    eq_config = EquipmentConfig.objects.filter(conf_period__in=period_conf).order_by('id')
+
+    # Fill categories 1st
+    for eq in eq_config:
+        name = eq.calibration.equipment.model.type.name + str(eq.height)
+        if name not in categories:
+            categories.append(name)
+
+    # Fill data
+    for eq in eq_config:
+        name = eq.calibration.equipment.model.type.name + str(eq.height)
+        classifications = ClassificationPeriod.objects.filter(equipment_configuration=eq).order_by('id')
+        for cl in classifications:
+            data.append({'x': dt2epoch(cl.begin_date),
+                         'x2': dt2epoch(cl.end_date),
+                         'y': categories.index(name),
+                         'name': cl.status.name,
+                         'colorIndex': get_color_index(cl.status.name)})
+
+    dataToReturn = {}
+    dataToReturn['data'] = data
+    dataToReturn['categories'] = categories
+    return JsonResponse(dataToReturn)
