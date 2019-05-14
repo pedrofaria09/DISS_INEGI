@@ -1,12 +1,104 @@
 $(document).ready(function () {
+    $("#xrange123").highcharts({
+        chart: {
+            type: 'xrange'
+        },
+        title: {
+            text: 'Highcharts X-range'
+        },
+        xAxis: {
+            type: 'datetime'
+        },
+        yAxis: {
+            title: {
+                text: ''
+            },
+            categories: ['Ane100', 'Development', 'Testing'],
+            reversed: true
+        },
+        plotOptions: {
+            series: {
+                dataLabels: {
+                    align: 'center',
+                    enabled: true,
+                    format: "{point.name}"
+                }
+            }
+        },
+        tooltip: {
+            formatter: function () {
+                console.log(this);
+                return this.point.name + ' is in <b>' +
+                    this.yCategory + '</b><br>  from <b>' +
+                    Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.point.x) + ' to ' +
+                    Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.point.x2) ;
+            }
+        },
+        series: [{
+            name: 'Ane100',
+            // pointPadding: 0,
+            // groupPadding: 0,
+            pointWidth: 20,
+            data: [{
+                x: Date.UTC(2014, 10, 21),
+                x2: Date.UTC(2014, 10, 23),
+                y: 0,
+                name: 'OK',
+                colorIndex: 5
+            }, {
+                x: Date.UTC(2014, 11, 1),
+                x2: Date.UTC(2014, 11, 5),
+                y: 0,
+                name: 'NOT OK',
+            }, {
+                x: Date.UTC(2014, 11, 5),
+                x2: Date.UTC(2014, 11, 10),
+                y: 0,
+                name: 'NOT OK',
+            }, {
+                x: Date.UTC(2014, 10, 21),
+                x2: Date.UTC(2014, 10, 25),
+                y: 1,
+                name: 'Dev1',
+            }, {
+                x: Date.UTC(2014, 10, 25),
+                x2: Date.UTC(2014, 11, 5),
+                y: 1,
+                name: 'Dev2',
+            }, {
+                x: Date.UTC(2014, 11, 5),
+                x2: Date.UTC(2014, 11, 10),
+                y: 1,
+                name: 'Dev3'
+            }, {
+                x: Date.UTC(2014, 10, 21),
+                x2: Date.UTC(2014, 11, 1),
+                y: 2,
+                name: 'Test1'
+            }, {
+                x: Date.UTC(2014, 11, 1),
+                x2: Date.UTC(2014, 11, 5),
+                y: 2,
+                name: 'Test2'
+            }, {
+                x: Date.UTC(2014, 11, 5),
+                x2: Date.UTC(2014, 11, 10),
+                y: 2,
+                name: 'Test3'
+            },],
+            dataLabels: {
+                enabled: true
+            }
+        }]
+    });
 
     $('input[name="begin_date_search"]').val('');
-    $('input[name="begin_date_search"]').attr("placeholder","New Begin Date");
+    $('input[name="begin_date_search"]').attr("placeholder", "New Begin Date");
     $('input[name="end_date_search"]').val('');
-    $('input[name="end_date_search"]').attr("placeholder","New End Date");
+    $('input[name="end_date_search"]').attr("placeholder", "New End Date");
 
     $(function () {
-        $('#formchart').submit(function() {
+        $('#formchart').submit(function () {
 
             var begin_date = $("#id_begin_date").val();
             var end_date = $("#id_end_date").val();
@@ -14,7 +106,7 @@ $(document).ready(function () {
             var id_tower = $("#id_tower :selected").val();
 
             dataToSend = $(this).serializeArray();
-            dataToSend.push({ name: 'tower_id', value: id_tower });
+            dataToSend.push({name: 'tower_id', value: id_tower});
 
             if (begin_date > end_date)
                 alert("Begin date is higher than end date");
@@ -31,9 +123,9 @@ $(document).ready(function () {
             var compact_comment = $("#id_compact_comment").val();
             var detailed_comment = $("#id_detailed_comment").val();
 
-            dataToSend.push({ name: 'internal_comment', value: internal_comment });
-            dataToSend.push({ name: 'compact_comment', value: compact_comment });
-            dataToSend.push({ name: 'detailed_comment', value: detailed_comment });
+            dataToSend.push({name: 'internal_comment', value: internal_comment});
+            dataToSend.push({name: 'compact_comment', value: compact_comment});
+            dataToSend.push({name: 'detailed_comment', value: detailed_comment});
 
             console.log(dataToSend);
 
@@ -59,23 +151,23 @@ $(document).ready(function () {
     $(function () {
         var button = $('#submit_tower');
         button.click(function () {
-            if ( document.getElementById("TowerForm").classList.contains('show') ){
+            if (document.getElementById("TowerForm").classList.contains('show')) {
 
                 var id_tower = $("#id_tower :selected").val();
 
-                if (id_tower){
+                if (id_tower) {
                     document.getElementById("TowerForm").classList.remove('show');
                     document.getElementById("ChartArea").classList.add('show');
                     document.getElementById("FilterForm").classList.add('show');
                     $.ajax({
                         url: "/line_highchart_json",
                         data: {tower_id: id_tower},
-                        success : function(json) {
+                        success: function (json) {
                             console.log("loading");
                             getgraph(json);
                         }
                     })
-                }else
+                } else
                     alert("Please choose a tower");
 
             } else
@@ -96,7 +188,7 @@ $(document).ready(function () {
             $.ajax({
                 url: "/line_highchart_json",
                 data: dataToSend,
-                success : function(json) {
+                success: function (json) {
                     console.log("loading");
                     getgraph(json);
                 }
@@ -168,7 +260,7 @@ function getgraph(data) {
 
                         $("#modal-type .modal-content").html(
                             "<div class='modal-header'>" +
-                            "<h5 class='modal-title'>You want to add this Date ("+ date +") to?</h5>" +
+                            "<h5 class='modal-title'>You want to add this Date (" + date + ") to?</h5>" +
                             "</div>" +
                             "<div class='modal-footer'>" +
                             "<div class='col-md-4'>" +

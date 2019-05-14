@@ -3,6 +3,9 @@
 {% load staticfiles %}
 
 {% block content %}
+    <link href="{% static 'css/highcharts.css' %}" rel="stylesheet">
+
+    <div id="xrange123"></div>
 
     <div class="container-fluid">
         <!-- Page Heading -->
@@ -79,6 +82,8 @@
                 </div>
 
                 <script type="text/javascript" src="{% static 'js/highcharts.js' %}"></script>
+                <script type="text/javascript" src="https://code.highcharts.com/js/modules/xrange.js"></script>
+                <script type="text/javascript" src="https://code.highcharts.com/js/modules/exporting.js"></script>
                 <script type="text/javascript" src="{% static 'js/highcharts_df.js' %}"></script>
 
             </div>
