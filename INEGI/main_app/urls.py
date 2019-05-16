@@ -110,6 +110,7 @@ urlpatterns = [
 
     url(r'^wizard/?$', views.FormWizardView.as_view(), name='wizard'),
 
+    url(r'^add_calib_equip/$', views.add_calib_equip, name='add_calib_equip'),
     url(r'^add_type_equipment/$', views.add_type_equipment, name='add_type_equipment'),
     url(r'^add_type_model/$', views.add_type_model, name='add_type_model'),
     url(r'^add_type_status/$', views.add_type_status, name='add_type_status'),

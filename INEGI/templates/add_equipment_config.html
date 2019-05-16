@@ -52,6 +52,9 @@
                                 </div>
                             {% else %}
                                 {{ field.label_tag }}{% if field.field.required %} *{% endif %}
+                                {% if field.name == "calibration" %}
+                                    <a href="#" class="js-create-type related-widget-wrapper-link add-related" data-type="calib_equip" id="add_id_type" title="Add another Equipment"><img src="/static/admin/img/icon-addlink.svg" alt="Add"></a>
+                                {% endif %}
                                 {% render_field  field placeholder=field.label %}
                             {% endif %}
                         </div>
@@ -61,7 +64,7 @@
                     <div class="form-group">
                         <div class="form-row">
                             <div class="col-md-6">
-                                <input type="submit" class="btn btn-primary btn-block" value="Create">
+                                <input type="submit" class="btn btn-success btn-block" value="Submit">
                             </div>
                             <div class="col-md-6">
                                 <button id="reset" type="reset" class="btn btn-warning btn-block"> Clean</button>
@@ -70,6 +73,12 @@
                     </div>
 
                 </form>
+            </div>
+        </div>
+        <!-- THE MODAL WE WILL BE USING -->
+        <div class="modal fade" id="modal-type">
+            <div class="modal-dialog">
+                <div class="modal-content"></div>
             </div>
         </div>
     </div>

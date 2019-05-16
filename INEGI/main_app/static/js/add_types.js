@@ -4,6 +4,9 @@ $(function () {
 
         var type_data =$(this).attr('data-type');
         var string_url = null;
+        console.log(type_data)
+        if(type_data === "calib_equip" )
+            string_url = '/add_calib_equip';
 
         if(type_data === "equipment" )
             string_url = '/add_type_equipment';

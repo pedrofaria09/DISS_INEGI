@@ -1,7 +1,7 @@
 <!-- DataTales Example -->
 <div class="card shadow mb-4">
     <div class="card-header py-2">
-        <h6 class="m-0 font-weight-bold text-primary text-center">Equipments Configuration Table</h6>
+        <h5 class="m-0 font-weight-bold text-primary text-center">Equipments Configuration Table</h5>
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -9,32 +9,30 @@
                 <thead class="thead-light">
                     <tr>
                         <th>Equipment SN</th>
-                        <th>OffSet</th>
-                        <th>Slope</th>
-                        <th>Reference</th>
+                        <th>Slope DL</th>
+                        <th>Offset DL</th>
+                        <th>Slope CAL</th>
+                        <th>Offset CAL</th>
                         <th>Height</th>
-                        <th>Actions</th>
+                        <th>Dimension</th>
+                        <th style="width:20%">Actions</th>
                     </tr>
                 </thead>
-                <tfoot>
-                    <tr>
-                        <th>Equipment SN</th>
-                        <th>OffSet</th>
-                        <th>Slope</th>
-                        <th>Reference</th>
-                        <th>Height</th>
-                        <th>Actions</th>
-                    </tr>
-                </tfoot>
                 <tbody>
 
                 {% for c in configurations %}
                     <tr>
                         <td class="align-middle p-2"><a href="{% url 'view_equipment' c.calibration.equipment.pk %}">{{ c.calibration.equipment.sn }}</a></td>
+                        <td class="align-middle p-2"><a href="{% url 'view_equipment_config' tower_id period_id c.pk%}">{{ c.slope_dl }}</a></td>
+                        <td class="align-middle p-2"><a href="{% url 'view_equipment_config' tower_id period_id c.pk%}">{{ c.offset_dl }}</a></td>
                         <td class="align-middle p-2"><a href="{% url 'view_calibration' c.calibration.equipment.pk c.calibration.pk %}">{{ c.calibration.offset }}</a></td>
                         <td class="align-middle p-2"><a href="{% url 'view_calibration' c.calibration.equipment.pk c.calibration.pk %}">{{ c.calibration.slope }}</a></td>
-                        <td class="align-middle p-2"><a href="{% url 'view_calibration' c.calibration.equipment.pk c.calibration.pk %}">{{ c.calibration.ref }}</a></td>
-                        <td class="align-middle p-2"><a href="{% url 'view_equipment_config' tower_id period_id c.pk%}">{{ c.height }}</a></td>
+                        <td class="align-middle p-2"><a href="{% url 'view_equipment_config' tower_id period_id c.pk%}">{{ c.height_label }}</a></td>
+                        <td class="align-middle p-2">
+                            {% for dim in c.dimension %}
+                                <a href="{% url 'view_dimension' tower_id period_id c.pk dim.pk%}">{{ dim.column }}</a>
+                            {% endfor %}
+                        </td>
                         <td>
                             <a href="{% url 'view_equipment_config' tower_id period_id c.pk%}" class="btn btn-sm btn-info">View - Edit</a>
                             <a href="#" name="delete_equipment_config" data-id="{{ c.pk }}" class="btn btn-sm btn-danger">Delete</a>

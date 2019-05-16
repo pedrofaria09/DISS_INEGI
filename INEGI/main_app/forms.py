@@ -243,6 +243,8 @@ class EquipmentCharacteristicForm(ModelForm):
         self.fields['model'].label = "Model"
         self.fields['version'].label = "Version"
         self.fields['designation'].label = "Designation"
+        self.fields['slope_stn'].label = "Standard Slope"
+        self.fields['offset_stn'].label = "Standard Offset"
         self.fields['output'].label = "Output"
         self.fields['gama'].label = "Gama"
         self.fields['error'].label = "Error"
@@ -254,6 +256,8 @@ class EquipmentCharacteristicForm(ModelForm):
         self.fields['model'].widget.attrs.update({'class': 'form-control mandatory'})
         self.fields['version'].widget.attrs.update({'class': 'form-control mandatory'})
         self.fields['designation'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['slope_stn'].widget.attrs.update({'class': 'form-control mandatory'})
+        self.fields['offset_stn'].widget.attrs.update({'class': 'form-control mandatory'})
         self.fields['output'].widget.attrs.update({'class': 'form-control mandatory'})
         self.fields['gama'].widget.attrs.update({'class': 'form-control mandatory'})
         self.fields['error'].widget.attrs.update({'class': 'form-control mandatory'})
@@ -279,6 +283,8 @@ class CalibrationForm(ModelForm):
         super(CalibrationForm, self).__init__(*args, **kwargs)
         self.fields['calib_date'].label = "Date of calibration"
         self.fields['ref'].label = "Reference"
+        self.fields['slope'].label = "Calibration Slope"
+        self.fields['offset'].label = "Calibration Offset"
 
         self.fields['offset'].widget.attrs.update({'class': 'form-control mandatory'})
         self.fields['slope'].widget.attrs.update({'class': 'form-control mandatory'})
@@ -404,11 +410,15 @@ class EquipmentConfigForm(ModelForm):
         super(EquipmentConfigForm, self).__init__(*args, **kwargs)
         self.fields['calibration'].label = "Equipment/Calibration"
         self.fields['boom_var_height'].label = "Boom vertical height"
+        self.fields['slope_dl'].label = "Data Logger Slope"
+        self.fields['offset_dl'].label = "Data Logger Offset"
 
         self.fields['height'].widget.attrs.update({'class': 'form-control mandatory', 'style': 'width:25%', 'autocomplete': 'off'})
         self.fields['height_label'].widget.attrs.update({'class': 'form-control mandatory', 'style': 'width:25%', 'autocomplete': 'off'})
         self.fields['orientation'].widget.attrs.update({'class': 'form-control mandatory', 'style': 'width:25%'})
         self.fields['boom_length'].widget.attrs.update({'class': 'form-control mandatory', 'style': 'width:25%'})
+        self.fields['slope_dl'].widget.attrs.update({'class': 'form-control mandatory', 'style': 'width:25%'})
+        self.fields['offset_dl'].widget.attrs.update({'class': 'form-control mandatory', 'style': 'width:25%'})
         self.fields['boom_var_height'].widget.attrs.update({'class': 'form-control mandatory', 'style': 'width:25%'})
 
 

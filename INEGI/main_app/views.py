@@ -995,6 +995,30 @@ def add_type(request, type):
     return render(request, 'add_type.html', {'form': form, 'type': type, 'name': name})
 
 
+def add_calib_equip(request):
+    data = dict()
+
+    if request.method == 'POST':
+        form_eq = EquipmentForm(request.POST)
+        form_calib = CalibrationForm(request.POST)
+        if form_eq.is_valid() and form_calib.is_valid():
+            equipment = form_eq.save(commit=False)
+            equipment.save()
+            calib = form_calib.save(commit=False)
+            calib.equipment = equipment
+            calib.save()
+            data['form_is_valid'] = True
+        else:
+            data['form_is_valid'] = False
+    else:
+        form_eq = EquipmentForm()
+        form_calib = CalibrationForm()
+
+    context = {'form_eq': form_eq, 'form_calib': form_calib}
+    data['html_form'] = render_to_string('add_calib_equip.html', context, request=request)
+    return JsonResponse(data)
+
+
 def add_type_equipment(request):
     data = dict()
 
@@ -1748,6 +1772,10 @@ def view_conf_period(request, period_id, tower_id):
             messages.warning(request, 'Period wasnt edited successfully!!!')
 
     configurations = EquipmentConfig.objects.filter(conf_period=period_id).order_by('-id')
+
+    for c in configurations:
+        dimension = Dimension.objects.filter(equipment_configuration=c)
+        c.dimension = dimension
 
     return render(request, 'view_conf_period.html', {'form': form, 'tower_id': tower_id, 'period_id': period_id, 'period': period, 'configurations': configurations})
 

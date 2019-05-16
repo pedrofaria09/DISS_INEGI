@@ -11,7 +11,7 @@
         <!-- DataTales Example -->
         <div class="card shadow mb-4">
             <div class="card-header py-2">
-                <h6 class="m-0 font-weight-bold text-primary text-center">Equipments Table</h6>
+                <h5 class="m-0 font-weight-bold text-primary text-center">Equipments Table</h5>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -22,15 +22,17 @@
                                 <th>Serial Number</th>
                                 <th>Manufacturer</th>
                                 <th>Model</th>
-                                <th>Actions</th>
+                                <th style="width:20%">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
 
                         {% for equipment in equipments %}
                             <tr>
-                                <td class="align-middle p-2"><a href="{% url "view_equipment" equipment.pk %}">{{ equipment.model.type }}</a></td>
+                                <td class="align-middle p-2"><a href="{% url "view_type" equipment.model.pk 'model'%}">{{ equipment.model.type }}</a></td>
                                 <td class="align-middle p-2"><a href="{% url "view_equipment" equipment.pk %}">{{ equipment.sn }}</a></th>
+                                <td class="align-middle p-2"><a href="{% url "view_type" equipment.model.pk 'model' %}">{{ equipment.model.manufacturer }}</a></th>
+                                <td class="align-middle p-2"><a href="{% url "view_type" equipment.model.pk 'model' %}">{{ equipment.model.model }}</a></th>
                                 <td>
                                     <a href="{% url "view_equipment" equipment.pk %}" class="btn btn-sm btn-info">View - Edit</a>
                                     <a href="#" name="delete_equipment" data-id="{{ equipment.pk }}" class="btn btn-sm btn-danger">Delete</a>

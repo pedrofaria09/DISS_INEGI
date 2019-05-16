@@ -182,10 +182,12 @@ class PeriodConfiguration(models.Model):
 
 class EquipmentConfig(models.Model):
     height = models.FloatField()
-    height_label = models.CharField(max_length=20, null=True, blank=True)
+    height_label = models.CharField(max_length=50)
     orientation = models.FloatField(null=True, blank=True)
     boom_length = models.FloatField(null=True, blank=True)
     boom_var_height = models.FloatField(null=True, blank=True)
+    slope_dl = models.FloatField(null=True, blank=True)
+    offset_dl = models.FloatField(null=True, blank=True)
     calibration = models.ForeignKey('Calibration', on_delete=models.DO_NOTHING)
     conf_period = models.ForeignKey('PeriodConfiguration', on_delete=models.DO_NOTHING)
 
@@ -206,6 +208,8 @@ class EquipmentCharacteristic(models.Model):
     model = models.CharField(max_length=50, null=True, blank=True)
     version = models.CharField(max_length=10, null=True, blank=True)
     designation = models.CharField(max_length=100, null=True, blank=True)
+    slope_stn = models.FloatField(null=True, blank=True)
+    offset_stn = models.FloatField(null=True, blank=True)
     output = models.CharField(max_length=100)
     gama = models.CharField(max_length=100, null=True, blank=True)
     error = models.CharField(max_length=100, null=True, blank=True)
