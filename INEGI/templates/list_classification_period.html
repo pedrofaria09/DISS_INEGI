@@ -30,7 +30,7 @@
                     <tr>
                         <td class="align-middle p-2"><a href={% url "view_classification_period" tower_id period_id equi_conf_id c.pk %}>{{ c.begin_date|date:'Y/m/d H:i' }}</a></td>
                         <td class="align-middle p-2"><a href={% url "view_classification_period" tower_id period_id equi_conf_id c.pk %}>{{ c.end_date|date:'Y/m/d H:i' }}</a></td>
-                        <td class="align-middle p-2"><a href={% url "view_classification_period" tower_id period_id equi_conf_id c.pk %}>{{ c.status }}</a></td>
+                        <td class="align-middle p-2"><a href={% url "view_classification_period" tower_id period_id equi_conf_id c.pk %}>{{ c.status.name }}</a></td>
                         <td class="align-middle p-2"><a href={% url "view_user" c.user.pk %}>{{ c.user.username }}</a></td>
                         <td class="align-middle p-2">
                             <a href="{% url "add_comment_classification" tower_id period_id equi_conf_id c.pk %}" class="btn btn-sm btn-success">Add Comment</a>

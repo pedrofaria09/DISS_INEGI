@@ -22,7 +22,7 @@ $(document).ready(function () {
 
                     $.ajax({
                         url: "/x_chart",
-                        // data: dataToSend,
+                        data: {tower_id: id_tower},
                         success: function (data) {
                             console.log("Loading X Chart");
                             getxgraph(data);
@@ -62,7 +62,7 @@ $(document).ready(function () {
 
             $.ajax({
                 url: "/x_chart",
-                // data: dataToSend,
+                data: dataToSend,
                 success: function (data) {
                     console.log("Loading X Chart");
                     getxgraph(data)
@@ -144,6 +144,20 @@ $(document).ready(function () {
                         } else {
                             alert(data.message);
                             $("#modal-type2").modal("hide");
+
+                            var id_tower = $("#id_tower :selected").val();
+                            var begin_date = $("#id_begin_date_search").val();
+                            var end_date = $("#id_end_date_search").val();
+                            dataToSend = {tower_id: id_tower, begin_date: begin_date, end_date: end_date};
+
+                            $.ajax({
+                                url: "/x_chart",
+                                data: dataToSend,
+                                success: function (data) {
+                                    console.log("Loading X Chart");
+                                    getxgraph(data)
+                                }
+                            })
                         }
                     }
                 })
@@ -159,12 +173,18 @@ function getxgraph(data) {
         chart: {
             type: 'xrange'
         },
+
         title: {
             text: 'Tower Classifications'
         },
+
         xAxis: {
-            type: 'datetime'
+            type: 'datetime',
+            labels: {
+                format: '{value:%Y-%m-%d %H:%M:%S}'
+            }
         },
+
         yAxis: {
             title: {
                 text: ''
@@ -173,6 +193,19 @@ function getxgraph(data) {
             reversed: true,
             staticScale: 50
         },
+
+        lang: {
+            noData: "No Data to show"
+        },
+
+        noData: {
+            style: {
+                fontWeight: 'bold',
+                fontSize: '15px',
+                color: '#303030'
+            }
+        },
+
         plotOptions: {
             series: {
                 dataLabels: {
@@ -182,6 +215,7 @@ function getxgraph(data) {
                 }
             }
         },
+
         tooltip: {
             formatter: function () {
                 // console.log(this);
@@ -189,6 +223,7 @@ function getxgraph(data) {
                 return to_show;
             }
         },
+
         series: [{
             name: 'Classifications',
             // pointPadding: 0,
@@ -199,6 +234,7 @@ function getxgraph(data) {
                 enabled: true
             }
         }],
+
         credits: {
             'enabled': true,
             'href': 'http://google.com',
@@ -227,6 +263,15 @@ function getgraph(data) {
         }]
     };
 
+    data['lang'] = {noData: "No Data to show"};
+    data['noData'] = {
+        style: {
+            fontWeight: 'bold',
+            fontSize: '15px',
+            color: '#303030'
+        }
+    };
+    console.log(data)
     data['tooltip'] = {xDateFormat: '%Y-%m-%d %H:%M'};
 
     // data['xAxis']['tickInterval'] = 24;

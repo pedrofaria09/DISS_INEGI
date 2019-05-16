@@ -218,7 +218,7 @@ class EquipmentCharacteristic(models.Model):
         ordering = ['-id']
 
     def __str__(self):
-        return "%s - %s - %s" % (self.type, self.model, self.version)
+        return "%s / %s / %s / %s" % (self.type, self.manufacturer, self.model, self.version)
 
 
 class Calibration(models.Model):
@@ -230,7 +230,7 @@ class Calibration(models.Model):
     dimension_type = models.ForeignKey('DimensionType', on_delete=models.DO_NOTHING)
 
     def __str__(self):
-        return "SN:%s Ref:%s OF:%s SL:%s" % (self.equipment, self.ref, self.offset, self.slope)
+        return "SN:%s / Ref:%s" % (self.equipment.sn, self.ref)
 
 
 class Status(models.Model):
@@ -252,7 +252,7 @@ class ClassificationPeriod(models.Model):
     user = models.ForeignKey('MyUser', on_delete=models.DO_NOTHING)
 
     class Meta:
-        unique_together = (("begin_date", "end_date", "equipment_configuration", "status"),)
+        unique_together = (("begin_date", "end_date", "equipment_configuration"),)
 
 
 class Dimension(models.Model):

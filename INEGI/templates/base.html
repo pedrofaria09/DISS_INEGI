@@ -66,16 +66,16 @@
 
             <!-- Nav Item - Dashboard -->
             <li class="nav-item active">
-                <a class="nav-link" href="{% url 'index' %}">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Data Visualization</span></a>
+                <a class="nav-link" href="{% url 'index2' %}">
+                    <i class="fas fa-fw fa-upload"></i>
+                    <span>Import Raw Data</span></a>
             </li>
 
             <!-- Nav Item - Dashboard -->
             <li class="nav-item active">
-                <a class="nav-link" href="{% url 'index2' %}">
-                    <i class="fas fa-fw fa-tachometer-alt"></i>
-                    <span>Dashboard</span></a>
+                <a class="nav-link" href="{% url 'index' %}">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Data Visualization</span></a>
             </li>
 
             <!-- Divider -->
@@ -90,13 +90,13 @@
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwoTower"
                    aria-expanded="true" aria-controls="collapseTwo">
-                    <i class="fas fa-fw fa-cog"></i>
-                    <span>Towers</span>
+                    <i class="fas fa-fw fa-broadcast-tower"></i>
+                    <span>Met Mast</span>
                 </a>
                 <div id="collapseTwoTower" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item" href="{% url "add_tower" %}">Add a Tower</a>
-                        <a class="collapse-item" href="{% url "list_towers" %}">View all Towers</a>
+                        <a class="collapse-item" href="{% url "add_tower" %}">Add a Met Mast</a>
+                        <a class="collapse-item" href="{% url "list_towers" %}">View all Met Masts</a>
                     </div>
                 </div>
             </li>
@@ -106,12 +106,12 @@
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwoMachine"
                    aria-expanded="true" aria-controls="collapseTwo">
                     <i class="fas fa-fw fa-gopuram"></i>
-                    <span>Machines</span>
+                    <span>Wind Turbines</span>
                 </a>
                 <div id="collapseTwoMachine" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item" href="{% url "add_machine" %}">Add a Machine</a>
-                        <a class="collapse-item" href="{% url "list_machines" %}">View all Machines</a>
+                        <a class="collapse-item" href="{% url "add_machine" %}">Add a Wind Turbine</a>
+                        <a class="collapse-item" href="{% url "list_machines" %}">View all Wind Turbines</a>
                     </div>
                 </div>
             </li>

@@ -26,7 +26,7 @@ from graphos.sources.csv_file import CSVDataSource
 from chartjs.views.lines import BaseLineChartView, HighchartPlotLineChartView
 
 import time, re, io, json, pytz, random
-
+import numpy as np
 # Create your views here.
 
 
@@ -88,7 +88,6 @@ class LineHighchartJson(HighchartPlotLineChartView):
         conf_periods = PeriodConfiguration.objects.filter(QD(tower=tower) & QD(begin_date__gte=begin_date, end_date__lte=end_date))
 
         df = read_frame(qs)
-        self.xdata = df['time_stamp'].apply(dt2epoch).tolist()
 
         new_df = df.value.apply(lambda x: pd.Series(str(x).split(",")))
         del df['value']
@@ -96,7 +95,6 @@ class LineHighchartJson(HighchartPlotLineChartView):
         del df['id']
         del df['tower_code']
 
-        # df.set_index('time_stamp')
         new_df = []
         flag = 1
         # Need to change columns name and get the correct order from the columns to read in each period in Dimensions
@@ -108,16 +106,16 @@ class LineHighchartJson(HighchartPlotLineChartView):
             temp_df = df[(df['time_stamp'] >= cf.begin_date) & (df['time_stamp'] <= cf.end_date)]
             equipments_conf = EquipmentConfig.objects.filter(conf_period=cf)
             for eq in equipments_conf:
-                name = eq.calibration.equipment.model.type.name + str(eq.height)
-                dim = Dimension.objects.get(equipment_configuration=eq)
-                if dim:
-                    column = dim.column-1
+                dim = Dimension.objects.filter(equipment_configuration=eq)
+                for d in dim:
+                    name = eq.calibration.equipment.model.type.name + '@' + str(eq.height_label) + d.dimension_type.statistic.name
+                    column = d.column-1
                     temp_df = temp_df.rename(columns={column: name})
             if not temp_df.empty:
                 new_df.append(temp_df)
 
         # add the new_df to the df, if new_df empty, means no periods and dimensions was configured yet.
-        if not df.empty:
+        if not df.empty and len(new_df) > 0:
             df = pd.concat(new_df, axis=0, sort=False)
 
         # Delete columns with empty values
@@ -128,13 +126,22 @@ class LineHighchartJson(HighchartPlotLineChartView):
             if df[d].name is not 'time_stamp':
                 df[d] = df[d].astype(float).tolist()
 
+        # Fill open spaces with a freq of 10min with NaN's
+        if not df.empty:
+            df = df.set_index('time_stamp')
+            i = df.index[0]
+            f = df.index[-1]
+            continuousrange = pd.date_range(i, f, freq=('10T'))
+            df = df.reindex(index=continuousrange)
+
         # Replace all NaN with None
         df = df.where((pd.notnull(df)), None)
+        eixo_x = df.index.astype(np.int64)//10**6
+        self.xdata = eixo_x.tolist()
 
         for d in df:
-            if df[d].name is not 'time_stamp':
-                self.ydata.append(df[d].values.tolist())
-                self.indexs.append(df[d].name)
+            self.ydata.append(df[d].values.tolist())
+            self.indexs.append(df[d].name)
 
         self.title = 'Data Visualization'
         self.y_axis_title = 'Values'
@@ -2659,7 +2666,7 @@ def classify_from_charts(request):
                 except IntegrityError:
                     data = {}
                     data['is_taken'] = True
-                    data['error'] = "There are already an Classification equal to that - Same Begin and End Date, Equipment and Status."
+                    data['error'] = "There are already a Classification equal for that Equipment with same Begin and End Date"
                     return JsonResponse(data)
 
                 if internal_comment or compact_comment or detailed_comment:
@@ -2691,11 +2698,29 @@ def classify_from_charts(request):
 
 
 def XChart(request):
+
+    begin_date = request.GET.get('begin_date', '')
+    end_date = request.GET.get('end_date', '')
+    tower_id = request.GET.get('tower_id', '')
+
+    print("GETX - Begin: ", begin_date)
+    print("GETX - End: ", end_date)
+    print("GETX - tower_id: ", tower_id)
+
+    if not (begin_date and end_date):
+        end_date = datetime.now(pytz.utc)
+        begin_date = end_date - timedelta(days=15)
+    else:
+        begin_date = get_date(begin_date)
+        end_date = get_date(end_date)
+
     data = []
     categories = []
 
-    tower = Tower.objects.get(pk=10)
-    period_conf = PeriodConfiguration.objects.filter(tower=tower).order_by('id')
+    period_conf = PeriodConfiguration.objects.filter(QD(tower=tower_id) & ((QD(begin_date__range=(begin_date, end_date)) | QD(end_date__range=(begin_date, end_date)))))
+    # print(period_conf)
+    # tower = Tower.objects.get(pk=10)
+    # period_conf = PeriodConfiguration.objects.filter(tower=tower).order_by('id')
     eq_config = EquipmentConfig.objects.filter(conf_period__in=period_conf).order_by('id')
 
     # Fill categories 1st

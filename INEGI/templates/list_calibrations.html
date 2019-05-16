@@ -11,19 +11,9 @@
                         <th>Calibration date</th>
                         <th>Offset</th>
                         <th>Slope</th>
-                        <th>Ref</th>
-                        <th>Equipment</th>
+                        <th>Reference</th>
                     </tr>
                 </thead>
-                <tfoot>
-                    <tr>
-                        <th>Calibration date</th>
-                        <th>Offset</th>
-                        <th>Slope</th>
-                        <th>Ref</th>
-                        <th>Equipment</th>
-                    </tr>
-                </tfoot>
                 <tbody>
 
                 {% for c in calibrations %}
@@ -32,7 +22,6 @@
                     <td class="align-middle p-2"><a href="{% url "view_calibration" equipment_id c.pk %}">{{ c.offset }}</a></td>
                     <td class="align-middle p-2"><a href="{% url "view_calibration" equipment_id c.pk %}">{{ c.slope }}</a></td>
                     <td class="align-middle p-2"><a href="{% url "view_calibration" equipment_id c.pk %}">{{ c.ref }}</a></td>
-                    <td class="align-middle p-2"><a href="{% url "view_calibration" equipment_id c.pk %}">{{ c.equipment }}</a></td>
                     </tr>
                 {% endfor %}
 

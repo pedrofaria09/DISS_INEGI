@@ -263,11 +263,6 @@ class EquipmentCharacteristicForm(ModelForm):
 
 
 class CalibrationForm(ModelForm):
-    equipment = forms.ModelChoiceField(
-        queryset=Equipment.objects.all().order_by('-id'),
-        widget=autocomplete.ModelSelect2(url='equipment-autocomplete', attrs={'style': 'width:100%'})
-    )
-
     dimension_type = forms.ModelChoiceField(
         queryset=DimensionType.objects.all().order_by('-id'),
         widget=autocomplete.ModelSelect2(url='dimension-type-autocomplete', attrs={'style': 'width:100%'})
@@ -278,10 +273,12 @@ class CalibrationForm(ModelForm):
     class Meta:
         model = Calibration
         fields = ('__all__')
+        exclude = ('equipment',)
 
     def __init__(self, *args, **kwargs):
         super(CalibrationForm, self).__init__(*args, **kwargs)
         self.fields['calib_date'].label = "Date of calibration"
+        self.fields['ref'].label = "Reference"
 
         self.fields['offset'].widget.attrs.update({'class': 'form-control mandatory'})
         self.fields['slope'].widget.attrs.update({'class': 'form-control mandatory'})
@@ -406,6 +403,7 @@ class EquipmentConfigForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(EquipmentConfigForm, self).__init__(*args, **kwargs)
         self.fields['calibration'].label = "Equipment/Calibration"
+        self.fields['boom_var_height'].label = "Boom vertical height"
 
         self.fields['height'].widget.attrs.update({'class': 'form-control mandatory', 'style': 'width:25%', 'autocomplete': 'off'})
         self.fields['height_label'].widget.attrs.update({'class': 'form-control mandatory', 'style': 'width:25%', 'autocomplete': 'off'})

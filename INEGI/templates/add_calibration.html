@@ -35,9 +35,6 @@
                                 </div>
                             {% else %}
                                 {{ field.label_tag }}{% if field.field.required %} *{% endif %}
-                                {% if field.name == "equipment" %}
-                                    <a href="#" class="js-create-type related-widget-wrapper-link add-related" data-type="new_equipment" id="add_id_type" title="Add another Equipment"><img src="/static/admin/img/icon-addlink.svg" alt="Add"></a>
-                                {% endif %}
                                 {% if field.name == "dimension_type" %}
                                     <a href="#" class="js-create-type related-widget-wrapper-link add-related" data-type="dimension_type" id="add_id_type" title="Add another Dimension"><img src="/static/admin/img/icon-addlink.svg" alt="Add"></a>
                                 {% endif %}
