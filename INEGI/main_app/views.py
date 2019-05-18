@@ -296,14 +296,12 @@ def index(request):
         return render(request, 'home.html', context)
 
 
-def index2(request):
-
-    if request.user.id is None:
-        form = LoginForm()
-        return render(request, 'home2.html', {'form': form})
-    else:
-        context = {}
-        return render(request, 'home2.html', context)
+def import_raw_data(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+    context = {}
+    return render(request, 'import_raw_data.html', context)
 
 
 class MyCSVDataSource(CSVDataSource):
@@ -388,6 +386,10 @@ def search(request):
 
 
 def add_user(request):
+    if not request.user.is_staff:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     if request.method == 'POST':
         form = RegisterForm(request.POST)
 
@@ -416,6 +418,10 @@ def add_user(request):
 
 
 def list_users(request):
+    if not request.user.is_staff:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     users = MyUser.objects.all()
 
     return render(request, 'list_users.html', {'users': users})
@@ -473,6 +479,10 @@ def view_user(request, user_id):
 
 
 def delete_user(request):
+    if not request.user.is_staff:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponse("not ok")
+
     if request.is_ajax and request.method == 'POST':
         user = MyUser.objects.get(id=request.POST["id"])
         try:
@@ -487,6 +497,10 @@ def delete_user(request):
 
 
 def ban_user(request):
+    if not request.user.is_staff:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponse("not ok")
+
     if request.is_ajax and request.method == 'POST':
         user = MyUser.objects.get(id=request.POST["id"])
         actual_info = user.is_active
@@ -504,6 +518,11 @@ def ban_user(request):
 
 
 def add_tower(request):
+
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     if request.method == 'POST':
         form = TowerForm(request.POST)
         if form.is_valid():
@@ -726,6 +745,10 @@ def delete_associate_tower(request):
 
 
 def add_machine(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     if request.method == 'POST':
         form = MachineForm(request.POST)
         if form.is_valid():
@@ -843,12 +866,20 @@ def delete_cluster(request):
 
 
 def list_equipments(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     equipments = Equipment.objects.all()
 
     return render(request, 'list_equipments.html', {'equipments': equipments})
 
 
 def add_equipment(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     if request.method == 'POST':
         form = EquipmentForm(request.POST)
         if form.is_valid():
@@ -865,6 +896,10 @@ def add_equipment(request):
 
 
 def view_equipment(request, equipment_id):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     try:
         equipment = Equipment.objects.get(pk=equipment_id)
     except Equipment.DoesNotExist:
@@ -904,6 +939,10 @@ def delete_equipment(request):
 
 
 def list_type(request, type):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     if type == 'equipment':
         type_obj = EquipmentType.objects.all()
         name = "Equipments Type"
@@ -933,6 +972,9 @@ def list_type(request, type):
 
 
 def add_type(request, type):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
     if type == 'equipment':
         name = "Equipment Type"
     elif type == 'user_group':
@@ -1182,6 +1224,10 @@ def add_equipment_json(request):
 
 
 def view_type(request, equipment_id, type):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     if type == 'equipment':
         name = "Equipment Type"
         try:
@@ -1312,6 +1358,10 @@ def delete_type(request):
 
 
 def show_towers_data_mongo(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     data = {}
 
     DataSetMongo.objects.all().delete()
@@ -1328,6 +1378,10 @@ def show_towers_data_mongo(request):
 
 
 def add_raw_data_mongo(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     total_time_operation = 0
     total_time_insertion = 0
     conta = 0
@@ -1424,6 +1478,10 @@ def add_raw_data_mongo(request):
 
 
 def show_towers_data_influx(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     start_time = time.time()
 
     result = INFLUXCLIENT.query("select time, value from ort542")
@@ -1451,6 +1509,10 @@ def show_towers_data_influx(request):
 
 
 def add_raw_data_influx(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     total_time_operation = 0
     total_time_insertion = 0
     conta = 0
@@ -1549,6 +1611,10 @@ def add_raw_data_influx(request):
 
 
 def show_towers_data_pg(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     data = {}
 
     # DataSetPG.objects.all().delete()
@@ -1569,6 +1635,10 @@ def show_towers_data_pg(request):
 
 
 def add_raw_data_pg(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     total_time_operation = 0
     total_time_insertion = 0
     conta = 0
@@ -1696,6 +1766,9 @@ class FormWizardView(SessionWizardView):
 
 
 def add_conf_period(request, tower_id):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
 
     try:
         tower = Tower.objects.get(pk=tower_id)
@@ -1746,6 +1819,10 @@ def add_conf_period(request, tower_id):
 
 
 def view_conf_period(request, period_id, tower_id):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     try:
         period = PeriodConfiguration.objects.get(pk=period_id)
     except PeriodConfiguration.DoesNotExist:
@@ -1800,6 +1877,10 @@ def delete_conf_period(request):
 
 def add_calibration(request, equipment_id):
 
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     try:
         equipment = Equipment.objects.get(pk=equipment_id)
     except Equipment.DoesNotExist:
@@ -1827,6 +1908,11 @@ def add_calibration(request, equipment_id):
 
 
 def view_calibration(request, equipment_id, calib_id):
+
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     try:
         calibration = Calibration.objects.get(pk=calib_id)
     except Calibration.DoesNotExist:
@@ -1866,6 +1952,10 @@ def delete_calibration(request):
 
 def add_equipment_config(request, tower_id, period_id):
 
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     try:
         Tower.objects.get(pk=tower_id)
     except Tower.DoesNotExist:
@@ -1902,6 +1992,10 @@ def add_equipment_config(request, tower_id, period_id):
 
 
 def view_equipment_config(request, tower_id, period_id, equi_conf_id):
+
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
 
     try:
         Tower.objects.get(pk=tower_id)
@@ -1957,6 +2051,11 @@ def delete_equipment_config(request):
 
 
 def add_status(request):
+
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     if request.method == 'POST':
         form = StatusForm(request.POST)
 
@@ -1991,12 +2090,22 @@ def add_type_status(request):
 
 
 def list_status(request):
+
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     status = Status.objects.all()
 
     return render(request, 'list_status.html', {'status': status})
 
 
 def view_status(request, status_id):
+
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     try:
         status = Status.objects.get(pk=status_id)
     except Status.DoesNotExist:
@@ -2035,6 +2144,11 @@ def delete_status(request):
 
 
 def add_classification_period(request, tower_id, period_id, equi_conf_id):
+
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     try:
         Tower.objects.get(pk=tower_id)
     except Tower.DoesNotExist:
@@ -2073,6 +2187,11 @@ def add_classification_period(request, tower_id, period_id, equi_conf_id):
 
 
 def view_classification_period(request, tower_id, period_id, equi_conf_id, classification_id):
+
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     try:
         Tower.objects.get(pk=tower_id)
     except Tower.DoesNotExist:
@@ -2132,6 +2251,11 @@ def delete_classification_period(request):
 
 
 def add_dimension_type(request):
+
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     if request.method == 'POST':
         form = DimensionTypeForm(request.POST)
 
@@ -2166,12 +2290,22 @@ def add_type_dimension(request):
 
 
 def list_dimensions_type(request):
+
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     dimensions = DimensionType.objects.all()
 
     return render(request, 'list_dimensions_type.html', {'dimensions': dimensions})
 
 
 def view_dimension_type(request, dimension_type_id):
+
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     try:
         dimension_type = DimensionType.objects.get(pk=dimension_type_id)
     except DimensionType.DoesNotExist:
@@ -2210,6 +2344,11 @@ def delete_dimension_type(request):
 
 
 def add_dimension(request, tower_id, period_id, equi_conf_id):
+
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     try:
         Tower.objects.get(pk=tower_id)
     except Tower.DoesNotExist:
@@ -2243,6 +2382,11 @@ def add_dimension(request, tower_id, period_id, equi_conf_id):
 
 
 def view_dimension(request, tower_id, period_id, equi_conf_id, dimension_id):
+
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     try:
         Tower.objects.get(pk=tower_id)
     except Tower.DoesNotExist:
@@ -2298,6 +2442,11 @@ def delete_dimension(request):
 
 
 def add_comment_classification(request, tower_id, period_id, equi_conf_id, classification_id):
+
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     try:
         Tower.objects.get(pk=tower_id)
     except Tower.DoesNotExist:
@@ -2338,6 +2487,11 @@ def add_comment_classification(request, tower_id, period_id, equi_conf_id, class
 
 
 def add_comment_tower(request, tower_id):
+
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
     try:
         tower = Tower.objects.get(pk=tower_id)
     except Tower.DoesNotExist:
@@ -2362,7 +2516,6 @@ def add_comment_tower(request, tower_id):
 
 
 def view_comment(request, tower_id, comment_id, type):
-
     if type == 'classification':
         try:
             comment = CommentClassification.objects.get(pk=comment_id)
@@ -2431,7 +2584,7 @@ class EquipmentAutocomplete(autocomplete.Select2QuerySetView):
         qs = Equipment.objects.all().order_by('-id')
 
         if self.q:
-            qs = qs.filter(sn__icontains=self.q)
+            qs = qs.filter(QD(sn__icontains=self.q) | QD(model__type__name__icontains=self.q))
 
         return qs
 
@@ -2461,7 +2614,7 @@ class UserAutocomplete(autocomplete.Select2QuerySetView):
         qs = MyUser.objects.all().order_by('-id')
 
         if self.q:
-            qs = qs.filter(full_name__icontains=self.q)
+            qs = qs.filter(QD(username__icontains=self.q) | QD(full_name__icontains=self.q))
 
         return qs
 
@@ -2476,7 +2629,7 @@ class ModelAutocomplete(autocomplete.Select2QuerySetView):
             qs = qs.filter(type=type)
 
         if self.q:
-            qs = qs.filter(QD(type__name__icontains=self.q) | QD(model__icontains=self.q) | QD(version__icontains=self.q))
+            qs = qs.filter(QD(type__name__icontains=self.q) | QD(manufacturer__icontains=self.q) | QD(model__icontains=self.q) | QD(version__icontains=self.q))
 
         return qs
 
@@ -2486,7 +2639,7 @@ class CalibrationAutocomplete(autocomplete.Select2QuerySetView):
         qs = Calibration.objects.all().order_by('-id')
 
         if self.q:
-            qs = qs.filter(equipment__sn__icontains=self.q)
+            qs = qs.filter(QD(ref__icontains=self.q) | QD(equipment__sn__icontains=self.q))
 
         return qs
 
@@ -2496,7 +2649,7 @@ class StatusAutocomplete(autocomplete.Select2QuerySetView):
         qs = Status.objects.all().order_by('-id')
 
         if self.q:
-            qs = qs.filter(code__icontains=self.q)
+            qs = qs.filter(QD(name__icontains=self.q) | QD(code__icontains=self.q))
 
         return qs
 
@@ -2630,7 +2783,7 @@ class TowerConfPeriodsAutocomplete(autocomplete.Select2QuerySetView):
                 # print(qs)
 
         if self.q:
-            qs = qs.filter(QD(calibration__equipment__model__type__name__icontains=self.q) | QD(height__icontains=self.q))
+            qs = qs.filter(QD(calibration__equipment__model__type__name__icontains=self.q) | QD(height_label__icontains=self.q))
 
         return qs
 

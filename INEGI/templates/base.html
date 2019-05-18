@@ -63,14 +63,14 @@
 
             <!-- Divider -->
             <hr class="sidebar-divider my-0">
-
-            <!-- Nav Item - Dashboard -->
-            <li class="nav-item active">
-                <a class="nav-link" href="{% url 'index2' %}">
-                    <i class="fas fa-fw fa-upload"></i>
-                    <span>Import Raw Data</span></a>
-            </li>
-
+            {% if request.user.is_staff or request.user.is_manager %}
+                <!-- Nav Item - Dashboard -->
+                <li class="nav-item active">
+                    <a class="nav-link" href="{% url 'import_raw_data' %}">
+                        <i class="fas fa-fw fa-upload"></i>
+                        <span>Import Raw Data</span></a>
+                </li>
+            {% endif %}
             <!-- Nav Item - Dashboard -->
             <li class="nav-item active">
                 <a class="nav-link" href="{% url 'index' %}">
@@ -95,7 +95,9 @@
                 </a>
                 <div id="collapseTwoTower" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
+                        {% if request.user.is_staff or request.user.is_manager %}
                         <a class="collapse-item" href="{% url "add_tower" %}">Add a Met Mast</a>
+                        {% endif %}
                         <a class="collapse-item" href="{% url "list_towers" %}">View all Met Masts</a>
                     </div>
                 </div>
@@ -110,12 +112,15 @@
                 </a>
                 <div id="collapseTwoMachine" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
+                        {% if request.user.is_staff or request.user.is_manager %}
                         <a class="collapse-item" href="{% url "add_machine" %}">Add a Wind Turbine</a>
+                        {% endif %}
                         <a class="collapse-item" href="{% url "list_machines" %}">View all Wind Turbines</a>
                     </div>
                 </div>
             </li>
 
+            {% if request.user.is_staff or request.user.is_manager %}
             <!-- Nav Item - DropDown Clusters -->
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwoCluster"
@@ -172,34 +177,35 @@
                     </div>
                 </div>
             </li>
+            {% endif %}
+            {% if request.user.is_staff %}
+                <!-- Divider -->
+                <hr class="sidebar-divider">
 
+                <!-- Heading -->
+                <div class="sidebar-heading">
+                    Users
+                </div>
 
-            <!-- Divider -->
-            <hr class="sidebar-divider">
+                <!-- Nav Item - Users -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url "add_user" %}">
+                        <i class="fas fa-fw fa-user-plus"></i>
+                        <span>Add User</span></a>
+                </li>
 
-            <!-- Heading -->
-            <div class="sidebar-heading">
-                Users
-            </div>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url "list_users" %}">
+                        <i class="fas fa-fw fa-users"></i>
+                        <span>List Users</span></a>
+                </li>
 
-            <!-- Nav Item - Users -->
-            <li class="nav-item">
-                <a class="nav-link" href="{% url "add_user" %}">
-                    <i class="fas fa-fw fa-user-plus"></i>
-                    <span>Add User</span></a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link" href="{% url "list_users" %}">
-                    <i class="fas fa-fw fa-users"></i>
-                    <span>List Users</span></a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link" href="{% url "list_associate_towers" %}">
-                    <i class="fas fa-fw fa-building"></i>
-                    <span>Associate Towers</span></a>
-            </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url "list_associate_towers" %}">
+                        <i class="fas fa-fw fa-building"></i>
+                        <span>Associate Towers</span></a>
+                </li>
+            {% endif %}
 
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">

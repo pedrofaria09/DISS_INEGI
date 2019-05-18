@@ -10,7 +10,8 @@ $(document).ready(function () {
                 if (id_tower) {
                     document.getElementById("TowerForm").classList.remove('show');
                     document.getElementById("ChartArea").classList.add('show');
-                    document.getElementById("FilterForm").classList.add('show');
+                    if (document.getElementById("FilterForm"))
+                        document.getElementById("FilterForm").classList.add('show');
                     $.ajax({
                         url: "/line_highchart_json",
                         data: {tower_id: id_tower},

@@ -115,7 +115,7 @@ class MyUser(AbstractUser):
     affiliation = models.ForeignKey('AffiliationType', on_delete=models.DO_NOTHING, null=True, blank=True)
 
     def __str__(self):
-        return "%s %s" % (self.id, self.full_name)
+        return "%s / %s" % (self.username, self.full_name)
 
 
 class Station(models.Model):
@@ -192,7 +192,7 @@ class EquipmentConfig(models.Model):
     conf_period = models.ForeignKey('PeriodConfiguration', on_delete=models.DO_NOTHING)
 
     def __str__(self):
-        return "%s @ %s" % (self.calibration.equipment.model.type.name, self.height)
+        return "%s @ %s" % (self.calibration.equipment.model.type.name, self.height_label)
 
 
 class Equipment(models.Model):
@@ -222,7 +222,7 @@ class EquipmentCharacteristic(models.Model):
         ordering = ['-id']
 
     def __str__(self):
-        return "%s / %s / %s / %s" % (self.type, self.manufacturer, self.model, self.version)
+        return "%s / %s / %s / %s" % (self.type.name, self.manufacturer, self.model, self.version)
 
 
 class Calibration(models.Model):
@@ -245,7 +245,7 @@ class Status(models.Model):
         unique_together = (("code", "name"),)
 
     def __str__(self):
-        return "%s %s" % (self.code, self.name)
+        return "%s / %s" % (self.code, self.name)
 
 
 class ClassificationPeriod(models.Model):
