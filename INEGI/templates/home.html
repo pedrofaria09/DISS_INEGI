@@ -10,6 +10,70 @@
             <h1 class="h3 mb-0 text-gray-800">Home</h1>
         </div>
 
+        <div class="row">
+
+            <div class="col-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-2">
+                        <h6 class="m-0 font-weight-bold text-primary text-center">Last 5 Users</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover table-sm" width="100%" cellspacing="0">
+                                <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Username</th>
+                                    <th>Full Name</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for user in users %}
+                                    <tr>
+                                        <td class="align-middle p-2"><a href="{% url "view_user" user.id %}">{{ user.id }}</a></td>
+                                        <td class="align-middle p-2"><a href="{% url "view_user" user.id %}">{{ user.username }}</a></td>
+                                        <td class="align-middle p-2"><a href="{% url "view_user" user.id %}">{{ user.full_name }}</a></td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-2">
+                        <h6 class="m-0 font-weight-bold text-primary text-center">Last 5 Stations</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover table-sm" width="100%" cellspacing="0">
+                                <thead>
+                                <tr>
+                                    <th>INEGI Code</th>
+                                    <th>Client Code</th>
+                                    <th>Designation</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for tower in stations %}
+                                    <tr>
+                                        <td class="align-middle p-2"><a href="{% url "view_tower" tower.pk %}">{{ tower.code_inegi }}</a></th>
+                                        <td class="align-middle p-2"><a href="{% url "view_tower" tower.pk %}">{{ tower.code_client }}</a></th>
+                                        <td class="align-middle p-2"><a href="{% url "view_tower" tower.pk %}">{{ tower.designation }}</a></td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
 
 {% endblock %}

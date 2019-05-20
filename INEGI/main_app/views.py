@@ -43,7 +43,9 @@ def index(request):
         form = LoginForm()
         return render(request, 'home.html', {'form': form})
     else:
-        context = {}
+        users = MyUser.objects.all().order_by('-id')[:5]
+        stations = Tower.objects.all().order_by('-id')[:5]
+        context = {'users': users, 'stations': stations}
         return render(request, 'home.html', context)
 
 
