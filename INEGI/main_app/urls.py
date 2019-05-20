@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^logout/$', views.logout_view, name='logout'),
     url(r'^search/?$', views.search, name='search'),
     url(r'^ban_user/?$', views.ban_user, name='ban_user'),
+    url(r'^pdf/?$', views.GeneratePdf.as_view(), name='pdf'),
 
     # Add one component
     url(r'^add_tower/?$', views.add_tower, name='add_tower'),

@@ -1,0 +1,127 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Title</title>
+        <!-- Custom fonts for this template-->
+{% load staticfiles %}
+
+    <link href="{% static 'css/highcharts.css' %}" rel="stylesheet">
+
+    {% load bootstrap4 %} {# import bootstrap4/bootstrap3 #}
+{#    {% bootstrap_css %} {# Embed Bootstrap CSS#}
+    {% bootstrap_javascript jquery='full' %} {# Embed Bootstrap JS+jQuery #}
+    {% block extrahead %}       {# Extra Resources Start #}
+        {{ form.media }}
+    {% endblock %}
+
+    <style type="text/css">
+        body {
+            font-weight: 200;
+            font-size: 14px;
+        }
+
+        .header {
+            font-size: 20px;
+            font-weight: 100;
+            text-align: center;
+            color: #007cae;
+        }
+
+        .title {
+            font-size: 22px;
+            font-weight: 100;
+            /* text-align: right;*/
+            padding: 10px 20px 0px 20px;
+        }
+
+        .title span {
+            color: #007cae;
+        }
+
+        .details {
+            padding: 10px 20px 0px 20px;
+            text-align: left !important;
+            /*margin-left: 40%;*/
+        }
+
+        .hrItem {
+            border: none;
+            height: 1px;
+            /* Set the hr color */
+            color: #333; /* old IE */
+            background-color: #fff; /* Modern Browsers */
+        }
+    </style>
+</head>
+<body>
+
+<div class='wrapper'>
+    <div class='header'>
+        <p class='title'>Invoice # {{ invoice_id }}</p>
+    </div>
+    <div>
+        <div class='details'>
+            Bill to: {{ customer_name }}<br/>
+            Amount: {{ amount }}<br/>
+            Date: {{ today }}
+            <hr class='hrItem'/>
+        </div>
+    </div>
+    <div class="card shadow mb-4">
+        <div class="card-header py-2">
+            <h6 class="m-0 font-weight-bold text-primary text-center">ASDSADSAD</h6>
+        </div>
+        <div class="card-body">
+            <div id="ChartArea2">
+                <div id="myHighChart" style="height: 600px;"></div>
+            </div>
+                <script type="text/javascript" src="{% static 'js/highcharts.js' %}"></script>
+                <script type="text/javascript" src="{% static 'js/highcharts_df.js' %}"></script>
+        </div>
+        <div class="form-group">
+                    <div class="form-row">
+                        <div class="col-md-3">
+                            <button id="button_print" class="btn btn-success btn-block">Print charts</button>
+                        </div>
+                    </div>
+                </div>
+    </div>
+</div>
+    <script src="{% static 'vendor/jquery-easing/jquery.easing.min.js' %}"></script>
+
+    <!-- Bootstrap core JavaScript-->
+    {% comment %}<script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+
+    <!-- Core plugin JavaScript-->
+
+
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>{% endcomment %}
+
+    <!-- Custom scripts for all pages-->
+    <script src="{% static 'js/sb-admin-2.min.js' %}"></script>
+
+    <!-- Page level plugins -->
+    {% comment %}<script src="{% static 'vendor/chart.js/Chart.min.js' %}"></script>
+
+    <!-- Page level custom scripts -->
+    <script src="{% static 'js/demo/chart-area-demo.js' %}"></script>
+    <script src="{% static 'js/demo/chart-pie-demo.js' %}"></script>{% endcomment %}
+
+    <!-- Page level plugins -->
+    <script src="{% static 'vendor/datatables/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'vendor/datatables/dataTables.bootstrap4.min.js' %}"></script>
+
+    <!-- Page level custom scripts -->
+    <script src="{% static 'js/demo/datatables-demo.js' %}"></script>
+
+    <!-- Deletes -->
+    <script src="{% static 'js/deletes.js' %}"></script>
+
+    <!-- Tables sort and search -->
+    <script src="{% static 'js/tables-aux.js' %}"></script>
+
+    <script src="{% static 'js/add_types.js' %}"></script>
+    <script src="{% static 'js/defult.js' %}"></script>
+</body>
+</html>

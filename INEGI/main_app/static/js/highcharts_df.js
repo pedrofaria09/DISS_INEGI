@@ -1,4 +1,13 @@
 $(document).ready(function () {
+    // console.log("Highchart");
+    // $.ajax({
+    //     url: "/line_highchart_json",
+    //     data: {tower_id: 10},
+    //     success: function (json) {
+    //         console.log("Loading Line Chart");
+    //         getgraph(json);
+    //     }
+    // });
 
     $(function () {
         var button = $('#submit_tower');

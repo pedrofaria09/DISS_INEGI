@@ -27,7 +27,47 @@ from chartjs.views.lines import BaseLineChartView, HighchartPlotLineChartView
 
 import time, re, io, json, pytz, random
 import numpy as np
-# Create your views here.
+
+from django.views.generic import View
+from .utils import render_to_pdf
+from django.template import loader
+
+
+class GeneratePdf(View):
+    def get(self, request, *args, **kwargs):
+        data = {
+            "invoice_id": 123,
+            "customer_name": "John Cooper",
+            "amount": 1399.99,
+            "today": "Today",
+        }
+        template = loader.get_template('pdf/pdf.html')
+        return HttpResponse(template.render(data, request))
+        # pdf = render_to_pdf('pdf/pdf.html', data)
+        # return HttpResponse(pdf, content_type='application/pdf')
+
+    # def get(self, request, *args, **kwargs):
+    #     template = loader.get_template('pdf/pdf.html')
+    #     context = {
+    #         "invoice_id": 123,
+    #         "customer_name": "John Cooper",
+    #         "amount": 1399.99,
+    #         "today": "Today",
+    #     }
+    #     html = template.render(context)
+    #     pdf = render_to_pdf('pdf/pdf.html', context)
+    #     if pdf:
+    #         response = HttpResponse(pdf, content_type='application/pdf')
+    #         filename = "Invoice_%s.pdf" % ("12341231")
+    #         content = "inline; filename='%s'" % (filename)
+    #         download = request.GET.get("download")
+    #         if download:
+    #             content = "attachment; filename='%s'" % (filename)
+    #         response['Content-Disposition'] = content
+    #         return response
+    #     return HttpResponse("Not found")
+
+# ========================================= MAGIC =========================================
 
 
 def get_obj_or_404_2(klass, *args, **kwargs):
@@ -2435,7 +2475,7 @@ class CommentTowerTypeAutocomplete(autocomplete.Select2QuerySetView):
         begin_date = self.forwarded.get('begin_date', None)
         end_date = self.forwarded.get('end_date', None)
         tower_id = self.forwarded.get('tower', None)
-        print(self.forwarded)
+
         if begin_date and end_date:
             begin_date = get_date(begin_date)
             end_date = get_date(end_date)
@@ -2497,7 +2537,6 @@ class TowerConfPeriodsAutocomplete(autocomplete.Select2QuerySetView):
             # qs = PeriodConfiguration.objects.filter((QD(begin_date__range=(begin_date, end_date)) | QD(end_date__range=(begin_date, end_date)))).order_by('-id')
             qs = PeriodConfiguration.objects.filter((QD(begin_date__lte=begin_date) & QD(end_date__gte=begin_date)) | (QD(begin_date__lte=end_date) & QD(end_date__gte=end_date))).order_by('-id')
             qs = qs.filter(tower=tower).distinct()
-            print(qs)
             if qs:
                 qs = EquipmentConfig.objects.filter(conf_period__in=qs).order_by('calibration').distinct('calibration')
                 # qs = EquipmentConfig.objects.filter(conf_period__in=qs).values_list('calibration', flat=True)
