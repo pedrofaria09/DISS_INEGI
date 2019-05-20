@@ -6,9 +6,13 @@ from . import views
 urlpatterns = [
     url(r'^$', views.index, name='index'),
     url(r'^import_raw_data/$', views.import_raw_data, name='import_raw_data'),
+    url(r'^data_visualization/$', views.data_visualization, name='data_visualization'),
     url(r'^login/$', views.login_view, name='login'),
     url(r'^logout/$', views.logout_view, name='logout'),
+    url(r'^search/?$', views.search, name='search'),
+    url(r'^ban_user/?$', views.ban_user, name='ban_user'),
 
+    # Add one component
     url(r'^add_tower/?$', views.add_tower, name='add_tower'),
     url(r'^add_user/?$', views.add_user, name='add_user'),
     url(r'^add_cluster/?$', views.add_cluster, name='add_cluster'),
@@ -26,6 +30,7 @@ urlpatterns = [
     url(r'^add_comment_classification/(?P<tower_id>[0-9]+)/(?P<period_id>[0-9]+)/(?P<equi_conf_id>[0-9]+)/(?P<classification_id>[0-9]+)$', views.add_comment_classification, name='add_comment_classification'),
     url(r'^add_comment_tower/(?P<tower_id>[0-9]+)$', views.add_comment_tower, name='add_comment_tower'),
 
+    # List components
     url(r'^list_towers/?$', views.list_towers, name='list_towers'),
     url(r'^list_users/?$', views.list_users, name='list_users'),
     url(r'^list_clusters/?$', views.list_clusters, name='list_clusters'),
@@ -36,6 +41,7 @@ urlpatterns = [
     url(r'^list_status/?$', views.list_status, name='list_status'),
     url(r'^list_dimensions_type/?$', views.list_dimensions_type, name='list_dimensions_type'),
 
+    # View one component
     url(r'^view_tower/(?P<tower_id>([\w ]+))$', views.view_tower, name='view_tower'),
     url(r'^view_user/(?P<user_id>[0-9]+)$', views.view_user, name='view_user'),
     url(r'^view_cluster/(?P<cluster_id>([\w ]+))$', views.view_cluster, name='view_cluster'),
@@ -52,6 +58,7 @@ urlpatterns = [
     url(r'^view_dimension/(?P<tower_id>[0-9]+)/(?P<period_id>[0-9]+)/(?P<equi_conf_id>[0-9]+)/(?P<dimension_id>[0-9]+)$', views.view_dimension, name='view_dimension'),
     url(r'^view_comment/(?P<tower_id>[0-9]+)/(?P<comment_id>[0-9]+)/(?P<type>([\w ]+))$', views.view_comment, name='view_comment'),
 
+    # Deletes
     url(r'^delete_tower/?$', views.delete_tower, name='delete_tower'),
     url(r'^delete_user/?$', views.delete_user, name='delete_user'),
     url(r'^delete_cluster/?$', views.delete_cluster, name='delete_cluster'),
@@ -68,6 +75,7 @@ urlpatterns = [
     url(r'^delete_dimension/?$', views.delete_dimension, name='delete_dimension'),
     url(r'^delete_comment/?$', views.delete_comment, name='delete_comment'),
 
+    # AutoCompletes
     url(r'^equipment-type-autocomplete/$', views.EquipmentTypeAutocomplete.as_view(), name='equipment-type-autocomplete'),
     url(r'^equipment-autocomplete/$', views.EquipmentAutocomplete.as_view(), name='equipment-autocomplete'),
     url(r'^tower-autocomplete/$', views.TowerAutocomplete.as_view(), name='tower-autocomplete'),
@@ -86,30 +94,27 @@ urlpatterns = [
     url(r'^affiliation-autocomplete/$', views.AffiliationAutocomplete.as_view(), name='affiliation-autocomplete'),
     url(r'^tower-conf_periods-autocomplete/$', views.TowerConfPeriodsAutocomplete.as_view(), name='tower-conf_periods-autocomplete'),
 
-    url(r'^ban_user/?$', views.ban_user, name='ban_user'),
-
+    # Charts
     url(r'^classify_from_charts/?$', views.classify_from_charts, name='classify_from_charts'),
-
-    url(r'^search/?$', views.search, name='search'),
+    # django_nvd3
     url(r'^chart_nvd3/?$', views.chart_nvd3, name='chart_nvd3'),
+    # django_graphos
     url(r'^chart_graphos/?$', views.chart_graphos, name='chart_graphos'),
-
+    # django_chartsjs
     url(r'^chart_chartjs/?$', views.chart_chartjs, name='chart_chartjs'),
-    url(r'^line_chart_json/?$', views.line_chart_json.as_view(), name='line_chart_json'),
+    url(r'^line_chart_json/?$', views.LineChartJson.as_view(), name='line_chart_json'),
     url(r'^line_highchart_json/?$', views.LineHighchartJson.as_view(), name='line_highchart_json'),
     url(r'^x_chart/?$', views.XChart, name='x_chart'),
 
+    # Databases
     url(r'^show_towers_data_mongo/?$', views.show_towers_data_mongo, name='show_towers_data_mongo'),
     url(r'^add_raw_data_mongo/?$', views.add_raw_data_mongo, name='add_raw_data_mongo'),
-
     url(r'^show_towers_data_influx/?$', views.show_towers_data_influx, name='show_towers_data_influx'),
     url(r'^add_raw_data_influx/?$', views.add_raw_data_influx, name='add_raw_data_influx'),
-
     url(r'^show_towers_data_pg/?$', views.show_towers_data_pg, name='show_towers_data_pg'),
     url(r'^add_raw_data_pg/?$', views.add_raw_data_pg, name='add_raw_data_pg'),
 
-    url(r'^wizard/?$', views.FormWizardView.as_view(), name='wizard'),
-
+    # Types
     url(r'^add_calib_equip/$', views.add_calib_equip, name='add_calib_equip'),
     url(r'^add_type_equipment/$', views.add_type_equipment, name='add_type_equipment'),
     url(r'^add_type_model/$', views.add_type_model, name='add_type_model'),

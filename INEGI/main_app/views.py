@@ -37,262 +37,13 @@ def get_obj_or_404_2(klass, *args, **kwargs):
         raise Http404
 
 
-def dt2epoch(value):
-    epoch = int(time.mktime(value.timetuple()) * 1000)
-    return epoch
-
-
-class line_chart_json(BaseLineChartView):
-    def get_labels(self):
-        """Return 7 labels for the x-axis."""
-        return ["January", "February", "March", "April", "May", "June", "July"]
-
-    def get_providers(self):
-        """Return names of datasets."""
-        return ["Central", "Eastside", "Westside"]
-
-    def get_data(self):
-        """Return 3 datasets to plot."""
-
-        return [[75, 44, 92, 11, 44, 95, 35],
-                [41, 92, 18, 3, 73, 87, 92],
-                [87, 21, 94, 3, 90, 13, 65]]
-
-
-class LineHighchartJson(HighchartPlotLineChartView):
-
-    def __init__(self):
-        self.xdata = []
-        self.ydata = []
-        self.indexs = []
-
-    def get(self, request, *args, **kwargs):
-        tower_id = self.request.GET.get('tower_id', '')
-        begin_date = self.request.GET.get('begin_date', '')
-        end_date = self.request.GET.get('end_date', '')
-        print("GET - tower_id: ", tower_id)
-
-        tower = Tower.objects.get(pk=tower_id)
-
-        if not (begin_date and end_date):
-            end_date = datetime.now(pytz.utc)
-            begin_date = end_date - timedelta(days=15)
-        else:
-            begin_date = get_date(begin_date)
-            end_date = get_date(end_date)
-
-        # qs = DataSetPG.objects.filter(QD(tower_code=tower)).order_by('time_stamp')
-
-        qs = DataSetPG.objects.filter(QD(tower_code=tower) & QD(time_stamp__range=(begin_date, end_date))).order_by('time_stamp')
-
-        conf_periods = PeriodConfiguration.objects.filter(QD(tower=tower) & QD(begin_date__gte=begin_date, end_date__lte=end_date))
-
-        df = read_frame(qs)
-
-        new_df = df.value.apply(lambda x: pd.Series(str(x).split(",")))
-        del df['value']
-        df = pd.concat([df, new_df], axis=1, sort=False)
-        del df['id']
-        del df['tower_code']
-
-        new_df = []
-        flag = 1
-        # Need to change columns name and get the correct order from the columns to read in each period in Dimensions
-        for cf in conf_periods:
-            if flag:
-                new_df.append(df[(df['time_stamp'] < cf.begin_date)])
-                flag = 0
-
-            temp_df = df[(df['time_stamp'] >= cf.begin_date) & (df['time_stamp'] <= cf.end_date)]
-            equipments_conf = EquipmentConfig.objects.filter(conf_period=cf)
-            for eq in equipments_conf:
-                dim = Dimension.objects.filter(equipment_configuration=eq)
-                for d in dim:
-                    name = eq.calibration.equipment.model.type.name + '@' + str(eq.height_label) + d.dimension_type.statistic.name
-                    column = d.column-1
-                    temp_df = temp_df.rename(columns={column: name})
-            if not temp_df.empty:
-                new_df.append(temp_df)
-
-        # add the new_df to the df, if new_df empty, means no periods and dimensions was configured yet.
-        if not df.empty and len(new_df) > 0:
-            df = pd.concat(new_df, axis=0, sort=False)
-
-        # Delete columns with empty values
-        df.dropna(axis=1, how='all', inplace=True)
-
-        # Convert all other columns rather than time_stamp to float
-        for d in df:
-            if df[d].name is not 'time_stamp':
-                df[d] = df[d].astype(float).tolist()
-
-        # Fill open spaces with a freq of 10min with NaN's
-        if not df.empty:
-            df = df.set_index('time_stamp')
-            i = df.index[0]
-            f = df.index[-1]
-            continuousrange = pd.date_range(i, f, freq=('10T'))
-            df = df.reindex(index=continuousrange)
-
-        # Replace all NaN with None
-        df = df.where((pd.notnull(df)), None)
-        eixo_x = df.index.astype(np.int64)//10**6
-        self.xdata = eixo_x.tolist()
-
-        for d in df:
-            self.ydata.append(df[d].values.tolist())
-            self.indexs.append(df[d].name)
-
-        self.title = 'Data Visualization'
-        self.y_axis_title = 'Values'
-
-        # special - line charts credits are personalized
-        self.credits = {
-            'enabled': True,
-            'href': 'http://google.com',
-            'text': 'INEGI Team',
-        }
-
-        context = self.get_context_data(**kwargs)
-        return self.render_to_response(context)
-
-    def get_labels(self):
-        """Return labels."""
-        return self.xdata
-
-    def get_providers(self):
-        """Return names of datasets."""
-        return self.indexs
-
-    def get_data(self):
-        """Return dataset to plot."""
-        return self.ydata
-
-
-def chart_chartjs(request):
-    date_form = DateRangeChooseForm()
-    return render(request, 'chart_chartjs.html', {'date_form': date_form})
-
-
-def chart_nvd3(request):
-    qs = DataSetPG.objects.all().order_by('id')
-    df = read_frame(qs)
-    print(df.head())
-
-    xdata = df['time_stamp'].apply(dt2epoch).tolist()
-    new_df = df.value.apply(lambda x: pd.Series(str(x).split(",")))
-    del df['value']
-    df = pd.concat([df, new_df], axis=1, sort=False)
-    del df['id']
-    del df['tower_code']
-
-    # Convert all other columns rather than time_stamp to float
-    for d in df:
-        if df[d].name is not 'time_stamp':
-            df[d] = df[d].astype(float).tolist()
-
-    # Replace all NaN with None
-    df = df.where((pd.notnull(df)), None)
-
-    ydata = []
-    for d in df:
-        if df[d].name is not 'time_stamp':
-            ydata.append(df[d])
-
-    tooltip_date = "%d %b %Y %H:%M:%S %p"
-    extra_serie = {"tooltip": {"y_start": "value: ", "y_end": " "},
-                   "date_format": tooltip_date}
-    chartdata = {'x': xdata}
-    for idx, item in enumerate(ydata):
-        chartdata = {**chartdata, **{'name': item.name, 'y'+str(idx): item, 'extra'+str(idx): extra_serie}}
-
-    # chartdata = {
-    #     'x': xdata,
-    #     'name': 'series 1', 'y1': ydata[0], 'extra1': extra_serie,
-    # }
-
-    # charttype = "lineChart"
-    # chartcontainer = 'lineChart_container'
-    charttype = "lineWithFocusChart"
-    chartcontainer = 'linewithfocuschart_container'
-    data = {
-        'charttype': charttype,
-        'chartdata': chartdata,
-        'chartcontainer': chartcontainer,
-        'extra': {
-            'x_is_date': True,
-            'x_axis_format': '%d %b %Y %H',
-            'tag_script_js': True,
-            'jquery_on_ready': False,
-            'focus_enable': True,
-        }
-    }
-    return render(request, 'chart_nvd3.html', data)
-
-
-def chart_graphos(request):
-    qs = DataSetPG.objects.all().order_by('id')
-    df = read_frame(qs)
-
-    new_df = df.value.apply(lambda x: pd.Series(str(x).split(",")))
-    del df['value']
-    df = pd.concat([df, new_df], axis=1, sort=False)
-
-    # df = read_frame(qs)
-    #
-    # all_list = df.value.str.split(',').to_list()
-    # del df['value']
-    # new_df = pd.DataFrame(all_list)
-    # df = pd.concat([df, new_df], axis=1, sort=False)
-    del df['id']
-    del df['tower_code']
-
-    # print(df)
-    # df.fillna(0, inplace=True)
-    # print(df)
-
-    # for x in df:
-    #     if df[x].name is not 'time_stamp':
-    #         df[x].astype(float)
-
-    # df.to_csv(path_or_buf='test.csv', float_format='%.2f', index=False, encoding='utf-8')
-    df.to_csv(path_or_buf='test.csv', index=False)
-
-    data = [
-        ['Year', 'Sales', 'Expenses'],
-        ["2004", 1000, 400],
-        ["2005", 1170, 460],
-        ["2006", 660, 1120],
-        ["2007", 1030, 540]
-    ]
-
-    # data_source = SimpleDataSource(data=data)
-    csv_file = open('test.csv')
-    # data_source = CSVDataSource(csv_file)
-    data_source = MyCSVDataSource(csv_file)
-
-    # data_source = ModelDataSource(qs, fields=['time_stamp', 'value'])
-    # data_source = MyModelDataSource(qs, fields=['time_stamp', 'value'])
-
-    # print(pd.DataFrame.to_csv(self=df , sep=';', float_format='%.2f', index=True, decimal=","))
-    chart = LineChart(data_source)
-    chart1 = LineChartMorris(data_source, options={'xLabels': 'day', 'continuousLine': 'false'})
-    chart2 = LineChartHIGH(data_source, width=1200, height=600, options={'title': 'Data Visualization', 'chart': {'zoomType': 'xy'}})
-
-    context = {'chart': chart, 'chart1': chart1, 'chart2': chart2}
-
-    return render(request, 'chart_graphos.html', context)
-
-
 def index(request):
 
     if request.user.id is None:
         form = LoginForm()
         return render(request, 'home.html', {'form': form})
     else:
-        form_tower = TowersDataVForm()
-        form_comment = CommentClassificationChartForm()
-        context = {'form_tower': form_tower, 'form_comment': form_comment}
+        context = {}
         return render(request, 'home.html', context)
 
 
@@ -302,36 +53,6 @@ def import_raw_data(request):
         return HttpResponseRedirect(reverse("index"))
     context = {}
     return render(request, 'import_raw_data.html', context)
-
-
-class MyCSVDataSource(CSVDataSource):
-    def get_data(self):
-        data = super(MyCSVDataSource, self).get_data()
-        header = data[0]
-        data_without_header = data[1:]
-        for row in data_without_header:
-            for x in range(1, len(row)):
-                try:
-                    row[x] = float(row[x])
-                except (ValueError, TypeError):
-                    row[x] = None
-        data_without_header.insert(0, header)
-        return data_without_header
-
-
-class MyModelDataSource(ModelDataSource):
-    def get_data(self):
-        data = super(MyModelDataSource, self).get_data()
-        header = data[0]
-        data_without_header = data[1:]
-        for row in data_without_header:
-            for x in range(1, len(row)):
-                try:
-                    row[x] = float(row[x])
-                except (ValueError, TypeError):
-                    row[x] = None
-        data_without_header.insert(0, header)
-        return data_without_header
 
 
 def login_view(request):
@@ -2788,6 +2509,148 @@ class TowerConfPeriodsAutocomplete(autocomplete.Select2QuerySetView):
         return qs
 
 
+# ========================================= CHARTS =========================================
+
+
+def dt2epoch(value):
+    epoch = int(time.mktime(value.timetuple()) * 1000)
+    return epoch
+
+
+def data_visualization(request):
+    form_tower = TowersDataVForm()
+    form_comment = CommentClassificationChartForm()
+    context = {'form_tower': form_tower, 'form_comment': form_comment}
+    return render(request, 'data_visualization.html', context)
+
+
+class LineChartJson(BaseLineChartView):
+    def get_labels(self):
+        """Return 7 labels for the x-axis."""
+        return ["January", "February", "March", "April", "May", "June", "July"]
+
+    def get_providers(self):
+        """Return names of datasets."""
+        return ["Central", "Eastside", "Westside"]
+
+    def get_data(self):
+        """Return 3 datasets to plot."""
+
+        return [[75, 44, 92, 11, 44, 95, 35],
+                [41, 92, 18, 3, 73, 87, 92],
+                [87, 21, 94, 3, 90, 13, 65]]
+
+
+class LineHighchartJson(HighchartPlotLineChartView):
+
+    def __init__(self):
+        self.xdata = []
+        self.ydata = []
+        self.indexs = []
+
+    def get(self, request, *args, **kwargs):
+        tower_id = self.request.GET.get('tower_id', '')
+        begin_date = self.request.GET.get('begin_date', '')
+        end_date = self.request.GET.get('end_date', '')
+        print("GET - tower_id: ", tower_id)
+
+        tower = Tower.objects.get(pk=tower_id)
+
+        if not (begin_date and end_date):
+            end_date = datetime.now(pytz.utc)
+            begin_date = end_date - timedelta(days=15)
+        else:
+            begin_date = get_date(begin_date)
+            end_date = get_date(end_date)
+
+        # qs = DataSetPG.objects.filter(QD(tower_code=tower)).order_by('time_stamp')
+
+        qs = DataSetPG.objects.filter(QD(tower_code=tower) & QD(time_stamp__range=(begin_date, end_date))).order_by('time_stamp')
+
+        conf_periods = PeriodConfiguration.objects.filter(QD(tower=tower) & QD(begin_date__gte=begin_date, end_date__lte=end_date))
+
+        df = read_frame(qs)
+
+        new_df = df.value.apply(lambda x: pd.Series(str(x).split(",")))
+        del df['value']
+        df = pd.concat([df, new_df], axis=1, sort=False)
+        del df['id']
+        del df['tower_code']
+
+        new_df = []
+        flag = 1
+        # Need to change columns name and get the correct order from the columns to read in each period in Dimensions
+        for cf in conf_periods:
+            if flag:
+                new_df.append(df[(df['time_stamp'] < cf.begin_date)])
+                flag = 0
+
+            temp_df = df[(df['time_stamp'] >= cf.begin_date) & (df['time_stamp'] <= cf.end_date)]
+            equipments_conf = EquipmentConfig.objects.filter(conf_period=cf)
+            for eq in equipments_conf:
+                dim = Dimension.objects.filter(equipment_configuration=eq)
+                for d in dim:
+                    name = eq.calibration.equipment.model.type.name + '@' + str(eq.height_label) + d.dimension_type.statistic.name
+                    column = d.column-1
+                    temp_df = temp_df.rename(columns={column: name})
+            if not temp_df.empty:
+                new_df.append(temp_df)
+
+        # add the new_df to the df, if new_df empty, means no periods and dimensions was configured yet.
+        if not df.empty and len(new_df) > 0:
+            df = pd.concat(new_df, axis=0, sort=False)
+
+        # Delete columns with empty values
+        df.dropna(axis=1, how='all', inplace=True)
+
+        # Convert all other columns rather than time_stamp to float
+        for d in df:
+            if df[d].name is not 'time_stamp':
+                df[d] = df[d].astype(float).tolist()
+
+        # Fill open spaces with a freq of 10min with NaN's
+        if not df.empty:
+            df = df.set_index('time_stamp')
+            i = df.index[0]
+            f = df.index[-1]
+            continuousrange = pd.date_range(i, f, freq=('10T'))
+            df = df.reindex(index=continuousrange)
+
+        # Replace all NaN with None
+        df = df.where((pd.notnull(df)), None)
+        eixo_x = df.index.astype(np.int64)//10**6
+        self.xdata = eixo_x.tolist()
+
+        for d in df:
+            self.ydata.append(df[d].values.tolist())
+            self.indexs.append(df[d].name)
+
+        self.title = 'Data Visualization'
+        self.y_axis_title = 'Values'
+
+        # special - line charts credits are personalized
+        self.credits = {
+            'enabled': True,
+            'href': 'http://google.com',
+            'text': 'INEGI Team',
+        }
+
+        context = self.get_context_data(**kwargs)
+        return self.render_to_response(context)
+
+    def get_labels(self):
+        """Return labels."""
+        return self.xdata
+
+    def get_providers(self):
+        """Return names of datasets."""
+        return self.indexs
+
+    def get_data(self):
+        """Return dataset to plot."""
+        return self.ydata
+
+
 def classify_from_charts(request):
     begin_date = get_date_secs(request.GET.get('begin_date', ''))
     end_date = get_date_secs(request.GET.get('end_date', ''))
@@ -2925,3 +2788,151 @@ def XChart(request):
     dataToReturn['data'] = data
     dataToReturn['categories'] = categories
     return JsonResponse(dataToReturn)
+
+
+# ============ Tests of some more charts ============
+
+
+def chart_chartjs(request):
+    date_form = DateRangeChooseForm()
+    return render(request, 'chart_chartjs.html', {'date_form': date_form})
+
+
+def chart_nvd3(request):
+    qs = DataSetPG.objects.all().order_by('id')
+    df = read_frame(qs)
+    print(df.head())
+
+    xdata = df['time_stamp'].apply(dt2epoch).tolist()
+    new_df = df.value.apply(lambda x: pd.Series(str(x).split(",")))
+    del df['value']
+    df = pd.concat([df, new_df], axis=1, sort=False)
+    del df['id']
+    del df['tower_code']
+
+    # Convert all other columns rather than time_stamp to float
+    for d in df:
+        if df[d].name is not 'time_stamp':
+            df[d] = df[d].astype(float).tolist()
+
+    # Replace all NaN with None
+    df = df.where((pd.notnull(df)), None)
+
+    ydata = []
+    for d in df:
+        if df[d].name is not 'time_stamp':
+            ydata.append(df[d])
+
+    tooltip_date = "%d %b %Y %H:%M:%S %p"
+    extra_serie = {"tooltip": {"y_start": "value: ", "y_end": " "},
+                   "date_format": tooltip_date}
+    chartdata = {'x': xdata}
+    for idx, item in enumerate(ydata):
+        chartdata = {**chartdata, **{'name': item.name, 'y'+str(idx): item, 'extra'+str(idx): extra_serie}}
+
+    # chartdata = {
+    #     'x': xdata,
+    #     'name': 'series 1', 'y1': ydata[0], 'extra1': extra_serie,
+    # }
+
+    # charttype = "lineChart"
+    # chartcontainer = 'lineChart_container'
+    charttype = "lineWithFocusChart"
+    chartcontainer = 'linewithfocuschart_container'
+    data = {
+        'charttype': charttype,
+        'chartdata': chartdata,
+        'chartcontainer': chartcontainer,
+        'extra': {
+            'x_is_date': True,
+            'x_axis_format': '%d %b %Y %H',
+            'tag_script_js': True,
+            'jquery_on_ready': False,
+            'focus_enable': True,
+        }
+    }
+    return render(request, 'chart_nvd3.html', data)
+
+
+def chart_graphos(request):
+    qs = DataSetPG.objects.all().order_by('id')
+    df = read_frame(qs)
+
+    new_df = df.value.apply(lambda x: pd.Series(str(x).split(",")))
+    del df['value']
+    df = pd.concat([df, new_df], axis=1, sort=False)
+
+    # df = read_frame(qs)
+    #
+    # all_list = df.value.str.split(',').to_list()
+    # del df['value']
+    # new_df = pd.DataFrame(all_list)
+    # df = pd.concat([df, new_df], axis=1, sort=False)
+    del df['id']
+    del df['tower_code']
+
+    # print(df)
+    # df.fillna(0, inplace=True)
+    # print(df)
+
+    # for x in df:
+    #     if df[x].name is not 'time_stamp':
+    #         df[x].astype(float)
+
+    # df.to_csv(path_or_buf='test.csv', float_format='%.2f', index=False, encoding='utf-8')
+    df.to_csv(path_or_buf='test.csv', index=False)
+
+    data = [
+        ['Year', 'Sales', 'Expenses'],
+        ["2004", 1000, 400],
+        ["2005", 1170, 460],
+        ["2006", 660, 1120],
+        ["2007", 1030, 540]
+    ]
+
+    # data_source = SimpleDataSource(data=data)
+    csv_file = open('test.csv')
+    # data_source = CSVDataSource(csv_file)
+    data_source = MyCSVDataSource(csv_file)
+
+    # data_source = ModelDataSource(qs, fields=['time_stamp', 'value'])
+    # data_source = MyModelDataSource(qs, fields=['time_stamp', 'value'])
+
+    # print(pd.DataFrame.to_csv(self=df , sep=';', float_format='%.2f', index=True, decimal=","))
+    chart = LineChart(data_source)
+    chart1 = LineChartMorris(data_source, options={'xLabels': 'day', 'continuousLine': 'false'})
+    chart2 = LineChartHIGH(data_source, width=1200, height=600, options={'title': 'Data Visualization', 'chart': {'zoomType': 'xy'}})
+
+    context = {'chart': chart, 'chart1': chart1, 'chart2': chart2}
+
+    return render(request, 'chart_graphos.html', context)
+
+
+class MyCSVDataSource(CSVDataSource):
+    def get_data(self):
+        data = super(MyCSVDataSource, self).get_data()
+        header = data[0]
+        data_without_header = data[1:]
+        for row in data_without_header:
+            for x in range(1, len(row)):
+                try:
+                    row[x] = float(row[x])
+                except (ValueError, TypeError):
+                    row[x] = None
+        data_without_header.insert(0, header)
+        return data_without_header
+
+
+class MyModelDataSource(ModelDataSource):
+    def get_data(self):
+        data = super(MyModelDataSource, self).get_data()
+        header = data[0]
+        data_without_header = data[1:]
+        for row in data_without_header:
+            for x in range(1, len(row)):
+                try:
+                    row[x] = float(row[x])
+                except (ValueError, TypeError):
+                    row[x] = None
+        data_without_header.insert(0, header)
+        return data_without_header
