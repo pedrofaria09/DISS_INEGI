@@ -327,6 +327,7 @@ class DataSetPG(models.Model):
             models.Index(fields=['tower_code', ]),
             models.Index(fields=['time_stamp', ])
         ]
+        # unique_together = (("tower_code", "time_stamp"),)
 
     def __str__(self):
         return "%s" % self.tower_code

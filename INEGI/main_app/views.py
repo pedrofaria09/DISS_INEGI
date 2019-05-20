@@ -25,6 +25,8 @@ from graphos.sources.model import ModelDataSource
 from graphos.sources.csv_file import CSVDataSource
 from chartjs.views.lines import BaseLineChartView, HighchartPlotLineChartView
 
+from django.core import serializers
+
 import time, re, io, json, pytz, random
 import numpy as np
 
@@ -1115,414 +1117,6 @@ def delete_type(request):
         return HttpResponse('ok')
     messages.error(request, 'An error occurred when deleting the type!')
     return HttpResponse("not ok")
-
-
-# ========================================= DATASETS =========================================
-
-
-def show_towers_data_mongo(request):
-    if request.user.is_client:
-        messages.error(request, 'You dont have access to this page')
-        return HttpResponseRedirect(reverse("index"))
-
-    data = {}
-
-    DataSetMongo.objects.all().delete()
-
-    start_time = time.time()
-    towers = DataSetMongo.objects(QM(tower_code="port525") and QM(time_stamp__lte=datetime(2010, 12, 25)))
-    end = time.time()
-    total_time = (end - start_time)
-    print('Query time: ', total_time, ' seconds', towers.count())
-
-    data['towers'] = {}
-
-    return render(request, 'show_towers_data_mongo.html', data)
-
-
-def add_raw_data_mongo(request):
-    if request.user.is_client:
-        messages.error(request, 'You dont have access to this page')
-        return HttpResponseRedirect(reverse("index"))
-
-    total_time_operation = 0
-    total_time_insertion = 0
-    conta = 0
-    flag_problem = False
-
-    for file in request.FILES.getlist('document'):
-        conta = conta + 1
-
-    if conta > 150:
-        messages.error(request, "Please select at max. 150 files")
-        return HttpResponseRedirect(reverse("show_towers_data_mongo"))
-
-    for file in request.FILES.getlist('document'):
-        decoded_file = file.read().decode('utf-8')
-        io_file = io.StringIO(decoded_file)
-
-        file = re.findall('[0-9]{4}_[0-9]{2}.row', str(file))
-
-        if file:
-            print(str(file))
-            firstime = True
-            op_time = time.time()
-            dataraw = []
-
-            for i, line in enumerate(io_file):
-
-                # remove the \n at the end
-                line = line.rstrip()
-
-                try:
-                    if line.strip()[-1] is ',':
-                        line = line.strip()[:-1]
-                except IndexError:
-                    flag_problem = True
-                    messages.error(request, 'Error reading a line, check your file -> ' + str(
-                        file) + '. No values was entered on the DB for this file')
-                    return HttpResponseRedirect(reverse("show_towers_data_mongo"))
-
-                mylist = line.split(",", 3)
-
-                time_value, flag_date = parsedate(request, file, mylist, i)
-
-                if flag_date:
-                    return HttpResponseRedirect(reverse("show_towers_data_mongo"))
-
-                try:
-                    mylist[3]
-                except IndexError:
-                    flag_problem = True
-                    messages.warning(request, 'Warning!!! reading a line, check your file -> ' + str(
-                        file) + ' at line: ' + str(i + 1) + '. No values was entered on the DB for time stamp: ' + str(
-                        time_value))
-                    continue
-
-                values = mylist[3]
-                tower_code = mylist[0]
-                tower_code = tower_code.lower()
-
-                # Check for if tower exists or not, if not create.
-                # if firstime:
-                #     create_tower_if_doesnt_exists(request, tower_code)
-                #     firstime = False
-
-                # Check if have a tower_code and a time_stamp and replace the value - Heavy Operation
-                try:
-                    check_replicated = DataSetMongo.objects(QM(tower_code=tower_code) and QM(time_stamp=time_value))
-                except DataSetMongo.DoesNotExist:
-                    check_replicated = None
-
-                if check_replicated.count() >= 1:
-                    check_replicated.update(value=values)
-                else:
-                    tower_data = DataSetMongo(tower_code=tower_code, time_stamp=time_value, value=values)
-                    dataraw.append(tower_data)
-
-            total_time = (time.time() - op_time)
-            total_time_operation += total_time
-            print('time of operation: ', total_time, ' seconds')
-
-            db_time = time.time()
-            if dataraw:
-                DataSetMongo.objects.insert(dataraw)
-            total_time = (time.time() - db_time)
-            total_time_insertion += total_time
-            print('time to insert in database: ', total_time, ' seconds')
-
-    print('Total time of operation: ', total_time_operation, ' seconds')
-    print('Total time to insert in database: ', total_time_insertion, ' seconds')
-
-    if not flag_problem:
-        messages.success(request, "All files was entered successfully")
-
-    return HttpResponseRedirect(reverse("show_towers_data_mongo"))
-
-
-def show_towers_data_influx(request):
-    if request.user.is_client:
-        messages.error(request, 'You dont have access to this page')
-        return HttpResponseRedirect(reverse("index"))
-
-    start_time = time.time()
-
-    result = INFLUXCLIENT.query("select time, value from ort542")
-    result2 = INFLUXCLIENT.query("select time, value from ort542_b")
-
-    end = time.time()
-    total_time = (end - start_time)
-    print('Query time: ', total_time, ' seconds')
-
-    # print("Result: {0}".format(result))
-
-    # print(json.dumps(list(result)[0]))
-
-    # for obj in list(result)[0]:
-    #     print(obj)
-
-    if result:
-        result = list(result)[0]
-    if result2:
-        result += list(result2)[0]
-
-    result = {}
-    # print(len(result))
-    return render(request, "show_towers_data_influx.html", {'data': result}, content_type="text/html")
-
-
-def add_raw_data_influx(request):
-    if request.user.is_client:
-        messages.error(request, 'You dont have access to this page')
-        return HttpResponseRedirect(reverse("index"))
-
-    total_time_operation = 0
-    total_time_insertion = 0
-    conta = 0
-    flag_problem = False
-
-    for file in request.FILES.getlist('document'):
-        conta = conta + 1
-
-    if conta > 150:
-        messages.error(request, "Please select at max. 150 files")
-        return HttpResponseRedirect(reverse("show_towers_data_influx"))
-
-    for file in request.FILES.getlist('document'):
-        decoded_file = file.read().decode('utf-8')
-        io_file = io.StringIO(decoded_file)
-
-        file = re.findall('[0-9]{4}_[0-9]{2}.row', str(file))
-
-        if file:
-            print(str(file))
-            firstime = True
-            op_time = time.time()
-            points = []
-            tt_date = 0
-
-            for i, line in enumerate(io_file):
-                #remove the \n at the end
-                line = line.rstrip()
-
-                try:
-                    if line.strip()[-1] is ',':
-                        line = line.strip()[:-1]
-                except IndexError:
-                    flag_problem = True
-                    messages.error(request, 'Error!!! Reading a line, check your file -> ' + str(
-                        file) + '. No values was entered on the DB for this file')
-                    return HttpResponseRedirect(reverse("show_towers_data_influx"))
-
-                mylist = line.split(",", 3)
-
-                timefordate = time.time()
-                time_value, flag_date = parsedate(request, file, mylist, i)
-                tt_date += time.time() - timefordate
-
-                if flag_date:
-                    return HttpResponseRedirect(reverse("show_towers_data_influx"))
-
-                try:
-                    mylist[3]
-                except IndexError:
-                    flag_problem = True
-                    messages.warning(request, 'Warning!!! reading a line, check your file -> ' + str(
-                        file) + ' at line: ' + str(i+1) + '. No values was entered on the DB for time stamp: ' + str(time_value))
-                    continue
-
-                values = mylist[3]
-                tower_code = mylist[0]
-                tower_code = tower_code.lower()
-
-                # Check for if tower exists or not, if not create.
-                # if firstime:
-                #     create_tower_if_doesnt_exists(request, tower_code)
-                #     firstime = False
-
-                # MySeriesHelper(measurement=tower_code, time=time_value, value=values)
-                point = {
-                        "measurement": tower_code,
-                        "time": time_value,
-                        "fields": {
-                            "value": values
-                            }
-                        }
-                points.append(point)
-
-            print('time of parse time: ', tt_date, ' seconds')
-
-            total_time = (time.time() - op_time)
-            total_time_operation += total_time
-            print('time of operation: ', total_time, ' seconds')
-
-            db_time = time.time()
-            # MySeriesHelper.commit()
-            if points:
-                INFLUXCLIENT.write_points(points, batch_size=5000)
-            total_time = (time.time() - db_time)
-            total_time_insertion += total_time
-            print('time to insert in database: ', total_time, ' seconds')
-
-    print('Total time of operation: ', total_time_operation, ' seconds')
-    print('Total time to insert in database: ', total_time_insertion, ' seconds')
-
-    if not flag_problem:
-        messages.success(request, "All files was entered successfully")
-
-    return HttpResponseRedirect(reverse("show_towers_data_influx"))
-
-
-def show_towers_data_pg(request):
-    if request.user.is_client:
-        messages.error(request, 'You dont have access to this page')
-        return HttpResponseRedirect(reverse("index"))
-
-    data = {}
-
-    # DataSetPG.objects.all().delete()
-
-    start_time = time.time()
-    # dataset = DataSetPG.objects.filter(QD(tower_code='port525'))
-    dataset = DataSetPG.objects.all()
-
-    # for t in dataset:
-    #     print(t.tower_code, "---", t.time_stamp, "---", t.value)
-
-    end = time.time()
-    total_time = (end - start_time)
-    print('\nQuery time: ', total_time, ' seconds -- size:', len(dataset))
-    data['towers'] = {}
-
-    return render(request, 'show_towers_data_pg.html', data)
-
-
-def add_raw_data_pg(request):
-    if request.user.is_client:
-        messages.error(request, 'You dont have access to this page')
-        return HttpResponseRedirect(reverse("index"))
-
-    total_time_operation = 0
-    total_time_insertion = 0
-    conta = 0
-    flag_problem = False
-
-    for file in request.FILES.getlist('document'):
-        conta = conta + 1
-
-    if conta > 150:
-        messages.error(request, "Please select at max. 150 files")
-        return HttpResponseRedirect(reverse("show_towers_data_pg"))
-
-    for file in request.FILES.getlist('document'):
-        decoded_file = file.read().decode('utf-8')
-        io_file = io.StringIO(decoded_file)
-
-        file = re.findall('[0-9]{4}_[0-9]{2}.row', str(file))
-
-        if file:
-            print(str(file))
-            op_time = time.time()
-            db_time = 0
-            dataraw = []
-            firstime = True
-
-            for i, line in enumerate(io_file):
-                # remove the \n at the end
-                line = line.rstrip()
-
-                try:
-                    if line.strip()[-1] is ',':
-                        line = line.strip()[:-1]
-                except IndexError:
-                    flag_problem = True
-                    messages.error(request, 'Error reading a line, check your file -> ' + str(
-                        file) + '. No values was entered on the DB')
-                    return HttpResponseRedirect(reverse("show_towers_data_pg"))
-
-                mylist = line.split(",", 3)
-
-                time_value, flag_date = parsedate(request, file, mylist, i)
-
-                if flag_date:
-                    return HttpResponseRedirect(reverse("show_towers_data_pg"))
-
-                try:
-                    mylist[3]
-                except IndexError:
-                    flag_problem = True
-                    messages.warning(request, 'Warning!!! reading a line, check your file -> ' + str(
-                        file) + ' at line: ' + str(i + 1) + '. No values was entered on the DB for time stamp: ' + str(
-                        time_value))
-                    continue
-
-                values = mylist[3]
-                tower_code = mylist[0]
-                tower_code = tower_code.lower()
-
-                # Check for if tower exists or not, if not create.
-                # if firstime:
-                #     create_tower_if_doesnt_exists(request, tower_code)
-                #     firstime = False
-
-                # Check if have a tower_code and a time_stamp and replace the value - VERY Heavy operation
-                db_time_start = time.time()
-                try:
-                    check_replicated = DataSetPG.objects.get(QD(tower_code=tower_code) and QD(time_stamp=time_value))
-                except DataSetPG.DoesNotExist:
-                    check_replicated = None
-
-                if check_replicated:
-                    check_replicated.value = values
-                    check_replicated.save()
-                else:
-                    tower_data = DataSetPG(tower_code=tower_code, time_stamp=time_value, value=values)
-                    dataraw.append(tower_data)
-                db_time += (time.time() - db_time_start)
-
-                # Heavier!!!!! - Maybe because takes care one by one! - Takes 1 to 2 seconds more in 6000 lines
-                # db_time_start = time.time()
-                # DataSetPG.objects.update_or_create(tower_code=tower_code, time_stamp=time_value, defaults={'value': values})
-                # db_time += (time.time() - db_time_start)
-
-            total_time_insertion += db_time
-            print('Database time inside: ', db_time, ' seconds')
-
-            op_time = (time.time() - op_time)
-            total_time_operation += op_time
-            print('Operation time: ', op_time, ' seconds')
-
-            # Takes normally 0.3 secs
-            db_time2 = time.time()
-            if dataraw:
-                DataSetPG.objects.bulk_create(dataraw)
-            db_time2 = (time.time() - db_time2)
-            total_time_insertion += db_time2
-
-    print('Total time to insert in database: ', total_time_insertion, ' seconds')
-    print('Total time of operation: ', total_time_operation, ' seconds')
-
-    if not flag_problem:
-        messages.success(request, "All files was entered successfully")
-
-    return HttpResponseRedirect(reverse("show_towers_data_pg"))
-
-
-# ========================================= WIZARD =========================================
-
-
-class FormWizardView(SessionWizardView):
-    template_name = "wizard.html"
-
-    # towers = Tower.objects.all()
-    # ClusterForm.fields['towers'].choices = [(x, x) for x in towers]
-
-    form_list = [ClusterForm, TowerForm]
-
-    def done(self, form_list,  **kwargs):
-        return render(self.request, 'home.html', {
-            'form_data': [form.cleaned_data for form in form_list],
-        })
 
 
 # ========================================= CONFIGURATION OF PERIODS TO TOWERS =========================================
@@ -2977,3 +2571,466 @@ class MyModelDataSource(ModelDataSource):
                     row[x] = None
         data_without_header.insert(0, header)
         return data_without_header
+
+
+# ========================================= DATASETS =========================================
+
+
+def show_towers_data_mongo(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
+    data = {}
+
+    # start_time = time.time()
+    # towers = DataSetMongo.objects(QM(tower_code="port525") and QM(time_stamp__lte=datetime(2010, 12, 25)))
+    # end = time.time()
+    # total_time = (end - start_time)
+    # print('Query time: ', total_time, ' seconds', towers.count())
+    #
+    # data['towers'] = {}
+
+    return render(request, 'show_towers_data_mongo.html', data)
+
+
+def dropdb_mongo(request):
+    dt = DataSetMongo.objects.all().count()
+    data = {'size': dt}
+    DataSetMongo.objects.all().delete()
+    return JsonResponse(data)
+
+
+def count_mongo(request):
+    start_time = time.time()
+    dt = DataSetMongo.objects.all()
+    # dt = DataSetMongo.objects.filter(QM(tower_code="port525"))
+    end = time.time()
+    total_time = (end - start_time)
+
+    data = {}
+    data['time'] = total_time
+    data['size'] = dt.count()
+    return JsonResponse(data)
+
+
+def add_raw_data_mongo(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
+    total_time_operation = 0
+    total_time_insertion = 0
+    conta = 0
+    flag_problem = False
+
+    for file in request.FILES.getlist('document'):
+        conta = conta + 1
+
+    if conta is 0:
+        messages.error(request, "Please select one file")
+        return HttpResponseRedirect(reverse("show_towers_data_mongo"))
+
+    if conta > 150:
+        messages.error(request, "Please select at max. 150 files")
+        return HttpResponseRedirect(reverse("show_towers_data_mongo"))
+
+    for file in request.FILES.getlist('document'):
+        decoded_file = file.read().decode('utf-8')
+        io_file = io.StringIO(decoded_file)
+
+        file = re.findall('[0-9]{4}_[0-9]{2}.row', str(file))
+
+        if file:
+            print(str(file))
+            firstime = True
+            op_time = time.time()
+            dataraw = []
+
+            for i, line in enumerate(io_file):
+
+                # remove the \n at the end
+                line = line.rstrip()
+
+                try:
+                    if line.strip()[-1] is ',':
+                        line = line.strip()[:-1]
+                except IndexError:
+                    flag_problem = True
+                    messages.error(request, 'Error reading a line, check your file -> ' + str(
+                        file) + '. No values was entered on the DB for this file')
+                    return HttpResponseRedirect(reverse("show_towers_data_mongo"))
+
+                mylist = line.split(",", 3)
+
+                time_value, flag_date = parsedate(request, file, mylist, i)
+
+                if flag_date:
+                    return HttpResponseRedirect(reverse("show_towers_data_mongo"))
+
+                try:
+                    mylist[3]
+                except IndexError:
+                    flag_problem = True
+                    messages.warning(request, 'Warning!!! reading a line, check your file -> ' + str(
+                        file) + ' at line: ' + str(i + 1) + '. No values was entered on the DB for time stamp: ' + str(
+                        time_value))
+                    continue
+
+                values = mylist[3]
+                tower_code = mylist[0]
+                tower_code = tower_code.lower()
+
+                # Check for if tower exists or not, if not create.
+                # if firstime:
+                #     create_tower_if_doesnt_exists(request, tower_code)
+                #     firstime = False
+
+                # Check if have a tower_code and a time_stamp and replace the value - Heavy Operation
+                # try:
+                #     check_replicated = DataSetMongo.objects(QM(tower_code=tower_code) and QM(time_stamp=time_value))
+                # except DataSetMongo.DoesNotExist:
+                #     check_replicated = None
+                #
+                # if check_replicated.count() >= 1:
+                #     check_replicated.update(value=values)
+                # else:
+                #     tower_data = DataSetMongo(tower_code=tower_code, time_stamp=time_value, value=values)
+                #     dataraw.append(tower_data)
+
+                tower_data = DataSetMongo(tower_code=tower_code, time_stamp=time_value, value=values)
+                dataraw.append(tower_data)
+
+            total_time = (time.time() - op_time)
+            total_time_operation += total_time
+            print('time of operation: ', total_time, ' seconds')
+
+            db_time = time.time()
+            if dataraw:
+                DataSetMongo.objects.insert(dataraw)
+            total_time = (time.time() - db_time)
+            total_time_insertion += total_time
+            print('time to insert in database: ', total_time, ' seconds')
+
+    print('Total time of operation: ', total_time_operation, ' seconds')
+    print('Total time to insert in database: ', total_time_insertion, ' seconds')
+
+    if not flag_problem:
+        messages.success(request, "All files was entered successfully")
+
+    return HttpResponseRedirect(reverse("show_towers_data_mongo"))
+
+
+def show_towers_data_influx(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
+    # start_time = time.time()
+    #
+    # result = INFLUXCLIENT.query("select time, value from port525")
+    #
+    # end = time.time()
+    # total_time = (end - start_time)
+    # print('Query time: ', total_time, ' seconds')
+
+    # print("Result: {0}".format(result))
+
+    # print(json.dumps(list(result)[0]))
+
+    # for obj in list(result)[0]:
+    #     print(obj)
+
+    # if result:
+    #     result = list(result)[0]
+
+    result = {}
+    # print(len(result))
+    return render(request, "show_towers_data_influx.html", {'data': result}, content_type="text/html")
+
+
+def dropdb_influx(request):
+    INFLUXCLIENT.query("drop measurement port525")
+    data = {'message': "Dropped"}
+    return JsonResponse(data)
+
+
+def count_influx(request):
+    start_time = time.time()
+    dt = INFLUXCLIENT.query("select * from port525")
+    end = time.time()
+    total_time = (end - start_time)
+
+    if dt:
+        result = list(dt)[0]
+    else:
+        result = {}
+
+    data = {}
+    data['time'] = total_time
+    data['size'] = len(result)
+    return JsonResponse(data)
+
+
+def add_raw_data_influx(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
+    total_time_operation = 0
+    total_time_insertion = 0
+    conta = 0
+    flag_problem = False
+
+    for file in request.FILES.getlist('document'):
+        conta = conta + 1
+
+    if conta is 0:
+        messages.error(request, "Please select one file")
+        return HttpResponseRedirect(reverse("show_towers_data_influx"))
+
+    if conta > 150:
+        messages.error(request, "Please select at max. 150 files")
+        return HttpResponseRedirect(reverse("show_towers_data_influx"))
+
+    for file in request.FILES.getlist('document'):
+        decoded_file = file.read().decode('utf-8')
+        io_file = io.StringIO(decoded_file)
+
+        file = re.findall('[0-9]{4}_[0-9]{2}.row', str(file))
+
+        if file:
+            print(str(file))
+            firstime = True
+            op_time = time.time()
+            points = []
+            tt_date = 0
+
+            for i, line in enumerate(io_file):
+                #remove the \n at the end
+                line = line.rstrip()
+
+                try:
+                    if line.strip()[-1] is ',':
+                        line = line.strip()[:-1]
+                except IndexError:
+                    flag_problem = True
+                    messages.error(request, 'Error!!! Reading a line, check your file -> ' + str(
+                        file) + '. No values was entered on the DB for this file')
+                    return HttpResponseRedirect(reverse("show_towers_data_influx"))
+
+                mylist = line.split(",", 3)
+
+                timefordate = time.time()
+                time_value, flag_date = parsedate(request, file, mylist, i)
+                tt_date += time.time() - timefordate
+
+                if flag_date:
+                    return HttpResponseRedirect(reverse("show_towers_data_influx"))
+
+                try:
+                    mylist[3]
+                except IndexError:
+                    flag_problem = True
+                    messages.warning(request, 'Warning!!! reading a line, check your file -> ' + str(
+                        file) + ' at line: ' + str(i+1) + '. No values was entered on the DB for time stamp: ' + str(time_value))
+                    continue
+
+                values = mylist[3]
+                tower_code = mylist[0]
+                tower_code = tower_code.lower()
+
+                # Check for if tower exists or not, if not create.
+                # if firstime:
+                #     create_tower_if_doesnt_exists(request, tower_code)
+                #     firstime = False
+
+                # MySeriesHelper(measurement=tower_code, time=time_value, value=values)
+                point = {
+                        "measurement": tower_code,
+                        "time": time_value,
+                        "fields": {
+                            "value": values
+                            }
+                        }
+                points.append(point)
+
+            print('time of parse time: ', tt_date, ' seconds')
+
+            total_time = (time.time() - op_time)
+            total_time_operation += total_time
+            print('time of operation: ', total_time, ' seconds')
+
+            db_time = time.time()
+            # MySeriesHelper.commit()
+            if points:
+                INFLUXCLIENT.write_points(points, batch_size=5000)
+            total_time = (time.time() - db_time)
+            total_time_insertion += total_time
+            print('time to insert in database: ', total_time, ' seconds')
+
+    print('Total time of operation: ', total_time_operation, ' seconds')
+    print('Total time to insert in database: ', total_time_insertion, ' seconds')
+
+    if not flag_problem:
+        messages.success(request, "All files was entered successfully")
+
+    return HttpResponseRedirect(reverse("show_towers_data_influx"))
+
+
+def show_towers_data_pg(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
+    data = {}
+
+    # start_time = time.time()
+    # # dataset = DataSetPG.objects.filter(QD(tower_code='port525'))
+    # dataset = DataSetPG.objects.all()
+    #
+    # # for t in dataset:
+    # #     print(t.tower_code, "---", t.time_stamp, "---", t.value)
+    #
+    # end = time.time()
+    # total_time = (end - start_time)
+    # print('\nQuery time: ', total_time, ' seconds -- size:', len(dataset))
+    # data['towers'] = {}
+
+    return render(request, 'show_towers_data_pg.html', data)
+
+
+def dropdb_pg(request):
+    dt = DataSetPG.objects.all().count()
+    data = {'size': dt}
+    DataSetPG.objects.all().delete()
+    return JsonResponse(data)
+
+
+def count_pg(request):
+    start_time = time.time()
+    dt = DataSetPG.objects.all()
+    # dt = DataSetPG.objects.filter(QD(tower_code="port525"))
+    end = time.time()
+    total_time = (end - start_time)
+
+    data = {}
+    data['time'] = total_time
+    data['size'] = dt.count()
+    return JsonResponse(data)
+
+
+def add_raw_data_pg(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to this page')
+        return HttpResponseRedirect(reverse("index"))
+
+    total_time_operation = 0
+    total_time_insertion = 0
+    conta = 0
+    flag_problem = False
+
+    for file in request.FILES.getlist('document'):
+        conta = conta + 1
+
+    if conta is 0:
+        messages.error(request, "Please select one file")
+        return HttpResponseRedirect(reverse("show_towers_data_pg"))
+
+    if conta > 150:
+        messages.error(request, "Please select at max. 150 files")
+        return HttpResponseRedirect(reverse("show_towers_data_pg"))
+
+    for file in request.FILES.getlist('document'):
+        decoded_file = file.read().decode('utf-8')
+        io_file = io.StringIO(decoded_file)
+
+        file = re.findall('[0-9]{4}_[0-9]{2}.row', str(file))
+
+        if file:
+            print(str(file))
+            op_time = time.time()
+            db_time = 0
+            dataraw = []
+            firstime = True
+
+            for i, line in enumerate(io_file):
+                # remove the \n at the end
+                line = line.rstrip()
+
+                try:
+                    if line.strip()[-1] is ',':
+                        line = line.strip()[:-1]
+                except IndexError:
+                    flag_problem = True
+                    messages.error(request, 'Error reading a line, check your file -> ' + str(
+                        file) + '. No values was entered on the DB')
+                    return HttpResponseRedirect(reverse("show_towers_data_pg"))
+
+                mylist = line.split(",", 3)
+
+                time_value, flag_date = parsedate(request, file, mylist, i)
+
+                if flag_date:
+                    return HttpResponseRedirect(reverse("show_towers_data_pg"))
+
+                try:
+                    mylist[3]
+                except IndexError:
+                    flag_problem = True
+                    messages.warning(request, 'Warning!!! reading a line, check your file -> ' + str(
+                        file) + ' at line: ' + str(i + 1) + '. No values was entered on the DB for time stamp: ' + str(
+                        time_value))
+                    continue
+
+                values = mylist[3]
+                tower_code = mylist[0]
+                tower_code = tower_code.lower()
+
+                # Check for if tower exists or not, if not create.
+                # if firstime:
+                #     create_tower_if_doesnt_exists(request, tower_code)
+                #     firstime = False
+
+                # Check if have a tower_code and a time_stamp and replace the value - VERY Heavy operation
+                # db_time_start = time.time()
+                # try:
+                #     check_replicated = DataSetPG.objects.get(QD(tower_code=tower_code) and QD(time_stamp=time_value))
+                # except DataSetPG.DoesNotExist:
+                #     check_replicated = None
+                #
+                # if check_replicated:
+                #     check_replicated.value = values
+                #     check_replicated.save()
+                # else:
+                #     tower_data = DataSetPG(tower_code=tower_code, time_stamp=time_value, value=values)
+                #     dataraw.append(tower_data)
+                tower_data = DataSetPG(tower_code=tower_code, time_stamp=time_value, value=values)
+                dataraw.append(tower_data)
+                # db_time += (time.time() - db_time_start)
+
+                # Heavier!!!!! - Maybe because takes care one by one! - Takes 1 to 2 seconds more in 6000 lines
+                # db_time_start = time.time()
+                # DataSetPG.objects.update_or_create(tower_code=tower_code, time_stamp=time_value, defaults={'value': values})
+                # db_time += (time.time() - db_time_start)
+
+            # total_time_insertion += db_time
+            # print('Database time inside: ', db_time, ' seconds')
+
+            op_time = (time.time() - op_time)
+            total_time_operation += op_time
+            print('Operation time: ', op_time, ' seconds')
+
+            db_time2 = time.time()
+            if dataraw:
+                DataSetPG.objects.bulk_create(dataraw)
+            db_time2 = (time.time() - db_time2)
+            total_time_insertion += db_time2
+
+    print('Total time of operation: ', total_time_operation, ' seconds')
+    print('Total time to insert in database: ', total_time_insertion, ' seconds')
+
+    if not flag_problem:
+        messages.success(request, "All files was entered successfully")
+
+    return HttpResponseRedirect(reverse("show_towers_data_pg"))
