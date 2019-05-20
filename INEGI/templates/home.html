@@ -28,6 +28,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
+                                {% if users %}
                                 {% for user in users %}
                                     <tr>
                                         <td class="align-middle p-2"><a href="{% url "view_user" user.id %}">{{ user.id }}</a></td>
@@ -35,6 +36,9 @@
                                         <td class="align-middle p-2"><a href="{% url "view_user" user.id %}">{{ user.full_name }}</a></td>
                                     </tr>
                                 {% endfor %}
+                                {% else %}
+                                    <td colspan="3" align="center">No values</td>
+                                {% endif %}
                                 </tbody>
                             </table>
                         </div>
@@ -59,6 +63,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
+                                {% if stations %}
                                 {% for tower in stations %}
                                     <tr>
                                         <td class="align-middle p-2"><a href="{% url "view_tower" tower.pk %}">{{ tower.code_inegi }}</a></th>
@@ -66,6 +71,9 @@
                                         <td class="align-middle p-2"><a href="{% url "view_tower" tower.pk %}">{{ tower.designation }}</a></td>
                                     </tr>
                                 {% endfor %}
+                                {% else %}
+                                    <td colspan="3" align="center">No values</td>
+                                {% endif %}
                                 </tbody>
                             </table>
                         </div>
