@@ -13,6 +13,8 @@
                         <th>Offset DL</th>
                         <th>Slope CAL</th>
                         <th>Offset CAL</th>
+                        <th>Slope Final</th>
+                        <th>Offset Final</th>
                         <th>Height</th>
                         <th>Dimension</th>
                         <th style="width:20%">Actions</th>
@@ -27,6 +29,8 @@
                         <td class="align-middle p-2"><a href="{% url 'view_equipment_config' tower_id period_id c.pk%}">{{ c.offset_dl }}</a></td>
                         <td class="align-middle p-2"><a href="{% url 'view_calibration' c.calibration.equipment.pk c.calibration.pk %}">{{ c.calibration.offset }}</a></td>
                         <td class="align-middle p-2"><a href="{% url 'view_calibration' c.calibration.equipment.pk c.calibration.pk %}">{{ c.calibration.slope }}</a></td>
+                        <td class="align-middle p-2">{{ c.slope_f }}</td>
+                        <td class="align-middle p-2">{{ c.offset_f }}</td>
                         <td class="align-middle p-2"><a href="{% url 'view_equipment_config' tower_id period_id c.pk%}">{{ c.height_label }}</a></td>
                         <td class="align-middle p-2">
                             {% for dim in c.dimension %}

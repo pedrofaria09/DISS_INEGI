@@ -1259,6 +1259,11 @@ def view_conf_period(request, period_id, tower_id):
         dimension = Dimension.objects.filter(equipment_configuration=c)
         c.dimension = dimension
 
+        slope_f = c.calibration.slope/c.slope_dl
+        c.slope_f = slope_f
+        offset_f = c.calibration.offset-(c.offset_dl*slope_f)
+        c.offset_f = offset_f
+
     return render(request, 'view_conf_period.html', {'form': form, 'tower_id': tower_id, 'period_id': period_id, 'period': period, 'configurations': configurations})
 
 
@@ -2299,11 +2304,12 @@ class LineHighchartJson(HighchartPlotLineChartView):
                 new_df.append(df[(df['time_stamp'] < cf.begin_date)])
                 flag = 0
 
-            temp_df = df[(df['time_stamp'] >= cf.begin_date) & (df['time_stamp'] <= cf.end_date)]
+            temp_df = df[(df['time_stamp'] >= cf.begin_date) & (df['time_stamp'] < cf.end_date)]
             equipments_conf = EquipmentConfig.objects.filter(conf_period=cf)
             for eq in equipments_conf:
                 dim = Dimension.objects.filter(equipment_configuration=eq)
                 for d in dim:
+                    # String to show in df header
                     name = eq.calibration.equipment.model.type.name + '@' + str(eq.height_label) + d.dimension_type.statistic.name
                     column = d.column-1
                     temp_df = temp_df.rename(columns={column: name})
@@ -2320,7 +2326,7 @@ class LineHighchartJson(HighchartPlotLineChartView):
         if not df.empty and len(new_df) > 0:
             df = pd.concat(new_df, axis=0, sort=False)
 
-        # Delete columns with empty values
+        # Delete columns with empty values - Columns that had periods and dimensions
         df.dropna(axis=1, how='all', inplace=True)
 
         # Convert all other columns rather than time_stamp to float

@@ -221,7 +221,8 @@ function getxgraph(data) {
                 dataLabels: {
                     align: 'center',
                     enabled: true,
-                    format: "{point.name}"
+                    // format: "{point.name}"
+                    format: ""
                 }
             }
         },
