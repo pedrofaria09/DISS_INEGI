@@ -2272,7 +2272,7 @@ class LineHighchartJson(HighchartPlotLineChartView):
 
         if not (begin_date and end_date):
             end_date = datetime.now(pytz.utc)
-            begin_date = end_date - timedelta(days=15)
+            begin_date = end_date - timedelta(days=30)
         else:
             begin_date = get_date(begin_date)
             end_date = get_date(end_date)
@@ -2307,6 +2307,12 @@ class LineHighchartJson(HighchartPlotLineChartView):
                     name = eq.calibration.equipment.model.type.name + '@' + str(eq.height_label) + d.dimension_type.statistic.name
                     column = d.column-1
                     temp_df = temp_df.rename(columns={column: name})
+                    temp_df[name] = temp_df[name].astype(float)
+                    # We need to get the original value back (raw_data-OffLogger)-SloLogger
+                    default = (temp_df[name] - (float(eq.offset_dl)))/float(eq.slope_dl)
+                    # Then multiply default by SloCalib and sum OffCalib
+                    final = (default*(float(eq.calibration.slope)))+float(eq.calibration.offset)
+                    temp_df[name] = final
             if not temp_df.empty:
                 new_df.append(temp_df)
 
@@ -2332,6 +2338,8 @@ class LineHighchartJson(HighchartPlotLineChartView):
 
         # Replace all NaN with None
         df = df.where((pd.notnull(df)), None)
+
+        # Convert data to unix_time
         eixo_x = df.index.astype(np.int64)//10**6
         self.xdata = eixo_x.tolist()
 
@@ -2988,8 +2996,8 @@ def dropdb_pg(request):
 
 def count_pg(request):
     start_time = time.time()
-    # dt = DataSetPG.objects.all()
-    dt = DataSetPG.objects.filter(QD(tower_code="port525") & QD(time_stamp__lte=datetime(2010, 12, 25)))
+    dt = DataSetPG.objects.all()
+    # dt = DataSetPG.objects.filter(QD(tower_code="port525") & QD(time_stamp__gte=datetime(2010, 12, 25)))
     end = time.time()
     total_time = (end - start_time)
 
