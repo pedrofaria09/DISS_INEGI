@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    console.log("Databases")
+    console.log("Databases");
 
     $(function () {
         var button = $('#dropdb_mongo');

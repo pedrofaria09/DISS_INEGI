@@ -43,10 +43,10 @@ class GeneratePdf(View):
             "amount": 1399.99,
             "today": "Today",
         }
-        template = loader.get_template('pdf/pdf.html')
-        return HttpResponse(template.render(data, request))
-        # pdf = render_to_pdf('pdf/pdf.html', data)
-        # return HttpResponse(pdf, content_type='application/pdf')
+        # template = loader.get_template('pdf/pdf.html')
+        # return HttpResponse(template.render(data, request))
+        pdf = render_to_pdf('pdf/pdf.html', data)
+        return HttpResponse(pdf, content_type='application/pdf')
 
     # def get(self, request, *args, **kwargs):
     #     template = loader.get_template('pdf/pdf.html')
@@ -86,7 +86,15 @@ def index(request):
         return render(request, 'home.html', {'form': form})
     else:
         users = MyUser.objects.all().order_by('-id')[:5]
-        stations = Tower.objects.all().order_by('-id')[:5]
+
+        if request.user.is_client or (request.user.is_manager and not request.user.is_staff):
+            now = datetime.now(pytz.utc)
+            user_towers = UserTowerDates.objects.filter(user__pk=request.user.pk, begin_date__lte=now,
+                                                        end_date__gte=now).values_list('tower', flat=True)
+            stations = Tower.objects.filter(pk__in=user_towers).distinct()[:5]
+        else:
+            stations = Tower.objects.all().order_by('-id')[:5]
+
         context = {'users': users, 'stations': stations}
         return render(request, 'home.html', context)
 
@@ -318,7 +326,15 @@ def create_tower_if_doesnt_exists(request, tower_code):
 
 
 def list_towers(request):
-    towers = Tower.objects.all()
+    if request.user.is_client or (request.user.is_manager and not request.user.is_staff):
+        now = datetime.now(pytz.utc)
+        user_towers = UserTowerDates.objects.filter(user__pk=request.user.pk, begin_date__lte=now,
+                                                    end_date__gte=now).values_list('tower', flat=True)
+        towers = Tower.objects.filter(pk__in=user_towers).distinct()
+    else:
+        towers = Tower.objects.all().order_by('-id')
+
+    # towers = Tower.objects.all()
 
     return render(request, 'list_towers.html', {'towers': towers})
 
@@ -329,9 +345,21 @@ def view_tower(request, tower_id):
     except Tower.DoesNotExist:
         return HttpResponseRedirect(reverse("list_towers"))
 
+    if request.user.is_client or (request.user.is_manager and not request.user.is_staff):
+        now = datetime.now(pytz.utc)
+        to_check = UserTowerDates.objects.filter(user__pk=request.user.pk, begin_date__lte=now, end_date__gte=now, tower=tower)
+        if not to_check:
+            messages.error(request, 'You dont have access to this page')
+            return HttpResponseRedirect(reverse("list_towers"))
+
     if request.method == 'GET':
         form = TowerForm(instance=tower)
     elif request.method == 'POST':
+
+        if request.user.is_client:
+            messages.error(request, 'You dont have access to this page')
+            return HttpResponseRedirect(reverse("view_tower", kwargs={'tower_id': tower_id}))
+
         form = TowerForm(request.POST, instance=tower)
         if form.is_valid():
             form.save()
@@ -396,6 +424,9 @@ def view_tower(request, tower_id):
 
 
 def delete_tower(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to that action')
+        return HttpResponse("not ok")
     if request.is_ajax and request.method == 'POST':
         tower = Tower.objects.get(pk=request.POST["id"])
         try:
@@ -494,6 +525,11 @@ def view_associate_towers(request, association_id):
 
 
 def delete_associate_tower(request):
+
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to that action')
+        return HttpResponse("not ok")
+
     if request.is_ajax and request.method == 'POST':
         utd = UserTowerDates.objects.get(pk=request.POST["id"])
         try:
@@ -555,6 +591,9 @@ def view_machine(request, machine_id):
 
 
 def delete_machine(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to that action')
+        return HttpResponse("not ok")
     if request.is_ajax and request.method == 'POST':
         machine = Machine.objects.get(pk=request.POST["id"])
         try:
@@ -614,6 +653,9 @@ def view_cluster(request, cluster_id):
 
 
 def delete_cluster(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to that action')
+        return HttpResponse("not ok")
     if request.is_ajax and request.method == 'POST':
         cluster = Cluster.objects.get(pk=request.POST["id"])
         try:
@@ -687,6 +729,9 @@ def view_equipment(request, equipment_id):
 
 
 def delete_equipment(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to that action')
+        return HttpResponse("not ok")
     if request.is_ajax and request.method == 'POST':
         equipment = Equipment.objects.get(pk=request.POST["id"])
         try:
@@ -1089,6 +1134,9 @@ def view_type(request, equipment_id, type):
 
 
 def delete_type(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to that action')
+        return HttpResponse("not ok")
     if request.is_ajax and request.method == 'POST':
         if request.POST["typex"] == 'equipment':
             obj = EquipmentType.objects.get(pk=request.POST["id"])
@@ -1178,7 +1226,7 @@ def add_conf_period(request, tower_id):
 def view_conf_period(request, period_id, tower_id):
     if request.user.is_client:
         messages.error(request, 'You dont have access to this page')
-        return HttpResponseRedirect(reverse("index"))
+        return HttpResponseRedirect(reverse("view_tower", kwargs={'tower_id': tower_id}))
 
     try:
         period = PeriodConfiguration.objects.get(pk=period_id)
@@ -1215,6 +1263,9 @@ def view_conf_period(request, period_id, tower_id):
 
 
 def delete_conf_period(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to that action')
+        return HttpResponse("not ok")
     if request.is_ajax and request.method == 'POST':
         period = PeriodConfiguration.objects.get(pk=request.POST["id"])
         try:
@@ -1290,6 +1341,9 @@ def view_calibration(request, equipment_id, calib_id):
 
 
 def delete_calibration(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to that action')
+        return HttpResponse("not ok")
     if request.is_ajax and request.method == 'POST':
         calib = Calibration.objects.get(pk=request.POST["id"])
         try:
@@ -1390,6 +1444,9 @@ def view_equipment_config(request, tower_id, period_id, equi_conf_id):
 
 
 def delete_equipment_config(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to that action')
+        return HttpResponse("not ok")
     if request.is_ajax and request.method == 'POST':
         equipment_config = EquipmentConfig.objects.get(pk=request.POST["id"])
         try:
@@ -1483,6 +1540,9 @@ def view_status(request, status_id):
 
 
 def delete_status(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to that action')
+        return HttpResponse("not ok")
     if request.is_ajax and request.method == 'POST':
         status = Status.objects.get(pk=request.POST["id"])
         try:
@@ -1590,6 +1650,9 @@ def view_classification_period(request, tower_id, period_id, equi_conf_id, class
 
 
 def delete_classification_period(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to that action')
+        return HttpResponse("not ok")
     if request.is_ajax and request.method == 'POST':
         classification = ClassificationPeriod.objects.get(pk=request.POST["id"])
         try:
@@ -1683,6 +1746,9 @@ def view_dimension_type(request, dimension_type_id):
 
 
 def delete_dimension_type(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to that action')
+        return HttpResponse("not ok")
     if request.is_ajax and request.method == 'POST':
         status = DimensionType.objects.get(pk=request.POST["id"])
         try:
@@ -1781,6 +1847,9 @@ def view_dimension(request, tower_id, period_id, equi_conf_id, dimension_id):
 
 
 def delete_dimension(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to that action')
+        return HttpResponse("not ok")
     if request.is_ajax and request.method == 'POST':
         dimension = Dimension.objects.get(pk=request.POST["id"])
         try:
@@ -1907,6 +1976,9 @@ def view_comment(request, tower_id, comment_id, type):
 
 
 def delete_comment(request):
+    if request.user.is_client:
+        messages.error(request, 'You dont have access to that action')
+        return HttpResponse("not ok")
     if request.is_ajax and request.method == 'POST':
         if request.POST["typex"] == 'classification':
             obj = CommentClassification.objects.get(pk=request.POST["id"])
@@ -1947,8 +2019,15 @@ class EquipmentAutocomplete(autocomplete.Select2QuerySetView):
 
 
 class TowerAutocomplete(autocomplete.Select2QuerySetView):
+
     def get_queryset(self):
-        qs = Tower.objects.all().order_by('-id')
+        if self.request.user.is_client or (self.request.user.is_manager and not self.request.user.is_staff):
+            now = datetime.now(pytz.utc)
+            user_towers = UserTowerDates.objects.filter(user__pk=self.request.user.pk, begin_date__lte=now,
+                                                        end_date__gte=now).values_list('tower', flat=True)
+            qs = Tower.objects.filter(pk__in=user_towers).distinct().order_by('-id')
+        else:
+            qs = Tower.objects.all().order_by('-id')
 
         if self.q:
             qs = qs.filter(code_inegi__icontains=self.q)
@@ -2909,8 +2988,8 @@ def dropdb_pg(request):
 
 def count_pg(request):
     start_time = time.time()
-    dt = DataSetPG.objects.all()
-    # dt = DataSetPG.objects.filter(QD(tower_code="port525"))
+    # dt = DataSetPG.objects.all()
+    dt = DataSetPG.objects.filter(QD(tower_code="port525") & QD(time_stamp__lte=datetime(2010, 12, 25)))
     end = time.time()
     total_time = (end - start_time)
 
