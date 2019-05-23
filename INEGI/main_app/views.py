@@ -27,7 +27,7 @@ from chartjs.views.lines import BaseLineChartView, HighchartPlotLineChartView
 
 from django.core import serializers
 
-import time, re, io, json, pytz, random
+import time, re, io, json, pytz, random, csv
 import numpy as np
 
 from django.views.generic import View
@@ -2481,7 +2481,7 @@ def XChart(request):
 
     if not (begin_date and end_date):
         end_date = datetime.now(pytz.utc)
-        begin_date = end_date - timedelta(days=15)
+        begin_date = end_date - timedelta(days=30)
     else:
         begin_date = get_date(begin_date)
         end_date = get_date(end_date)
@@ -2677,7 +2677,7 @@ def show_towers_data_mongo(request):
     data = {}
 
     # start_time = time.time()
-    # towers = DataSetMongo.objects(QM(tower_code="port525") and QM(time_stamp__lte=datetime(2010, 12, 25)))
+    # towers = DataSetMongoPyMod.objects(QM(tower_code="port525") and QM(time_stamp__lte=datetime(2010, 12, 25)))
     # end = time.time()
     # total_time = (end - start_time)
     # print('Query time: ', total_time, ' seconds', towers.count())
@@ -2688,16 +2688,16 @@ def show_towers_data_mongo(request):
 
 
 def dropdb_mongo(request):
-    dt = DataSetMongo.objects.all().count()
+    dt = DataSetMongoPyMod.objects.all().count()
     data = {'size': dt}
-    DataSetMongo.objects.all().delete()
+    DataSetMongoPyMod.objects.all().delete()
     return JsonResponse(data)
 
 
 def count_mongo(request):
     start_time = time.time()
-    dt = DataSetMongo.objects.all()
-    # dt = DataSetMongo.objects.filter(QM(tower_code="port525"))
+    dt = DataSetMongoPyMod.objects.all()
+    # dt = DataSetMongoPyMod.objects.filter(QM(tower_code="port525"))
     end = time.time()
     total_time = (end - start_time)
 
@@ -2714,11 +2714,9 @@ def add_raw_data_mongo(request):
 
     total_time_operation = 0
     total_time_insertion = 0
-    conta = 0
     flag_problem = False
 
-    for file in request.FILES.getlist('document'):
-        conta = conta + 1
+    conta = len(request.FILES.getlist('document'))
 
     if conta is 0:
         messages.error(request, "Please select one file")
@@ -2781,17 +2779,17 @@ def add_raw_data_mongo(request):
 
                 # Check if have a tower_code and a time_stamp and replace the value - Heavy Operation
                 # try:
-                #     check_replicated = DataSetMongo.objects(QM(tower_code=tower_code) and QM(time_stamp=time_value))
-                # except DataSetMongo.DoesNotExist:
+                #     check_replicated = DataSetMongoPyMod.objects(QM(tower_code=tower_code) and QM(time_stamp=time_value))
+                # except DataSetMongoPyMod.DoesNotExist:
                 #     check_replicated = None
                 #
                 # if check_replicated.count() >= 1:
                 #     check_replicated.update(value=values)
                 # else:
-                #     tower_data = DataSetMongo(tower_code=tower_code, time_stamp=time_value, value=values)
+                #     tower_data = DataSetMongoPyMod(tower_code=tower_code, time_stamp=time_value, value=values)
                 #     dataraw.append(tower_data)
 
-                tower_data = DataSetMongo(tower_code=tower_code, time_stamp=time_value, value=values)
+                tower_data = DataSetMongoPyMod(tower_code=tower_code, time_stamp=time_value, value=values)
                 dataraw.append(tower_data)
 
             total_time = (time.time() - op_time)
@@ -2800,7 +2798,7 @@ def add_raw_data_mongo(request):
 
             db_time = time.time()
             if dataraw:
-                DataSetMongo.objects.insert(dataraw)
+                DataSetMongoPyMod.objects.bulk_create(dataraw)
             total_time = (time.time() - db_time)
             total_time_insertion += total_time
             print('time to insert in database: ', total_time, ' seconds')
@@ -2843,25 +2841,25 @@ def show_towers_data_influx(request):
 
 
 def dropdb_influx(request):
-    INFLUXCLIENT.query("drop measurement port525")
+    INFLUXCLIENT.query("DROP SERIES FROM /.*/")
     data = {'message': "Dropped"}
     return JsonResponse(data)
 
 
 def count_influx(request):
     start_time = time.time()
-    dt = INFLUXCLIENT.query("select * from port525")
+    # dt = INFLUXCLIENT.query("select * FROM /.*/")
+    dt = INFLUXCLIENT.query("select * FROM port525")
     end = time.time()
     total_time = (end - start_time)
 
-    if dt:
-        result = list(dt)[0]
-    else:
-        result = {}
+    result = 0
+    for d in dt:
+        result += len(d)
 
     data = {}
     data['time'] = total_time
-    data['size'] = len(result)
+    data['size'] = result
     return JsonResponse(data)
 
 
@@ -2872,11 +2870,9 @@ def add_raw_data_influx(request):
 
     total_time_operation = 0
     total_time_insertion = 0
-    conta = 0
     flag_problem = False
 
-    for file in request.FILES.getlist('document'):
-        conta = conta + 1
+    conta = len(request.FILES.getlist('document'))
 
     if conta is 0:
         messages.error(request, "Please select one file")
@@ -2957,7 +2953,7 @@ def add_raw_data_influx(request):
             db_time = time.time()
             # MySeriesHelper.commit()
             if points:
-                INFLUXCLIENT.write_points(points, batch_size=5000)
+                INFLUXCLIENT.write_points(points, batch_size=100000)
             total_time = (time.time() - db_time)
             total_time_insertion += total_time
             print('time to insert in database: ', total_time, ' seconds')
@@ -3003,6 +2999,7 @@ def dropdb_pg(request):
 def count_pg(request):
     start_time = time.time()
     dt = DataSetPG.objects.all()
+    print(DataSetPG.objects.all().explain())
     # dt = DataSetPG.objects.filter(QD(tower_code="port525") & QD(time_stamp__gte=datetime(2010, 12, 25)))
     end = time.time()
     total_time = (end - start_time)
@@ -3020,11 +3017,9 @@ def add_raw_data_pg(request):
 
     total_time_operation = 0
     total_time_insertion = 0
-    conta = 0
     flag_problem = False
 
-    for file in request.FILES.getlist('document'):
-        conta = conta + 1
+    conta = len(request.FILES.getlist('document'))
 
     if conta is 0:
         messages.error(request, "Please select one file")
@@ -3127,3 +3122,271 @@ def add_raw_data_pg(request):
         messages.success(request, "All files was entered successfully")
 
     return HttpResponseRedirect(reverse("show_towers_data_pg"))
+
+
+FILE_PATH_TO_UPLOAD = "./files/raw_data/2019_05.row"
+ITIMES = 10
+FILE_TEST_PG = './files/tests_pg.csv'
+FILE_TEST_IN = './files/tests_in.csv'
+FILE_TEST_MG = './files/tests_mg.csv'
+
+
+def add_raw_data_pg2(request):
+    total_time_operation = 0
+    total_time_insertion = 0
+    flag_problem = False
+    file = open(FILE_PATH_TO_UPLOAD, "r")
+    file_to_write = csv.writer(open(FILE_TEST_PG, 'a+'), delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+
+    if file:
+        file_to_write.writerow([str(file)])
+        file_to_write.writerow(['Iteration', 'Operation Time', 'Insertion Time'])
+        # print(str(file))
+
+        for t in range(0, ITIMES):
+            print("Iteration: ", t)
+            if t is not 0:
+                file = open(FILE_PATH_TO_UPLOAD, "r")
+
+            op_time = time.time()
+            dataraw = []
+
+            for i, line in enumerate(file):
+                # # remove the \n at the end
+                line = line.rstrip()
+
+                try:
+                    if line.strip()[-1] is ',':
+                        line = line.strip()[:-1]
+                except IndexError:
+                    flag_problem = True
+                    messages.error(request, 'Error reading a line, check your file -> ' + str(
+                        file) + '. No values was entered on the DB')
+                    return HttpResponseRedirect(reverse("show_towers_data_pg"))
+
+                mylist = line.split(",", 3)
+
+                time_value, flag_date = parsedate(request, file, mylist, i)
+
+                if flag_date:
+                    return HttpResponseRedirect(reverse("show_towers_data_pg"))
+
+                try:
+                    mylist[3]
+                except IndexError:
+                    flag_problem = True
+                    messages.warning(request, 'Warning!!! reading a line, check your file -> ' + str(
+                        file) + ' at line: ' + str(i + 1) + '. No values was entered on the DB for time stamp: ' + str(
+                        time_value))
+                    continue
+
+                values = mylist[3]
+                tower_code = mylist[0]
+                tower_code = tower_code.lower()
+
+                tower_data = DataSetPG(tower_code=tower_code, time_stamp=time_value, value=values)
+                dataraw.append(tower_data)
+
+            op_time = (time.time() - op_time)
+            total_time_operation += op_time
+            # print('Operation time: ', op_time, ' seconds')
+
+            db_time2 = time.time()
+            if dataraw:
+                DataSetPG.objects.bulk_create(dataraw)
+            db_time2 = (time.time() - db_time2)
+            # print('Inserition time: ', db_time2, ' seconds')
+            total_time_insertion += db_time2
+
+            DataSetPG.objects.all().delete()
+
+            iteration = t+1
+            file_to_write.writerow([str(iteration), str(op_time), str(db_time2)])
+
+    file.close()
+
+    # print('Total time of operation: ', total_time_operation, ' seconds')
+    # print('Total time to insert in database: ', total_time_insertion, ' seconds')
+
+    file_to_write.writerow([str(total_time_operation), str(total_time_insertion)])
+
+    if not flag_problem:
+        messages.success(request, "All files was entered successfully")
+
+    return HttpResponseRedirect(reverse("show_towers_data_pg"))
+
+
+def add_raw_data_influx2(request):
+    total_time_operation = 0
+    total_time_insertion = 0
+    flag_problem = False
+    file = open(FILE_PATH_TO_UPLOAD, "r")
+    file_to_write = csv.writer(open(FILE_TEST_IN, 'a+'), delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+
+    if file:
+        file_to_write.writerow([str(file)])
+        file_to_write.writerow(['Iteration', 'Operation Time', 'Insertion Time'])
+        # print(str(file))
+
+        for t in range(0, ITIMES):
+            print("Iteration: ", t)
+            if t is not 0:
+                file = open(FILE_PATH_TO_UPLOAD, "r")
+
+            op_time = time.time()
+            points = []
+
+            for i, line in enumerate(file):
+                # # remove the \n at the end
+                line = line.rstrip()
+
+                try:
+                    if line.strip()[-1] is ',':
+                        line = line.strip()[:-1]
+                except IndexError:
+                    flag_problem = True
+                    messages.error(request, 'Error reading a line, check your file -> ' + str(
+                        file) + '. No values was entered on the DB')
+                    return HttpResponseRedirect(reverse("show_towers_data_influx"))
+
+                mylist = line.split(",", 3)
+
+                time_value, flag_date = parsedate(request, file, mylist, i)
+
+                if flag_date:
+                    return HttpResponseRedirect(reverse("show_towers_data_influx"))
+
+                try:
+                    mylist[3]
+                except IndexError:
+                    flag_problem = True
+                    messages.warning(request, 'Warning!!! reading a line, check your file -> ' + str(
+                        file) + ' at line: ' + str(i + 1) + '. No values was entered on the DB for time stamp: ' + str(
+                        time_value))
+                    continue
+
+                values = mylist[3]
+                tower_code = mylist[0]
+                tower_code = tower_code.lower()
+
+                point = {
+                    "measurement": tower_code,
+                    "time": time_value,
+                    "fields": {
+                        "value": values
+                    }
+                }
+                points.append(point)
+
+            op_time = (time.time() - op_time)
+            total_time_operation += op_time
+            # print('Operation time: ', op_time, ' seconds')
+
+            db_time2 = time.time()
+            if points:
+                INFLUXCLIENT.write_points(points, batch_size=100000)
+            db_time2 = (time.time() - db_time2)
+            # print('Inserition time: ', db_time2, ' seconds')
+            total_time_insertion += db_time2
+
+            INFLUXCLIENT.query("DROP SERIES FROM /.*/")
+
+            iteration = t + 1
+            file_to_write.writerow([str(iteration), str(op_time), str(db_time2)])
+
+    file.close()
+
+    # print('Total time of operation: ', total_time_operation, ' seconds')
+    # print('Total time to insert in database: ', total_time_insertion, ' seconds')
+
+    file_to_write.writerow([str(total_time_operation), str(total_time_insertion)])
+
+    if not flag_problem:
+        messages.success(request, "All files was entered successfully")
+
+    return HttpResponseRedirect(reverse("show_towers_data_influx"))
+
+
+def add_raw_data_mongo2(request):
+    total_time_operation = 0
+    total_time_insertion = 0
+    flag_problem = False
+    file = open(FILE_PATH_TO_UPLOAD, "r")
+    file_to_write = csv.writer(open(FILE_TEST_MG, 'a+'), delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+
+    if file:
+        file_to_write.writerow([str(file)])
+        file_to_write.writerow(['Iteration', 'Operation Time', 'Insertion Time'])
+        # print(str(file))
+
+        for t in range(0, ITIMES):
+            print("Iteration: ", t)
+            if t is not 0:
+                file = open(FILE_PATH_TO_UPLOAD, "r")
+
+            op_time = time.time()
+            dataraw = []
+
+            for i, line in enumerate(file):
+                # # remove the \n at the end
+                line = line.rstrip()
+
+                try:
+                    if line.strip()[-1] is ',':
+                        line = line.strip()[:-1]
+                except IndexError:
+                    flag_problem = True
+                    messages.error(request, 'Error reading a line, check your file -> ' + str(
+                        file) + '. No values was entered on the DB')
+                    return HttpResponseRedirect(reverse("show_towers_data_mongo"))
+
+                mylist = line.split(",", 3)
+
+                time_value, flag_date = parsedate(request, file, mylist, i)
+
+                if flag_date:
+                    return HttpResponseRedirect(reverse("show_towers_data_pg"))
+
+                try:
+                    mylist[3]
+                except IndexError:
+                    flag_problem = True
+                    messages.warning(request, 'Warning!!! reading a line, check your file -> ' + str(
+                        file) + ' at line: ' + str(i + 1) + '. No values was entered on the DB for time stamp: ' + str(
+                        time_value))
+                    continue
+
+                values = mylist[3]
+                tower_code = mylist[0]
+                tower_code = tower_code.lower()
+
+                tower_data = DataSetMongoPyMod(tower_code=tower_code, time_stamp=time_value, value=values)
+                dataraw.append(tower_data)
+
+            op_time = (time.time() - op_time)
+            total_time_operation += op_time
+            # print('Operation time: ', op_time, ' seconds')
+
+            db_time2 = time.time()
+            if dataraw:
+                DataSetMongoPyMod.objects.bulk_create(dataraw)
+            db_time2 = (time.time() - db_time2)
+            # print('Inserition time: ', db_time2, ' seconds')
+            total_time_insertion += db_time2
+
+            DataSetMongoPyMod.objects.all().delete()
+
+            iteration = t+1
+            file_to_write.writerow([str(iteration), str(op_time), str(db_time2)])
+
+    file.close()
+
+    # print('Total time of operation: ', total_time_operation, ' seconds')
+    # print('Total time to insert in database: ', total_time_insertion, ' seconds')
+
+    file_to_write.writerow([str(total_time_operation), str(total_time_insertion)])
+
+    if not flag_problem:
+        messages.success(request, "All files was entered successfully")
+
+    return HttpResponseRedirect(reverse("show_towers_data_mongo"))

@@ -7,11 +7,22 @@ from django.conf import settings
 from django_countries.fields import CountryField
 from django.db.models import Q as QD
 
-# Connection to MongoDB
+from pymodm.connection import connect as connect2
+from pymodm import MongoModel, fields
+from pymongo.write_concern import WriteConcern
+from pymongo import IndexModel, ASCENDING
+
+# Connection to MongoEngine
 if settings.DOCKER:
     connect(db='INEGI', host='mongo')
 else:
     connect(db='INEGI', host='localhost')
+
+# Connection to Mongo pymodm
+if settings.DOCKER:
+    connect2("mongodb://mongo:27017/INEGI", alias="my-app")
+else:
+    connect2("mongodb://localhost:27017/INEGI", alias="my-app")
 
 # Connection test for mongo in the server
 # connect(host="mongodb+srv://pedro:pedrofaria@cluster0-rparn.mongodb.net/test?retryWrites=true")
@@ -323,9 +334,10 @@ class DataSetPG(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=['tower_code', 'time_stamp', ]),
-            models.Index(fields=['tower_code', ]),
-            models.Index(fields=['time_stamp', ])
+            models.Index(fields=['tower_code', 'time_stamp', 'value', ])
+            # models.Index(fields=['tower_code', ]),
+            # models.Index(fields=['time_stamp', ]),
+            # models.Index(fields=['value', ])
         ]
         # unique_together = (("tower_code", "time_stamp"),)
 
@@ -337,7 +349,24 @@ class DataSetMongo(DynamicDocument):
     tower_code = StringField(max_length=20)
     time_stamp = DateTimeField(default=datetime.now)
     value = StringField(max_length=200)
-    meta = {"indexes": ['tower_code', 'time_stamp']}
+    # meta = {"indexes": [('tower_code', 'time_stamp', 'value',)]}
+
+    def __str__(self):
+        return "%s" % self.tower_code
+
+
+class DataSetMongoPyMod(MongoModel):
+    tower_code = fields.CharField(max_length=20)
+    time_stamp = fields.DateTimeField(default=datetime.now)
+    value = fields.CharField(max_length=200)
+
+    class Meta:
+        write_concern = WriteConcern(j=True)
+        connection_alias = 'my-app'
+        # Compound index
+        # indexes = [IndexModel([('tower_code', ASCENDING),
+        #                        ('time_stamp', ASCENDING),
+        #                        ('value', ASCENDING)])]
 
     def __str__(self):
         return "%s" % self.tower_code
