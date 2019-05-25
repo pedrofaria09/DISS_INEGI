@@ -24,10 +24,10 @@ from graphos.renderers.highcharts import LineChart as LineChartHIGH
 from graphos.sources.model import ModelDataSource
 from graphos.sources.csv_file import CSVDataSource
 from chartjs.views.lines import BaseLineChartView, HighchartPlotLineChartView
-
+from pymongo import DESCENDING as PYDESCENDING
 from django.core import serializers
 
-import time, re, io, json, pytz, random, csv
+import time, re, io, json, pytz, random, csv, os, glob
 import numpy as np
 
 from django.views.generic import View
@@ -2289,7 +2289,6 @@ class LineHighchartJson(HighchartPlotLineChartView):
         conf_periods = PeriodConfiguration.objects.filter(QD(tower=tower) & QD(begin_date__gte=begin_date, end_date__lte=end_date))
 
         df = read_frame(qs)
-
         new_df = df.value.apply(lambda x: pd.Series(str(x).split(",")))
         del df['value']
         df = pd.concat([df, new_df], axis=1, sort=False)
@@ -2313,12 +2312,13 @@ class LineHighchartJson(HighchartPlotLineChartView):
                     name = eq.calibration.equipment.model.type.name + '@' + str(eq.height_label) + d.dimension_type.statistic.name
                     column = d.column-1
                     temp_df = temp_df.rename(columns={column: name})
-                    temp_df[name] = temp_df[name].astype(float)
-                    # We need to get the original value back (raw_data-OffLogger)-SloLogger
-                    default = (temp_df[name] - (float(eq.offset_dl)))/float(eq.slope_dl)
-                    # Then multiply default by SloCalib and sum OffCalib
-                    final = (default*(float(eq.calibration.slope)))+float(eq.calibration.offset)
-                    temp_df[name] = final
+                    if not temp_df.empty:
+                        temp_df[name] = temp_df[name].astype(float)
+                        # We need to get the original value back (raw_data-OffLogger)-SloLogger
+                        default = (temp_df[name] - (float(eq.offset_dl)))/float(eq.slope_dl)
+                        # Then multiply default by SloCalib and sum OffCalib
+                        final = (default*(float(eq.calibration.slope)))+float(eq.calibration.offset)
+                        temp_df[name] = final
             if not temp_df.empty:
                 new_df.append(temp_df)
 
@@ -2350,8 +2350,167 @@ class LineHighchartJson(HighchartPlotLineChartView):
         self.xdata = eixo_x.tolist()
 
         for d in df:
-            self.ydata.append(df[d].values.tolist())
-            self.indexs.append(df[d].name)
+            if df[d].name is not 'time_stamp':
+                self.ydata.append(df[d].values.tolist())
+                self.indexs.append(df[d].name)
+
+        self.title = 'Data Visualization'
+        self.y_axis_title = 'Values'
+
+        # special - line charts credits are personalized
+        self.credits = {
+            'enabled': True,
+            'href': 'http://google.com',
+            'text': 'INEGI Team',
+        }
+
+        context = self.get_context_data(**kwargs)
+        return self.render_to_response(context)
+
+    def get_labels(self):
+        """Return labels."""
+        return self.xdata
+
+    def get_providers(self):
+        """Return names of datasets."""
+        return self.indexs
+
+    def get_data(self):
+        """Return dataset to plot."""
+        return self.ydata
+
+
+class LineHighchartJsonTESTS(HighchartPlotLineChartView):
+
+    def __init__(self):
+        self.xdata = []
+        self.ydata = []
+        self.indexs = []
+
+    def get(self, request, *args, **kwargs):
+        tower_id = self.request.GET.get('tower_id', '')
+        begin_date = self.request.GET.get('begin_date', '')
+        end_date = self.request.GET.get('end_date', '')
+        typeX = self.request.GET.get('typeX', '')
+        print("GET - tower_id: ", tower_id)
+
+        tower = Tower.objects.get(pk=tower_id)
+
+        if not (begin_date and end_date):
+            end_date = datetime.now(pytz.utc)
+            begin_date = end_date - timedelta(days=30)
+        else:
+            begin_date = get_date(begin_date)
+            end_date = get_date(end_date)
+
+        df = pd.DataFrame()
+        if typeX == 'pg':
+            # qs = DataSetPG.objects.filter(QD(tower_code=tower)).order_by('time_stamp')
+
+            qs = DataSetPG.objects.filter(QD(tower_code=tower.code_inegi) & QD(time_stamp__range=(begin_date, end_date))).order_by('time_stamp')
+
+            df = read_frame(qs)
+        elif typeX == 'mo':
+            qs = DataSetMongoPyMod.objects.raw({'tower_code': tower.code_inegi, 'time_stamp': {'$gte': begin_date, '$lte': end_date}})
+            # .order_by([{'time_stamp': PYDESCENDING}])
+
+            rows_list = []
+            for ds in qs:
+                dict1 = {'tower_code': str(ds.tower_code), 'time_stamp': str(ds.time_stamp), 'value': str(ds.value)}
+                rows_list.append(dict1)
+            df = pd.DataFrame(rows_list, columns=['tower_code', 'time_stamp', 'value'])
+            df = df.sort_values(by='time_stamp')
+            df = df.reset_index(drop=True)
+            df['time_stamp'] = pd.to_datetime(df['time_stamp'])
+        elif typeX == 'in':
+            begin_date = begin_date.strftime("%Y-%m-%dT%H:%M:%SZ")
+            end_date = end_date.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+            qs = INFLUXCLIENT.query("select * FROM port525 where time >= '"+begin_date+"' and time <= '"+end_date+"' order by time")
+            qs = list(qs)[0]
+
+            rows_list = []
+            for el in qs:
+                dict1 = {'tower_code': tower.code_inegi, 'time_stamp': el.get('time'), 'value': el.get('value')}
+                rows_list.append(dict1)
+
+            df = pd.DataFrame(rows_list, columns=['tower_code', 'time_stamp', 'value'])
+            df = df.sort_values(by='time_stamp')
+            df = df.reset_index(drop=True)
+            df['time_stamp'] = pd.to_datetime(df['time_stamp'])
+
+        elif typeX == 'files':
+            rows_list = []
+            # file_temp = csv.writer(open("./files/temp/temp.csv", "w+"), delimiter=',', quoting=csv.QUOTE_MINIMAL)
+            # file_temp.writerow(['tower_code', 'time_stamp', 'value'])
+            path = "./files/raw_data/" + tower.code_inegi + "/"
+            for filename in glob.glob(os.path.join(path, '*.row')):
+                with open(filename, 'r') as f:
+                    for i, line in enumerate(f):
+                        line = line.rstrip()
+                        try:
+                            if line.strip()[-1] is ',':
+                                line = line.strip()[:-1]
+                        except IndexError:
+                            print("Problem with file")
+                            pass
+
+                        mylist = line.split(",", 3)
+
+                        time_value, flag_date = parsedate(request, f, mylist, i)
+
+                        if flag_date:
+                            print("Problem with date at :" + str(i))
+                        values = mylist[3]
+                        tower_code = mylist[0]
+                        tower_code = tower_code.lower()
+                        if begin_date <= time_value and end_date >= time_value:
+                            dict1 = {'tower_code': str(tower_code), 'time_stamp': str(time_value), 'value': str(values)}
+                            rows_list.append(dict1)
+                            # file_temp.writerow([str(tower_code), str(time_value), str(values)])
+            df = pd.DataFrame(rows_list, columns=['tower_code', 'time_stamp', 'value'])
+
+            # file_csv = open("./files/temp/temp.csv")
+            # df = pd.read_csv(file_csv, header=3, names=['tower_code', 'time_stamp', 'value'])
+            df = df.sort_values(by='time_stamp')
+            df = df.reset_index(drop=True)
+            df['time_stamp'] = pd.to_datetime(df['time_stamp'])
+
+        if not df.empty:
+            new_df = df.value.apply(lambda x: pd.Series(str(x).split(",")))
+            del df['value']
+            df = pd.concat([df, new_df], axis=1, sort=False)
+            try:
+                del df['id']
+            except KeyError:
+                pass
+            del df['tower_code']
+
+        # Convert all other columns rather than time_stamp to float
+        for d in df:
+            if df[d].name != 'time_stamp':
+                df[d] = df[d].astype(float).tolist()
+
+        # Fill open spaces with a freq of 10min with NaN's
+        if not df.empty:
+            df = df.set_index('time_stamp')
+            i = df.index[0]
+            f = df.index[-1]
+            continuousrange = pd.date_range(i, f, freq=('10T'))
+            df = df.reindex(index=continuousrange)
+
+        # Replace all NaN with None
+        df = df.where((pd.notnull(df)), None)
+
+        # Convert data to unix_time
+        eixo_x = df.index.astype(np.int64) // 10 ** 6
+        self.xdata = eixo_x.tolist()
+
+        # print(df)
+        for d in df:
+            if df[d].name != 'time_stamp':
+                self.ydata.append(df[d].values.tolist())
+                self.indexs.append(df[d].name)
 
         self.title = 'Data Visualization'
         self.y_axis_title = 'Values'
@@ -2972,7 +3131,8 @@ def show_towers_data_pg(request):
         messages.error(request, 'You dont have access to this page')
         return HttpResponseRedirect(reverse("index"))
 
-    data = {}
+    form_tower = TowersDataVForm()
+    data = {'form_tower': form_tower}
 
     # start_time = time.time()
     # # dataset = DataSetPG.objects.filter(QD(tower_code='port525'))
@@ -3152,7 +3312,7 @@ def add_raw_data_pg2(request):
             dataraw = []
 
             for i, line in enumerate(file):
-                # # remove the \n at the end
+                # remove the \n at the end
                 line = line.rstrip()
 
                 try:

@@ -30,19 +30,9 @@
         </div>
 
         <hr>
+        <p>From server - Tests</p>
         <a href="{% url "add_raw_data_pg2" %}" class="btn btn-primary btn-block">Upload files locally</a>
         <hr>
-
-        <div class="row">
-            <div class="col-12">
-
-                {% for k in data %}
-                    Time: {{ k.time }} ---> Value: {{ k.value }}
-                    <hr>
-                {% endfor %}
-
-            </div>
-        </div>
 
     </div>
 

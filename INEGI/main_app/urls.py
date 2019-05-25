@@ -105,6 +105,7 @@ urlpatterns = [
     url(r'^chart_chartjs/?$', views.chart_chartjs, name='chart_chartjs'),
     url(r'^line_chart_json/?$', views.LineChartJson.as_view(), name='line_chart_json'),
     url(r'^line_highchart_json/?$', views.LineHighchartJson.as_view(), name='line_highchart_json'),
+    url(r'^line_highchart_json_tests/?$', views.LineHighchartJsonTESTS.as_view(), name='line_highchart_json_tests'),
     url(r'^x_chart/?$', views.XChart, name='x_chart'),
 
     # Databases
