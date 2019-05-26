@@ -109,55 +109,53 @@ $(document).ready(function () {
     $(function () {
         var button = $('#submit_tower');
         button.click(function () {
-            // var id_tower = $("#id_tower :selected").val();
-            // var begin_date = $("#id_begin_date_search").val();
-            // var end_date = $("#id_end_date_search").val();
+
             var id_tower = 10;
-            var begin_date = "2019-01-01 00:00";
+            var begin_date = "2019-01-10 00:00";
             var end_date = "2019-01-30 00:00";
-            // var typeX = "files";
+
+            var typeX = "files";
             // var typeX = "pg";
             // var typeX = "mo";
-            var typeX = "in";
-            var nVezes = 1;
+            // var typeX = "in";
 
             dataToSend = {tower_id: id_tower, begin_date: begin_date, end_date: end_date, typeX: typeX};
-
-            // for (var i = 0; i < nVezes; i++) {
-            //     ajcall();
-            // }
-            $.ajax({
-                url: "/line_highchart_json_tests",
-                data: dataToSend,
-                beforeSend: function (){
-                    ajaxTime= new Date().getTime();
-                },
-                success: function (json) {
-                    console.log("Loading Line Chart");
-                    getgraph(json);
-                    totalTime = new Date().getTime()-ajaxTime;
-                    console.log(totalTime);
-                }
-            });
+            ajcall();
+            // var ajaxTime= new Date().getTime();
+            // $.ajax({
+            //     url: "/line_highchart_json_tests",
+            //     data: dataToSend,
+            //     // beforeSend: function (){
+            //     //     var ajaxTime= new Date().getTime();
+            //     // },
+            //     success: function (json) {
+            //         console.log("Loading Line Chart");
+            //         getgraph(json);
+            //         var totalTime = new Date().getTime()-ajaxTime;
+            //         console.log(totalTime);
+            //     }
+            // });
 
         });
     });
 
-    let ajaxTime;
-    let totalTime;
+    // let ajaxTime;
+    // let totalTime;
 
     function ajcall() {
-        return $.ajax({
+        var ajaxTime= new Date().getTime();
+        $.ajax({
             url: "/line_highchart_json_tests",
             data: dataToSend,
-            beforeSend: function (){
-                ajaxTime= new Date().getTime();
-            },
+            // beforeSend: function (){
+            //     ajaxTime= new Date().getTime();
+            // },
             success: function (json) {
                 console.log("Loading Line Chart");
                 getgraph(json);
-                totalTime = new Date().getTime()-ajaxTime;
+                var totalTime = new Date().getTime()-ajaxTime;
                 console.log(totalTime);
+                setTimeout(ajcall, (totalTime+500))
             }
         });
     }

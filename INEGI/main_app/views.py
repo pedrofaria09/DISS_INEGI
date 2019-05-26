@@ -24,12 +24,12 @@ from graphos.renderers.highcharts import LineChart as LineChartHIGH
 from graphos.sources.model import ModelDataSource
 from graphos.sources.csv_file import CSVDataSource
 from chartjs.views.lines import BaseLineChartView, HighchartPlotLineChartView
-from pymongo import DESCENDING as PYDESCENDING
+from pymongo import ASCENDING as PYASCENDING
 from django.core import serializers
 
 import time, re, io, json, pytz, random, csv, os, glob
 import numpy as np
-
+from faker import Faker
 from django.views.generic import View
 from .utils import render_to_pdf
 from django.template import loader
@@ -2407,21 +2407,24 @@ class LineHighchartJsonTESTS(HighchartPlotLineChartView):
         if typeX == 'pg':
             # qs = DataSetPG.objects.filter(QD(tower_code=tower)).order_by('time_stamp')
 
-            qs = DataSetPG.objects.filter(QD(tower_code=tower.code_inegi) & QD(time_stamp__range=(begin_date, end_date))).order_by('time_stamp')
+            qs = DataSetPG.objects.filter(QD(tower_code=tower.code_inegi) & QD(time_stamp__range=(begin_date, end_date))).order_by('time_stamp').values('time_stamp', 'value')
 
             df = read_frame(qs)
+
         elif typeX == 'mo':
             qs = DataSetMongoPyMod.objects.raw({'tower_code': tower.code_inegi, 'time_stamp': {'$gte': begin_date, '$lte': end_date}})
-            # .order_by([{'time_stamp': PYDESCENDING}])
+            qs = qs.order_by([('time_stamp', PYASCENDING)])
 
             rows_list = []
             for ds in qs:
-                dict1 = {'tower_code': str(ds.tower_code), 'time_stamp': str(ds.time_stamp), 'value': str(ds.value)}
+                dict1 = {'time_stamp': str(ds.time_stamp), 'value': str(ds.value)}
                 rows_list.append(dict1)
-            df = pd.DataFrame(rows_list, columns=['tower_code', 'time_stamp', 'value'])
-            df = df.sort_values(by='time_stamp')
-            df = df.reset_index(drop=True)
+
+            df = pd.DataFrame(rows_list, columns=['time_stamp', 'value'])
+            # df = df.sort_values(by='time_stamp')
+            # df = df.reset_index(drop=True)
             df['time_stamp'] = pd.to_datetime(df['time_stamp'])
+
         elif typeX == 'in':
             begin_date = begin_date.strftime("%Y-%m-%dT%H:%M:%SZ")
             end_date = end_date.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -2431,18 +2434,16 @@ class LineHighchartJsonTESTS(HighchartPlotLineChartView):
 
             rows_list = []
             for el in qs:
-                dict1 = {'tower_code': tower.code_inegi, 'time_stamp': el.get('time'), 'value': el.get('value')}
+                dict1 = {'time_stamp': el.get('time'), 'value': el.get('value')}
                 rows_list.append(dict1)
 
-            df = pd.DataFrame(rows_list, columns=['tower_code', 'time_stamp', 'value'])
-            df = df.sort_values(by='time_stamp')
-            df = df.reset_index(drop=True)
+            df = pd.DataFrame(rows_list, columns=['time_stamp', 'value'])
+            # df = df.sort_values(by='time_stamp')
+            # df = df.reset_index(drop=True)
             df['time_stamp'] = pd.to_datetime(df['time_stamp'])
 
         elif typeX == 'files':
             rows_list = []
-            # file_temp = csv.writer(open("./files/temp/temp.csv", "w+"), delimiter=',', quoting=csv.QUOTE_MINIMAL)
-            # file_temp.writerow(['tower_code', 'time_stamp', 'value'])
             path = "./files/raw_data/" + tower.code_inegi + "/"
             for filename in glob.glob(os.path.join(path, '*.row')):
                 with open(filename, 'r') as f:
@@ -2465,13 +2466,10 @@ class LineHighchartJsonTESTS(HighchartPlotLineChartView):
                         tower_code = mylist[0]
                         tower_code = tower_code.lower()
                         if begin_date <= time_value and end_date >= time_value:
-                            dict1 = {'tower_code': str(tower_code), 'time_stamp': str(time_value), 'value': str(values)}
+                            dict1 = {'time_stamp': str(time_value), 'value': str(values)}
                             rows_list.append(dict1)
-                            # file_temp.writerow([str(tower_code), str(time_value), str(values)])
-            df = pd.DataFrame(rows_list, columns=['tower_code', 'time_stamp', 'value'])
 
-            # file_csv = open("./files/temp/temp.csv")
-            # df = pd.read_csv(file_csv, header=3, names=['tower_code', 'time_stamp', 'value'])
+            df = pd.DataFrame(rows_list, columns=['time_stamp', 'value'])
             df = df.sort_values(by='time_stamp')
             df = df.reset_index(drop=True)
             df['time_stamp'] = pd.to_datetime(df['time_stamp'])
@@ -2480,11 +2478,6 @@ class LineHighchartJsonTESTS(HighchartPlotLineChartView):
             new_df = df.value.apply(lambda x: pd.Series(str(x).split(",")))
             del df['value']
             df = pd.concat([df, new_df], axis=1, sort=False)
-            try:
-                del df['id']
-            except KeyError:
-                pass
-            del df['tower_code']
 
         # Convert all other columns rather than time_stamp to float
         for d in df:
@@ -3008,7 +3001,7 @@ def dropdb_influx(request):
 def count_influx(request):
     start_time = time.time()
     # dt = INFLUXCLIENT.query("select * FROM /.*/")
-    dt = INFLUXCLIENT.query("select * FROM port525")
+    dt = INFLUXCLIENT.query("select * FROM port1")
     end = time.time()
     total_time = (end - start_time)
 
@@ -3284,11 +3277,12 @@ def add_raw_data_pg(request):
     return HttpResponseRedirect(reverse("show_towers_data_pg"))
 
 
-FILE_PATH_TO_UPLOAD = "./files/raw_data/2019_05.row"
-ITIMES = 10
-FILE_TEST_PG = './files/tests_pg.csv'
-FILE_TEST_IN = './files/tests_in.csv'
-FILE_TEST_MG = './files/tests_mg.csv'
+FILE_PATH_TO_UPLOAD = "./files/raw_data/1000000.row"
+ITIMES = 1
+BATCHS = 1
+FILE_TEST_PG = './files/tests_insert_pg.csv'
+FILE_TEST_IN = './files/tests_insert_in.csv'
+FILE_TEST_MG = './files/tests_insert_mg.csv'
 
 
 def add_raw_data_pg2(request):
@@ -3299,7 +3293,7 @@ def add_raw_data_pg2(request):
     file_to_write = csv.writer(open(FILE_TEST_PG, 'a+'), delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 
     if file:
-        file_to_write.writerow([str(file)])
+        file_to_write.writerow(["SIZE: "+str(BATCHS)+str(file)])
         file_to_write.writerow(['Iteration', 'Operation Time', 'Insertion Time'])
         # print(str(file))
 
@@ -3311,51 +3305,63 @@ def add_raw_data_pg2(request):
             op_time = time.time()
             dataraw = []
 
-            for i, line in enumerate(file):
-                # remove the \n at the end
-                line = line.rstrip()
+            # fake = Faker()
+            #
+            # for i in range(0, SIZE_FOR_IT):
+            #     rndm_date = fake.date_time_between(start_date='-100y', end_date='now', tzinfo=pytz.UTC)
+            #     # tower_code = "port"+str(random.randint(0, 100))
+            #     tower_code = "port525"
+            #     values = "49,67,28,8,49,66,31,8,49,76,29,10,268,11,255,12,45,2961,1000,138,91,93"
+            #     tower_data = DataSetPG(tower_code=tower_code, time_stamp=rndm_date, value=values)
+            #     dataraw.append(tower_data)
 
-                try:
-                    if line.strip()[-1] is ',':
-                        line = line.strip()[:-1]
-                except IndexError:
-                    flag_problem = True
-                    messages.error(request, 'Error reading a line, check your file -> ' + str(
-                        file) + '. No values was entered on the DB')
-                    return HttpResponseRedirect(reverse("show_towers_data_pg"))
+            for b in range(0, BATCHS):
 
-                mylist = line.split(",", 3)
+                for i, line in enumerate(file):
+                    # remove the \n at the end
+                    line = line.rstrip()
 
-                time_value, flag_date = parsedate(request, file, mylist, i)
+                    try:
+                        if line.strip()[-1] is ',':
+                            line = line.strip()[:-1]
+                    except IndexError:
+                        flag_problem = True
+                        messages.error(request, 'Error reading a line, check your file -> ' + str(
+                            file) + '. No values was entered on the DB')
+                        return HttpResponseRedirect(reverse("show_towers_data_pg"))
 
-                if flag_date:
-                    return HttpResponseRedirect(reverse("show_towers_data_pg"))
+                    mylist = line.split(",", 3)
 
-                try:
-                    mylist[3]
-                except IndexError:
-                    flag_problem = True
-                    messages.warning(request, 'Warning!!! reading a line, check your file -> ' + str(
-                        file) + ' at line: ' + str(i + 1) + '. No values was entered on the DB for time stamp: ' + str(
-                        time_value))
-                    continue
+                    time_value, flag_date = parsedate(request, file, mylist, i)
 
-                values = mylist[3]
-                tower_code = mylist[0]
-                tower_code = tower_code.lower()
+                    if flag_date:
+                        return HttpResponseRedirect(reverse("show_towers_data_pg"))
 
-                tower_data = DataSetPG(tower_code=tower_code, time_stamp=time_value, value=values)
-                dataraw.append(tower_data)
+                    try:
+                        mylist[3]
+                    except IndexError:
+                        flag_problem = True
+                        messages.warning(request, 'Warning!!! reading a line, check your file -> ' + str(
+                            file) + ' at line: ' + str(i + 1) + '. No values was entered on the DB for time stamp: ' + str(
+                            time_value))
+                        continue
+
+                    values = mylist[3]
+                    batch = b + 1
+                    tower_code = "port" + str(batch)
+
+                    tower_data = DataSetPG(tower_code=tower_code, time_stamp=time_value, value=values)
+                    dataraw.append(tower_data)
 
             op_time = (time.time() - op_time)
             total_time_operation += op_time
-            # print('Operation time: ', op_time, ' seconds')
+            print('Operation time: ', op_time, ' seconds')
 
             db_time2 = time.time()
             if dataraw:
                 DataSetPG.objects.bulk_create(dataraw)
             db_time2 = (time.time() - db_time2)
-            # print('Inserition time: ', db_time2, ' seconds')
+            print('Inserition time: ', db_time2, ' seconds')
             total_time_insertion += db_time2
 
             DataSetPG.objects.all().delete()
@@ -3384,7 +3390,7 @@ def add_raw_data_influx2(request):
     file_to_write = csv.writer(open(FILE_TEST_IN, 'a+'), delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 
     if file:
-        file_to_write.writerow([str(file)])
+        file_to_write.writerow(["SIZE: "+str(BATCHS)+str(file)])
         file_to_write.writerow(['Iteration', 'Operation Time', 'Insertion Time'])
         # print(str(file))
 
@@ -3396,57 +3402,75 @@ def add_raw_data_influx2(request):
             op_time = time.time()
             points = []
 
-            for i, line in enumerate(file):
-                # # remove the \n at the end
-                line = line.rstrip()
+            # fake = Faker()
+            #
+            # for i in range(0, SIZE_FOR_IT):
+            #     rndm_date = fake.date_time_between(start_date='-100y', end_date='now')
+            #     # tower_code = "port"+str(random.randint(0, 100))
+            #     tower_code = "port525"
+            #     values = "49,67,28,8,49,66,31,8,49,76,29,10,268,11,255,12,45,2961,1000,138,91,93"
+            #     point = {
+            #         "measurement": tower_code,
+            #         "time": rndm_date,
+            #         "fields": {
+            #             "value": values
+            #         }
+            #     }
+            #     points.append(point)
 
-                try:
-                    if line.strip()[-1] is ',':
-                        line = line.strip()[:-1]
-                except IndexError:
-                    flag_problem = True
-                    messages.error(request, 'Error reading a line, check your file -> ' + str(
-                        file) + '. No values was entered on the DB')
-                    return HttpResponseRedirect(reverse("show_towers_data_influx"))
+            for b in range(0, BATCHS):
 
-                mylist = line.split(",", 3)
+                for i, line in enumerate(file):
+                    # # remove the \n at the end
+                    line = line.rstrip()
 
-                time_value, flag_date = parsedate(request, file, mylist, i)
+                    try:
+                        if line.strip()[-1] is ',':
+                            line = line.strip()[:-1]
+                    except IndexError:
+                        flag_problem = True
+                        messages.error(request, 'Error reading a line, check your file -> ' + str(
+                            file) + '. No values was entered on the DB')
+                        return HttpResponseRedirect(reverse("show_towers_data_influx"))
 
-                if flag_date:
-                    return HttpResponseRedirect(reverse("show_towers_data_influx"))
+                    mylist = line.split(",", 3)
 
-                try:
-                    mylist[3]
-                except IndexError:
-                    flag_problem = True
-                    messages.warning(request, 'Warning!!! reading a line, check your file -> ' + str(
-                        file) + ' at line: ' + str(i + 1) + '. No values was entered on the DB for time stamp: ' + str(
-                        time_value))
-                    continue
+                    time_value, flag_date = parsedate(request, file, mylist, i)
 
-                values = mylist[3]
-                tower_code = mylist[0]
-                tower_code = tower_code.lower()
+                    if flag_date:
+                        return HttpResponseRedirect(reverse("show_towers_data_influx"))
 
-                point = {
-                    "measurement": tower_code,
-                    "time": time_value,
-                    "fields": {
-                        "value": values
+                    try:
+                        mylist[3]
+                    except IndexError:
+                        flag_problem = True
+                        messages.warning(request, 'Warning!!! reading a line, check your file -> ' + str(
+                            file) + ' at line: ' + str(i + 1) + '. No values was entered on the DB for time stamp: ' + str(
+                            time_value))
+                        continue
+
+                    values = mylist[3]
+                    batch = b+1
+                    tower_code = "port"+str(batch)
+
+                    point = {
+                        "measurement": tower_code,
+                        "time": time_value,
+                        "fields": {
+                            "value": values
+                        }
                     }
-                }
-                points.append(point)
+                    points.append(point)
 
             op_time = (time.time() - op_time)
             total_time_operation += op_time
-            # print('Operation time: ', op_time, ' seconds')
+            print('Operation time: ', op_time, ' seconds')
 
             db_time2 = time.time()
             if points:
                 INFLUXCLIENT.write_points(points, batch_size=100000)
             db_time2 = (time.time() - db_time2)
-            # print('Inserition time: ', db_time2, ' seconds')
+            print('Inserition time: ', db_time2, ' seconds')
             total_time_insertion += db_time2
 
             INFLUXCLIENT.query("DROP SERIES FROM /.*/")
@@ -3475,7 +3499,7 @@ def add_raw_data_mongo2(request):
     file_to_write = csv.writer(open(FILE_TEST_MG, 'a+'), delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 
     if file:
-        file_to_write.writerow([str(file)])
+        file_to_write.writerow(["SIZE: "+str(BATCHS)+str(file)])
         file_to_write.writerow(['Iteration', 'Operation Time', 'Insertion Time'])
         # print(str(file))
 
@@ -3487,51 +3511,64 @@ def add_raw_data_mongo2(request):
             op_time = time.time()
             dataraw = []
 
-            for i, line in enumerate(file):
-                # # remove the \n at the end
-                line = line.rstrip()
+            # fake = Faker()
+            #
+            # for i in range(0, SIZE_FOR_IT):
+            #     rndm_date = fake.date_time_between(start_date='-100y', end_date='now', tzinfo=pytz.UTC)
+            #     # tower_code = "port"+str(random.randint(0, 100))
+            #     tower_code = "port525"
+            #     values = "49,67,28,8,49,66,31,8,49,76,29,10,268,11,255,12,45,2961,1000,138,91,93"
+            #
+            #     tower_data = DataSetMongoPyMod(tower_code=tower_code, time_stamp=rndm_date, value=values)
+            #     dataraw.append(tower_data)
 
-                try:
-                    if line.strip()[-1] is ',':
-                        line = line.strip()[:-1]
-                except IndexError:
-                    flag_problem = True
-                    messages.error(request, 'Error reading a line, check your file -> ' + str(
-                        file) + '. No values was entered on the DB')
-                    return HttpResponseRedirect(reverse("show_towers_data_mongo"))
+            for b in range(0, BATCHS):
 
-                mylist = line.split(",", 3)
+                for i, line in enumerate(file):
+                    # # remove the \n at the end
+                    line = line.rstrip()
 
-                time_value, flag_date = parsedate(request, file, mylist, i)
+                    try:
+                        if line.strip()[-1] is ',':
+                            line = line.strip()[:-1]
+                    except IndexError:
+                        flag_problem = True
+                        messages.error(request, 'Error reading a line, check your file -> ' + str(
+                            file) + '. No values was entered on the DB')
+                        return HttpResponseRedirect(reverse("show_towers_data_mongo"))
 
-                if flag_date:
-                    return HttpResponseRedirect(reverse("show_towers_data_pg"))
+                    mylist = line.split(",", 3)
 
-                try:
-                    mylist[3]
-                except IndexError:
-                    flag_problem = True
-                    messages.warning(request, 'Warning!!! reading a line, check your file -> ' + str(
-                        file) + ' at line: ' + str(i + 1) + '. No values was entered on the DB for time stamp: ' + str(
-                        time_value))
-                    continue
+                    time_value, flag_date = parsedate(request, file, mylist, i)
 
-                values = mylist[3]
-                tower_code = mylist[0]
-                tower_code = tower_code.lower()
+                    if flag_date:
+                        return HttpResponseRedirect(reverse("show_towers_data_pg"))
 
-                tower_data = DataSetMongoPyMod(tower_code=tower_code, time_stamp=time_value, value=values)
-                dataraw.append(tower_data)
+                    try:
+                        mylist[3]
+                    except IndexError:
+                        flag_problem = True
+                        messages.warning(request, 'Warning!!! reading a line, check your file -> ' + str(
+                            file) + ' at line: ' + str(i + 1) + '. No values was entered on the DB for time stamp: ' + str(
+                            time_value))
+                        continue
+
+                    values = mylist[3]
+                    batch = b+1
+                    tower_code = "port"+str(batch)
+
+                    tower_data = DataSetMongoPyMod(tower_code=tower_code, time_stamp=time_value, value=values)
+                    dataraw.append(tower_data)
 
             op_time = (time.time() - op_time)
             total_time_operation += op_time
-            # print('Operation time: ', op_time, ' seconds')
+            print('Operation time: ', op_time, ' seconds')
 
             db_time2 = time.time()
             if dataraw:
                 DataSetMongoPyMod.objects.bulk_create(dataraw)
             db_time2 = (time.time() - db_time2)
-            # print('Inserition time: ', db_time2, ' seconds')
+            print('Inserition time: ', db_time2, ' seconds')
             total_time_insertion += db_time2
 
             DataSetMongoPyMod.objects.all().delete()

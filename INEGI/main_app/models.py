@@ -332,13 +332,13 @@ class DataSetPG(models.Model):
     time_stamp = models.DateTimeField(default=datetime.now, null=True, blank=True)
     value = models.CharField(max_length=200)
 
-    class Meta:
-        indexes = [
-            models.Index(fields=['tower_code', 'time_stamp', 'value', ])
+    # class Meta:
+    #     indexes = [
+    #         models.Index(fields=['tower_code', 'time_stamp', 'value', ])
             # models.Index(fields=['tower_code', ]),
             # models.Index(fields=['time_stamp', ]),
             # models.Index(fields=['value', ])
-        ]
+        # ]
         # unique_together = (("tower_code", "time_stamp"),)
 
     def __str__(self):
