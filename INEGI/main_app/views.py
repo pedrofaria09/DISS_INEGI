@@ -2846,19 +2846,6 @@ def dropdb_mongo(request):
     return JsonResponse(data)
 
 
-def count_mongo(request):
-    start_time = time.time()
-    dt = DataSetMongoPyMod.objects.all()
-    # dt = DataSetMongoPyMod.objects.filter(QM(tower_code="port525"))
-    end = time.time()
-    total_time = (end - start_time)
-
-    data = {}
-    data['time'] = total_time
-    data['size'] = dt.count()
-    return JsonResponse(data)
-
-
 def add_raw_data_mongo(request):
     if request.user.is_client:
         messages.error(request, 'You dont have access to this page')
@@ -2998,23 +2985,6 @@ def dropdb_influx(request):
     return JsonResponse(data)
 
 
-def count_influx(request):
-    start_time = time.time()
-    # dt = INFLUXCLIENT.query("select * FROM /.*/")
-    dt = INFLUXCLIENT.query("select * FROM port1")
-    end = time.time()
-    total_time = (end - start_time)
-
-    result = 0
-    for d in dt:
-        result += len(d)
-
-    data = {}
-    data['time'] = total_time
-    data['size'] = result
-    return JsonResponse(data)
-
-
 def add_raw_data_influx(request):
     if request.user.is_client:
         messages.error(request, 'You dont have access to this page')
@@ -3149,20 +3119,6 @@ def dropdb_pg(request):
     return JsonResponse(data)
 
 
-def count_pg(request):
-    start_time = time.time()
-    dt = DataSetPG.objects.all()
-    print(DataSetPG.objects.all().explain())
-    # dt = DataSetPG.objects.filter(QD(tower_code="port525") & QD(time_stamp__gte=datetime(2010, 12, 25)))
-    end = time.time()
-    total_time = (end - start_time)
-
-    data = {}
-    data['time'] = total_time
-    data['size'] = dt.count()
-    return JsonResponse(data)
-
-
 def add_raw_data_pg(request):
     if request.user.is_client:
         messages.error(request, 'You dont have access to this page')
@@ -3279,10 +3235,59 @@ def add_raw_data_pg(request):
 
 FILE_PATH_TO_UPLOAD = "./files/raw_data/1000000.row"
 ITIMES = 1
-BATCHS = 1
+BATCHS = 1000
+# SIZE_FOR_IT = 100000
 FILE_TEST_PG = './files/tests_insert_pg.csv'
 FILE_TEST_IN = './files/tests_insert_in.csv'
 FILE_TEST_MG = './files/tests_insert_mg.csv'
+
+
+def count_pg(request):
+    start_time = time.time()
+    # dt = DataSetPG.objects.all()
+    # print(DataSetPG.objects.all().explain())
+    # dt = DataSetPG.objects.filter(QD(tower_code="port5") & QD(time_stamp__lte=datetime(2010, 12, 25, tzinfo=pytz.UTC)) & QD(time_stamp__gte=datetime(1990, 12, 25, tzinfo=pytz.UTC)))
+    conta = DataSetPG.objects.filter(QD(tower_code="port1")).order_by('-time_stamp').count()
+    print(DataSetPG.objects.filter(QD(tower_code="port1")).order_by('-time_stamp').explain())
+    end = time.time()
+    total_time = (end - start_time)
+
+    data = {}
+    data['time'] = total_time
+    data['size'] = conta
+    return JsonResponse(data)
+
+
+def count_influx(request):
+    start_time = time.time()
+    # dt = INFLUXCLIENT.query("select * FROM /.*/")
+    dt = INFLUXCLIENT.query("select * FROM port1")
+    end = time.time()
+    total_time = (end - start_time)
+
+    result = 0
+    for d in dt:
+        result += len(d)
+
+    data = {}
+    data['time'] = total_time
+    data['size'] = result
+    return JsonResponse(data)
+
+
+def count_mongo(request):
+    start_time = time.time()
+    # dt = DataSetMongoPyMod.objects.all()
+    # dt = DataSetMongoPyMod.objects.raw({'tower_code': tower.code_inegi, 'time_stamp': {'$gte': begin_date, '$lte': end_date}})
+    dt = DataSetMongoPyMod.objects.raw({'tower_code': 'port1'})
+    conta = dt.count()  # REAL OPERATION!!!!
+    end = time.time()
+    total_time = (end - start_time)
+
+    data = {}
+    data['time'] = total_time
+    data['size'] = conta
+    return JsonResponse(data)
 
 
 def add_raw_data_pg2(request):
@@ -3309,13 +3314,16 @@ def add_raw_data_pg2(request):
             #
             # for i in range(0, SIZE_FOR_IT):
             #     rndm_date = fake.date_time_between(start_date='-100y', end_date='now', tzinfo=pytz.UTC)
-            #     # tower_code = "port"+str(random.randint(0, 100))
-            #     tower_code = "port525"
+            #     tower_code = "port"+str(random.randint(0, 100))
+            #     # tower_code = "port525"
             #     values = "49,67,28,8,49,66,31,8,49,76,29,10,268,11,255,12,45,2961,1000,138,91,93"
             #     tower_data = DataSetPG(tower_code=tower_code, time_stamp=rndm_date, value=values)
             #     dataraw.append(tower_data)
 
             for b in range(0, BATCHS):
+                print("Batch: ", b)
+                if b is not 0:
+                    file = open(FILE_PATH_TO_UPLOAD, "r")
 
                 for i, line in enumerate(file):
                     # remove the \n at the end
@@ -3359,12 +3367,13 @@ def add_raw_data_pg2(request):
 
             db_time2 = time.time()
             if dataraw:
-                DataSetPG.objects.bulk_create(dataraw)
+                DataSetPG.objects.bulk_create(dataraw, batch_size=100000)
             db_time2 = (time.time() - db_time2)
             print('Inserition time: ', db_time2, ' seconds')
             total_time_insertion += db_time2
 
-            DataSetPG.objects.all().delete()
+            if t is not ITIMES - 1:
+                DataSetPG.objects.all().delete()
 
             iteration = t+1
             file_to_write.writerow([str(iteration), str(op_time), str(db_time2)])
@@ -3419,6 +3428,9 @@ def add_raw_data_influx2(request):
             #     points.append(point)
 
             for b in range(0, BATCHS):
+                print("Batch: ", b)
+                if b is not 0:
+                    file = open(FILE_PATH_TO_UPLOAD, "r")
 
                 for i, line in enumerate(file):
                     # # remove the \n at the end
@@ -3473,7 +3485,8 @@ def add_raw_data_influx2(request):
             print('Inserition time: ', db_time2, ' seconds')
             total_time_insertion += db_time2
 
-            INFLUXCLIENT.query("DROP SERIES FROM /.*/")
+            if t is not ITIMES - 1:
+                INFLUXCLIENT.query("DROP SERIES FROM /.*/")
 
             iteration = t + 1
             file_to_write.writerow([str(iteration), str(op_time), str(db_time2)])
@@ -3492,8 +3505,6 @@ def add_raw_data_influx2(request):
 
 
 def add_raw_data_mongo2(request):
-    total_time_operation = 0
-    total_time_insertion = 0
     flag_problem = False
     file = open(FILE_PATH_TO_UPLOAD, "r")
     file_to_write = csv.writer(open(FILE_TEST_MG, 'a+'), delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -3508,9 +3519,6 @@ def add_raw_data_mongo2(request):
             if t is not 0:
                 file = open(FILE_PATH_TO_UPLOAD, "r")
 
-            op_time = time.time()
-            dataraw = []
-
             # fake = Faker()
             #
             # for i in range(0, SIZE_FOR_IT):
@@ -3522,7 +3530,16 @@ def add_raw_data_mongo2(request):
             #     tower_data = DataSetMongoPyMod(tower_code=tower_code, time_stamp=rndm_date, value=values)
             #     dataraw.append(tower_data)
 
+            total_time_insertion = 0
+            total_time_operation = 0
+
             for b in range(0, BATCHS):
+                print("Batch: ", b)
+                if b is not 0:
+                    file = open(FILE_PATH_TO_UPLOAD, "r")
+
+                dataraw = []
+                op_time = time.time()
 
                 for i, line in enumerate(file):
                     # # remove the \n at the end
@@ -3560,28 +3577,29 @@ def add_raw_data_mongo2(request):
                     tower_data = DataSetMongoPyMod(tower_code=tower_code, time_stamp=time_value, value=values)
                     dataraw.append(tower_data)
 
-            op_time = (time.time() - op_time)
-            total_time_operation += op_time
-            print('Operation time: ', op_time, ' seconds')
+                op_time = (time.time() - op_time)
+                total_time_operation += op_time
+                print('Operation time: ', op_time, ' seconds')
 
-            db_time2 = time.time()
-            if dataraw:
-                DataSetMongoPyMod.objects.bulk_create(dataraw)
-            db_time2 = (time.time() - db_time2)
-            print('Inserition time: ', db_time2, ' seconds')
-            total_time_insertion += db_time2
+                db_time2 = time.time()
+                if dataraw:
+                    DataSetMongoPyMod.objects.bulk_create(dataraw)
+                db_time2 = (time.time() - db_time2)
+                print('Inserition time: ', db_time2, ' seconds')
+                total_time_insertion += db_time2
 
-            DataSetMongoPyMod.objects.all().delete()
+            print('Total time of operation: ', total_time_operation, ' seconds')
+            print('Total time to insert in database: ', total_time_insertion, ' seconds')
 
             iteration = t+1
-            file_to_write.writerow([str(iteration), str(op_time), str(db_time2)])
+            file_to_write.writerow([str(iteration), str(total_time_operation), str(total_time_insertion)])
+
+            if t is not ITIMES-1:
+                DataSetMongoPyMod.objects.all().delete()
+            else:
+                file_to_write.writerow([str(total_time_operation), str(total_time_insertion)])
 
     file.close()
-
-    # print('Total time of operation: ', total_time_operation, ' seconds')
-    # print('Total time to insert in database: ', total_time_insertion, ' seconds')
-
-    file_to_write.writerow([str(total_time_operation), str(total_time_insertion)])
 
     if not flag_problem:
         messages.success(request, "All files was entered successfully")
