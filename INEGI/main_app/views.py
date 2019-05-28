@@ -3234,8 +3234,8 @@ def add_raw_data_pg(request):
 
 
 FILE_PATH_TO_UPLOAD = "./files/raw_data/1000000.row"
-ITIMES = 1
-BATCHS = 1000
+ITIMES = 20
+BATCHS = 10
 # SIZE_FOR_IT = 100000
 FILE_TEST_PG = './files/tests_insert_pg.csv'
 FILE_TEST_IN = './files/tests_insert_in.csv'
@@ -3291,8 +3291,6 @@ def count_mongo(request):
 
 
 def add_raw_data_pg2(request):
-    total_time_operation = 0
-    total_time_insertion = 0
     flag_problem = False
     file = open(FILE_PATH_TO_UPLOAD, "r")
     file_to_write = csv.writer(open(FILE_TEST_PG, 'a+'), delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -3307,9 +3305,6 @@ def add_raw_data_pg2(request):
             if t is not 0:
                 file = open(FILE_PATH_TO_UPLOAD, "r")
 
-            op_time = time.time()
-            dataraw = []
-
             # fake = Faker()
             #
             # for i in range(0, SIZE_FOR_IT):
@@ -3320,10 +3315,16 @@ def add_raw_data_pg2(request):
             #     tower_data = DataSetPG(tower_code=tower_code, time_stamp=rndm_date, value=values)
             #     dataraw.append(tower_data)
 
+            total_time_operation = 0
+            total_time_insertion = 0
+
             for b in range(0, BATCHS):
                 print("Batch: ", b)
                 if b is not 0:
                     file = open(FILE_PATH_TO_UPLOAD, "r")
+
+                op_time = time.time()
+                dataraw = []
 
                 for i, line in enumerate(file):
                     # remove the \n at the end
@@ -3361,29 +3362,29 @@ def add_raw_data_pg2(request):
                     tower_data = DataSetPG(tower_code=tower_code, time_stamp=time_value, value=values)
                     dataraw.append(tower_data)
 
-            op_time = (time.time() - op_time)
-            total_time_operation += op_time
-            print('Operation time: ', op_time, ' seconds')
+                op_time = (time.time() - op_time)
+                total_time_operation += op_time
+                print('Operation time: ', op_time, ' seconds')
 
-            db_time2 = time.time()
-            if dataraw:
-                DataSetPG.objects.bulk_create(dataraw, batch_size=100000)
-            db_time2 = (time.time() - db_time2)
-            print('Inserition time: ', db_time2, ' seconds')
-            total_time_insertion += db_time2
+                db_time2 = time.time()
+                if dataraw:
+                    DataSetPG.objects.bulk_create(dataraw, batch_size=100000)
+                db_time2 = (time.time() - db_time2)
+                print('Inserition time: ', db_time2, ' seconds')
+                total_time_insertion += db_time2
+
+            print('Total time of operation: ', total_time_operation, ' seconds')
+            print('Total time to insert in database: ', total_time_insertion, ' seconds')
+
+            iteration = t + 1
+            file_to_write.writerow([str(iteration), str(total_time_operation), str(total_time_insertion)])
 
             if t is not ITIMES - 1:
                 DataSetPG.objects.all().delete()
-
-            iteration = t+1
-            file_to_write.writerow([str(iteration), str(op_time), str(db_time2)])
+            # else:
+            #     file_to_write.writerow([str(total_time_operation), str(total_time_insertion)])
 
     file.close()
-
-    # print('Total time of operation: ', total_time_operation, ' seconds')
-    # print('Total time to insert in database: ', total_time_insertion, ' seconds')
-
-    file_to_write.writerow([str(total_time_operation), str(total_time_insertion)])
 
     if not flag_problem:
         messages.success(request, "All files was entered successfully")
@@ -3392,8 +3393,6 @@ def add_raw_data_pg2(request):
 
 
 def add_raw_data_influx2(request):
-    total_time_operation = 0
-    total_time_insertion = 0
     flag_problem = False
     file = open(FILE_PATH_TO_UPLOAD, "r")
     file_to_write = csv.writer(open(FILE_TEST_IN, 'a+'), delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -3407,9 +3406,6 @@ def add_raw_data_influx2(request):
             print("Iteration: ", t)
             if t is not 0:
                 file = open(FILE_PATH_TO_UPLOAD, "r")
-
-            op_time = time.time()
-            points = []
 
             # fake = Faker()
             #
@@ -3427,10 +3423,16 @@ def add_raw_data_influx2(request):
             #     }
             #     points.append(point)
 
+            total_time_operation = 0
+            total_time_insertion = 0
+
             for b in range(0, BATCHS):
                 print("Batch: ", b)
                 if b is not 0:
                     file = open(FILE_PATH_TO_UPLOAD, "r")
+
+                op_time = time.time()
+                points = []
 
                 for i, line in enumerate(file):
                     # # remove the \n at the end
@@ -3474,29 +3476,29 @@ def add_raw_data_influx2(request):
                     }
                     points.append(point)
 
-            op_time = (time.time() - op_time)
-            total_time_operation += op_time
-            print('Operation time: ', op_time, ' seconds')
+                op_time = (time.time() - op_time)
+                total_time_operation += op_time
+                print('Operation time: ', op_time, ' seconds')
 
-            db_time2 = time.time()
-            if points:
-                INFLUXCLIENT.write_points(points, batch_size=100000)
-            db_time2 = (time.time() - db_time2)
-            print('Inserition time: ', db_time2, ' seconds')
-            total_time_insertion += db_time2
+                db_time2 = time.time()
+                if points:
+                    INFLUXCLIENT.write_points(points, batch_size=100000)
+                db_time2 = (time.time() - db_time2)
+                print('Inserition time: ', db_time2, ' seconds')
+                total_time_insertion += db_time2
+
+            print('Total time of operation: ', total_time_operation, ' seconds')
+            print('Total time to insert in database: ', total_time_insertion, ' seconds')
+
+            iteration = t + 1
+            file_to_write.writerow([str(iteration), str(total_time_operation), str(total_time_insertion)])
 
             if t is not ITIMES - 1:
                 INFLUXCLIENT.query("DROP SERIES FROM /.*/")
-
-            iteration = t + 1
-            file_to_write.writerow([str(iteration), str(op_time), str(db_time2)])
+            # else:
+            #     file_to_write.writerow([str(total_time_operation), str(total_time_insertion)])
 
     file.close()
-
-    # print('Total time of operation: ', total_time_operation, ' seconds')
-    # print('Total time to insert in database: ', total_time_insertion, ' seconds')
-
-    file_to_write.writerow([str(total_time_operation), str(total_time_insertion)])
 
     if not flag_problem:
         messages.success(request, "All files was entered successfully")
@@ -3591,13 +3593,13 @@ def add_raw_data_mongo2(request):
             print('Total time of operation: ', total_time_operation, ' seconds')
             print('Total time to insert in database: ', total_time_insertion, ' seconds')
 
-            iteration = t+1
+            iteration = t + 1
             file_to_write.writerow([str(iteration), str(total_time_operation), str(total_time_insertion)])
 
             if t is not ITIMES-1:
                 DataSetMongoPyMod.objects.all().delete()
-            else:
-                file_to_write.writerow([str(total_time_operation), str(total_time_insertion)])
+            # else:
+            #     file_to_write.writerow([str(total_time_operation), str(total_time_insertion)])
 
     file.close()
 
