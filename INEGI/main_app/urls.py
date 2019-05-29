@@ -114,18 +114,21 @@ urlpatterns = [
     url(r'^add_raw_data_mongo2/?$', views.add_raw_data_mongo2, name='add_raw_data_mongo2'),
     url(r'^dropdb_mongo/?$', views.dropdb_mongo, name='dropdb_mongo'),
     url(r'^count_mongo/?$', views.count_mongo, name='count_mongo'),
+    url(r'^query_mg/?$', views.query_mg, name='query_mg'),
 
     url(r'^show_towers_data_influx/?$', views.show_towers_data_influx, name='show_towers_data_influx'),
     url(r'^add_raw_data_influx/?$', views.add_raw_data_influx, name='add_raw_data_influx'),
     url(r'^add_raw_data_influx2/?$', views.add_raw_data_influx2, name='add_raw_data_influx2'),
     url(r'^dropdb_influx/?$', views.dropdb_influx, name='dropdb_influx'),
     url(r'^count_influx/?$', views.count_influx, name='count_influx'),
+    url(r'^query_in/?$', views.query_in, name='query_in'),
 
     url(r'^show_towers_data_pg/?$', views.show_towers_data_pg, name='show_towers_data_pg'),
     url(r'^add_raw_data_pg/?$', views.add_raw_data_pg, name='add_raw_data_pg'),
     url(r'^add_raw_data_pg2/?$', views.add_raw_data_pg2, name='add_raw_data_pg2'),
     url(r'^dropdb_pg/?$', views.dropdb_pg, name='dropdb_pg'),
     url(r'^count_pg/?$', views.count_pg, name='count_pg'),
+    url(r'^query_pg/?$', views.query_pg, name='query_pg'),
 
     # Types
     url(r'^add_calib_equip/$', views.add_calib_equip, name='add_calib_equip'),

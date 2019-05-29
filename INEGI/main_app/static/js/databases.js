@@ -29,6 +29,20 @@ $(document).ready(function () {
     });
 
     $(function () {
+        var button = $('#query_mg');
+        button.click(function () {
+            $.ajax({
+                url: "/query_mg",
+                // data: {},
+                success: function (data) {
+                    console.log(data.size);
+                    console.log('TOTAL: ', data.time , ' seconds');
+                }
+            });
+        });
+    });
+
+    $(function () {
         var button = $('#dropdb_influx');
         button.click(function () {
             $.ajax({
@@ -55,6 +69,19 @@ $(document).ready(function () {
         });
     });
 
+    $(function () {
+        var button = $('#query_in');
+        button.click(function () {
+            $.ajax({
+                url: "/query_in",
+                // data: {},
+                success: function (data) {
+                    console.log(data.size);
+                    console.log('TOTAL: ', data.time , ' seconds');
+                }
+            });
+        });
+    });
 
     $(function () {
         var button = $('#dropdb_pg');
@@ -78,6 +105,20 @@ $(document).ready(function () {
                 success: function (data) {
                     console.log(data.size);
                     console.log(data.time , ' seconds');
+                }
+            });
+        });
+    });
+
+    $(function () {
+        var button = $('#query_pg');
+        button.click(function () {
+            $.ajax({
+                url: "/query_pg",
+                // data: {},
+                success: function (data) {
+                    console.log(data.size);
+                    console.log('TOTAL: ', data.time , ' seconds');
                 }
             });
         });

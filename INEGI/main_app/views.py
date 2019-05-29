@@ -3233,35 +3233,163 @@ def add_raw_data_pg(request):
     return HttpResponseRedirect(reverse("show_towers_data_pg"))
 
 
+# ===============================================================================================
+# ========================================= TESTES!!!!! =========================================
+# ===============================================================================================
+
+
 FILE_PATH_TO_UPLOAD = "./files/raw_data/1000000.row"
-ITIMES = 20
+ITIMES = 1
 BATCHS = 10
 # SIZE_FOR_IT = 100000
 FILE_TEST_PG = './files/tests_insert_pg.csv'
 FILE_TEST_IN = './files/tests_insert_in.csv'
 FILE_TEST_MG = './files/tests_insert_mg.csv'
 
+ITIMES_QR = 50
+FILE_QR_PG = './files/tests_query_pg.csv'
+FILE_QR_MG = './files/tests_query_mg.csv'
+FILE_QR_IN = './files/tests_query_in.csv'
+
+
+def query_pg(request):
+    file_to_write = csv.writer(open(FILE_QR_PG, 'a+'), delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+    tt = 0
+
+    # for it in range(1, ITIMES_QR+1):
+    #     start_time = time.time()
+    #
+    #     # B= 1, 1 000 000 to 20190405,04:10
+    #     conta = len(DataSetPG.objects.filter(QD(tower_code="port1") & QD(time_stamp__gte=datetime(2009, 4, 8, 18, 20, tzinfo=pytz.UTC)) & QD(time_stamp__lte=datetime(2019, 4, 5, 4, 10, tzinfo=pytz.UTC))).order_by('-time_stamp'))
+    #
+    #     end = time.time()
+    #     total_time = (end - start_time)
+    #     print(it, total_time)
+    #     tt += total_time
+    #     if it is 1:
+    #         file_to_write.writerow(["SIZE: " + str(conta) + " Query PARCIAL"])
+    #         file_to_write.writerow(['Iteration', 'Query Time'])
+    #     file_to_write.writerow([str(it), str(total_time)])
+
+    conta = DataSetPG.objects.all().count()
+
+    for it in range(1, ITIMES_QR+1):
+        start_time = time.time()
+        dt = DataSetPG.objects.all()
+        for d in dt:
+            pass
+        end = time.time()
+        total_time = (end - start_time)
+        print(it, total_time)
+        tt += total_time
+        if it is 1:
+            file_to_write.writerow(["SIZE: " + str(conta) + " Query TOTAL"])
+            file_to_write.writerow(['Iteration', 'Query Time'])
+        file_to_write.writerow([str(it), str(total_time)])
+
+    file_to_write.writerow([])
+
+    data = {}
+    data['time'] = tt
+    data['size'] = conta
+    return JsonResponse(data)
+
+
+def query_in(request):
+    file_to_write = csv.writer(open(FILE_QR_IN, 'a+'), delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+    tt = 0
+
+    conta = 0
+    dt = INFLUXCLIENT.query("select * FROM /.*/")
+    for d in dt:
+        conta += len(d)
+
+    for it in range(1, ITIMES_QR + 1):
+        start_time = time.time()
+        dt = INFLUXCLIENT.query("select * FROM /.*/")
+        end = time.time()
+        total_time = (end - start_time)
+        print(it, total_time)
+        tt += total_time
+        if it is 1:
+            file_to_write.writerow(["SIZE: " + str(conta) + " Query TOTAL"])
+            file_to_write.writerow(['Iteration', 'Query Time'])
+        file_to_write.writerow([str(it), str(total_time)])
+
+    file_to_write.writerow([])
+
+    data = {}
+    data['time'] = tt
+    data['size'] = conta
+    return JsonResponse(data)
+
+
+def query_mg(request):
+    file_to_write = csv.writer(open(FILE_QR_MG, 'a+'), delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+    tt = 0
+
+    # start_time = time.time()
+    # # dt = DataSetMongoPyMod.objects.all()
+    # # dt = DataSetMongoPyMod.objects.raw({'tower_code': tower.code_inegi, 'time_stamp': {'$gte': begin_date, '$lte': end_date}})
+    # dt = DataSetMongoPyMod.objects.raw({'tower_code': 'port1'})
+    # conta = dt.count()  # REAL OPERATION!!!!
+    # end = time.time()
+    # total_time = (end - start_time)
+
+    conta = DataSetMongoPyMod.objects.all().count()
+
+    for it in range(1, ITIMES_QR + 1):
+        start_time = time.time()
+        dt = DataSetMongoPyMod.objects.all()
+        for d in dt:
+            pass
+        end = time.time()
+        total_time = (end - start_time)
+        print(it, total_time)
+        tt += total_time
+        if it is 1:
+            file_to_write.writerow(["SIZE: " + str(conta) + " Query TOTAL"])
+            file_to_write.writerow(['Iteration', 'Query Time'])
+        file_to_write.writerow([str(it), str(total_time)])
+
+    file_to_write.writerow([])
+
+    data = {}
+    data['time'] = tt
+    data['size'] = conta
+    return JsonResponse(data)
+
 
 def count_pg(request):
+
+    # start_time = time.time()
+    # # dt = DataSetPG.objects.all()
+    # # print(DataSetPG.objects.all().explain())
+    # # dt = DataSetPG.objects.filter(QD(tower_code="port5") & QD(time_stamp__lte=datetime(2010, 12, 25, tzinfo=pytz.UTC)) & QD(time_stamp__gte=datetime(1990, 12, 25, tzinfo=pytz.UTC)))
+    # conta = len(DataSetPG.objects.filter(QD(tower_code="port1")).order_by('-time_stamp'))
+    # print(DataSetPG.objects.filter(QD(tower_code="port1")).order_by('-time_stamp').explain())
+    # end = time.time()
+    # total_time = (end - start_time)
+    # print(total_time)
+
     start_time = time.time()
-    # dt = DataSetPG.objects.all()
-    # print(DataSetPG.objects.all().explain())
-    # dt = DataSetPG.objects.filter(QD(tower_code="port5") & QD(time_stamp__lte=datetime(2010, 12, 25, tzinfo=pytz.UTC)) & QD(time_stamp__gte=datetime(1990, 12, 25, tzinfo=pytz.UTC)))
-    conta = DataSetPG.objects.filter(QD(tower_code="port1")).order_by('-time_stamp').count()
-    print(DataSetPG.objects.filter(QD(tower_code="port1")).order_by('-time_stamp').explain())
+    conta = len(DataSetPG.objects.all())
+    # conta = len(DataSetPG.objects.filter(QD(tower_code="port1") & QD(time_stamp__gte=datetime(2009, 4, 8, 18, 20, tzinfo=pytz.UTC)) & QD(time_stamp__lte=datetime(2019, 4, 5, 4, 10, tzinfo=pytz.UTC))).order_by('-time_stamp'))
+
     end = time.time()
     total_time = (end - start_time)
 
     data = {}
     data['time'] = total_time
     data['size'] = conta
+
     return JsonResponse(data)
 
 
 def count_influx(request):
     start_time = time.time()
-    # dt = INFLUXCLIENT.query("select * FROM /.*/")
-    dt = INFLUXCLIENT.query("select * FROM port1")
+    dt = INFLUXCLIENT.query("select * FROM /.*/")
+    # dt = INFLUXCLIENT.query("select * FROM port1")
     end = time.time()
     total_time = (end - start_time)
 
@@ -3276,13 +3404,24 @@ def count_influx(request):
 
 
 def count_mongo(request):
+    # start_time = time.time()
+    # # dt = DataSetMongoPyMod.objects.all()
+    # # dt = DataSetMongoPyMod.objects.raw({'tower_code': tower.code_inegi, 'time_stamp': {'$gte': begin_date, '$lte': end_date}})
+    # dt = DataSetMongoPyMod.objects.raw({'tower_code': 'port1'})
+    # conta = dt.count()  # REAL OPERATION!!!!
+    # end = time.time()
+    # total_time = (end - start_time)
+
     start_time = time.time()
-    # dt = DataSetMongoPyMod.objects.all()
-    # dt = DataSetMongoPyMod.objects.raw({'tower_code': tower.code_inegi, 'time_stamp': {'$gte': begin_date, '$lte': end_date}})
-    dt = DataSetMongoPyMod.objects.raw({'tower_code': 'port1'})
-    conta = dt.count()  # REAL OPERATION!!!!
+    dt = DataSetMongoPyMod.objects.all()
+    # dt = DataSetMongoPyMod.objects.raw({'tower_code': 'port1', 'time_stamp': {'$gte': datetime(2009, 4, 8, 18, 20, tzinfo=pytz.UTC), '$lte': datetime(2019, 4, 5, 4, 10, tzinfo=pytz.UTC)}})
+    # dt = DataSetMongoPyMod.objects.raw({'tower_code': 'port1'})
+    for d in dt:
+        pass
     end = time.time()
     total_time = (end - start_time)
+
+    conta = dt.count()
 
     data = {}
     data['time'] = total_time
