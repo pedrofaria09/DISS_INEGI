@@ -239,3 +239,6 @@ Iteration,Operation Time,Insertion Time
 3,1973.878719329834,6317.695302248001
 4,1976.5720355510712,6352.5031645298
 5,1961.6227638721466,6323.6577298641205
+SIZE: 1<_io.TextIOWrapper name='./files/raw_data/1000000.row' mode='r' encoding='UTF-8'>
+Iteration,Operation Time,Insertion Time
+1,20.084042072296143,64.67894792556763

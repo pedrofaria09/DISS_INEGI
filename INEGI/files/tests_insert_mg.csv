@@ -232,3 +232,19 @@ Iteration,Operation Time,Insertion Time
 18,226.82046842575073,489.59815740585327
 19,214.16247987747192,465.34078311920166
 20,213.75020480155945,464.9840180873871
+SIZE: 100<_io.TextIOWrapper name='./files/raw_data/1000000.row' mode='r' encoding='UTF-8'>
+Iteration,Operation Time,Insertion Time
+1,2196.814126253128,4721.921941518784
+2,2195.209933280945,4684.186954975128
+3,2193.5059378147125,4706.868982076645
+4,2188.9085648059845,4702.590515136719
+5,2208.711393594742,4702.740230321884
+SIZE: 1<_io.TextIOWrapper name='./files/raw_data/20.row' mode='r' encoding='UTF-8'>
+Iteration,Operation Time,Insertion Time
+1,0.0014429092407226562,0.01379084587097168
+SIZE: 1<_io.TextIOWrapper name='./files/raw_data/20.row' mode='r' encoding='UTF-8'>
+Iteration,Operation Time,Insertion Time
+1,0.0039060115814208984,0.009422063827514648
+SIZE: 1<_io.TextIOWrapper name='./files/raw_data/1000000.row' mode='r' encoding='UTF-8'>
+Iteration,Operation Time,Insertion Time
+1,25.932197093963623,51.030762910842896

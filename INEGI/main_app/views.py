@@ -25,9 +25,10 @@ from graphos.sources.model import ModelDataSource
 from graphos.sources.csv_file import CSVDataSource
 from chartjs.views.lines import BaseLineChartView, HighchartPlotLineChartView
 from pymongo import ASCENDING as PYASCENDING
+from pymongo import DESCENDING as PYDESCENDING
 from django.core import serializers
 
-import time, re, io, json, pytz, random, csv, os, glob
+import time, re, io, json, pytz, random, csv, os, glob, gc
 import numpy as np
 from faker import Faker
 from django.views.generic import View
@@ -2840,10 +2841,10 @@ def show_towers_data_mongo(request):
 
 
 def dropdb_mongo(request):
-    dt = DataSetMongoPyMod.objects.all().count()
-    data = {'size': dt}
+    # dt = DataSetMongoPyMod.objects.all().count()
+    # data = {'size': dt}
     DataSetMongoPyMod.objects.all().delete()
-    return JsonResponse(data)
+    return JsonResponse({})
 
 
 def add_raw_data_mongo(request):
@@ -3113,10 +3114,10 @@ def show_towers_data_pg(request):
 
 
 def dropdb_pg(request):
-    dt = DataSetPG.objects.all().count()
-    data = {'size': dt}
+    # dt = DataSetPG.objects.all().count()
+    # data = {'size': dt}
     DataSetPG.objects.all().delete()
-    return JsonResponse(data)
+    return JsonResponse({})
 
 
 def add_raw_data_pg(request):
@@ -3240,16 +3241,30 @@ def add_raw_data_pg(request):
 
 FILE_PATH_TO_UPLOAD = "./files/raw_data/1000000.row"
 ITIMES = 1
-BATCHS = 10
+BATCHS = 1
 # SIZE_FOR_IT = 100000
 FILE_TEST_PG = './files/tests_insert_pg.csv'
 FILE_TEST_IN = './files/tests_insert_in.csv'
 FILE_TEST_MG = './files/tests_insert_mg.csv'
 
-ITIMES_QR = 50
+ITIMES_QR = 1
 FILE_QR_PG = './files/tests_query_pg.csv'
 FILE_QR_MG = './files/tests_query_mg.csv'
 FILE_QR_IN = './files/tests_query_in.csv'
+
+
+def queryset_iterator(queryset, chunksize=1000):
+    try:
+        pk = 0
+        last_pk = queryset.order_by('-id')[0].pk
+        queryset = queryset.order_by('pk')
+        while pk < last_pk:
+            for row in queryset.filter(pk__gt=pk)[:chunksize]:
+                pk = row.pk
+                yield row
+            gc.collect()
+    except IndexError:
+        pass
 
 
 def query_pg(request):
@@ -3272,10 +3287,10 @@ def query_pg(request):
     #     file_to_write.writerow([str(it), str(total_time)])
 
     conta = DataSetPG.objects.all().count()
-
+    print(conta)
     for it in range(1, ITIMES_QR+1):
         start_time = time.time()
-        dt = DataSetPG.objects.all()
+        dt = DataSetPG.objects.all().iterator(chunk_size=100000)
         for d in dt:
             pass
         end = time.time()
@@ -3283,7 +3298,7 @@ def query_pg(request):
         print(it, total_time)
         tt += total_time
         if it is 1:
-            file_to_write.writerow(["SIZE: " + str(conta) + " Query TOTAL"])
+            file_to_write.writerow(["SIZE: " + str(conta) + " Query TOTAL queryset_iterator"])
             file_to_write.writerow(['Iteration', 'Query Time'])
         file_to_write.writerow([str(it), str(total_time)])
 
@@ -3300,10 +3315,7 @@ def query_in(request):
     tt = 0
 
     conta = 0
-    dt = INFLUXCLIENT.query("select * FROM /.*/")
-    for d in dt:
-        conta += len(d)
-
+    print(ITIMES_QR)
     for it in range(1, ITIMES_QR + 1):
         start_time = time.time()
         dt = INFLUXCLIENT.query("select * FROM /.*/")
@@ -3312,6 +3324,8 @@ def query_in(request):
         print(it, total_time)
         tt += total_time
         if it is 1:
+            for d in dt:
+                conta += len(d)
             file_to_write.writerow(["SIZE: " + str(conta) + " Query TOTAL"])
             file_to_write.writerow(['Iteration', 'Query Time'])
         file_to_write.writerow([str(it), str(total_time)])
@@ -3336,11 +3350,11 @@ def query_mg(request):
     # end = time.time()
     # total_time = (end - start_time)
 
-    conta = DataSetMongoPyMod.objects.all().count()
-
+    conta = DataSetMongoPyMod.objects.values().all().count()
+    print(conta)
     for it in range(1, ITIMES_QR + 1):
         start_time = time.time()
-        dt = DataSetMongoPyMod.objects.all()
+        dt = DataSetMongoPyMod.objects.all().aggregate(batchSize=100000)
         for d in dt:
             pass
         end = time.time()
@@ -3373,11 +3387,15 @@ def count_pg(request):
     # print(total_time)
 
     start_time = time.time()
-    conta = len(DataSetPG.objects.all())
     # conta = len(DataSetPG.objects.filter(QD(tower_code="port1") & QD(time_stamp__gte=datetime(2009, 4, 8, 18, 20, tzinfo=pytz.UTC)) & QD(time_stamp__lte=datetime(2019, 4, 5, 4, 10, tzinfo=pytz.UTC))).order_by('-time_stamp'))
-
+    # dt = queryset_iterator(DataSetPG.objects.all(), chunksize=100000)
+    dt = DataSetPG.objects.all().iterator(chunk_size=100000)
+    for d in dt:
+        pass
     end = time.time()
     total_time = (end - start_time)
+
+    conta = DataSetPG.objects.all().count()
 
     data = {}
     data['time'] = total_time
@@ -3388,7 +3406,7 @@ def count_pg(request):
 
 def count_influx(request):
     start_time = time.time()
-    dt = INFLUXCLIENT.query("select * FROM /.*/")
+    dt = INFLUXCLIENT.query(query="select * FROM /.*/")
     # dt = INFLUXCLIENT.query("select * FROM port1")
     end = time.time()
     total_time = (end - start_time)
@@ -3413,7 +3431,8 @@ def count_mongo(request):
     # total_time = (end - start_time)
 
     start_time = time.time()
-    dt = DataSetMongoPyMod.objects.all()
+    # dt = queryset_iterator_mongo(DataSetMongoPyMod.objects.all(batch_size=5), chunksize=5)
+    dt = DataSetMongoPyMod.objects.all().aggregate(batchSize=100000)
     # dt = DataSetMongoPyMod.objects.raw({'tower_code': 'port1', 'time_stamp': {'$gte': datetime(2009, 4, 8, 18, 20, tzinfo=pytz.UTC), '$lte': datetime(2019, 4, 5, 4, 10, tzinfo=pytz.UTC)}})
     # dt = DataSetMongoPyMod.objects.raw({'tower_code': 'port1'})
     for d in dt:
@@ -3421,7 +3440,7 @@ def count_mongo(request):
     end = time.time()
     total_time = (end - start_time)
 
-    conta = dt.count()
+    conta = DataSetMongoPyMod.objects.all().count()
 
     data = {}
     data['time'] = total_time
@@ -3433,6 +3452,7 @@ def add_raw_data_pg2(request):
     flag_problem = False
     file = open(FILE_PATH_TO_UPLOAD, "r")
     file_to_write = csv.writer(open(FILE_TEST_PG, 'a+'), delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+    print(ITIMES, BATCHS)
 
     if file:
         file_to_write.writerow(["SIZE: "+str(BATCHS)+str(file)])
@@ -3535,6 +3555,7 @@ def add_raw_data_influx2(request):
     flag_problem = False
     file = open(FILE_PATH_TO_UPLOAD, "r")
     file_to_write = csv.writer(open(FILE_TEST_IN, 'a+'), delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+    print(ITIMES, BATCHS)
 
     if file:
         file_to_write.writerow(["SIZE: "+str(BATCHS)+str(file)])
@@ -3649,7 +3670,7 @@ def add_raw_data_mongo2(request):
     flag_problem = False
     file = open(FILE_PATH_TO_UPLOAD, "r")
     file_to_write = csv.writer(open(FILE_TEST_MG, 'a+'), delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-
+    print(ITIMES, BATCHS)
     if file:
         file_to_write.writerow(["SIZE: "+str(BATCHS)+str(file)])
         file_to_write.writerow(['Iteration', 'Operation Time', 'Insertion Time'])

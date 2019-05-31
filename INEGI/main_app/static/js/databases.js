@@ -4,11 +4,12 @@ $(document).ready(function () {
     $(function () {
         var button = $('#dropdb_mongo');
         button.click(function () {
+            console.log("dropping");
             $.ajax({
                 url: "/dropdb_mongo",
                 // data: {},
                 success: function (data) {
-                    console.log(data.size);
+                    console.log("dropped");
                 }
             });
         });
@@ -17,6 +18,7 @@ $(document).ready(function () {
     $(function () {
         var button = $('#count_mongo');
         button.click(function () {
+            console.log("counting");
             $.ajax({
                 url: "/count_mongo",
                 // data: {},
@@ -31,6 +33,7 @@ $(document).ready(function () {
     $(function () {
         var button = $('#query_mg');
         button.click(function () {
+            console.log("querying");
             $.ajax({
                 url: "/query_mg",
                 // data: {},
@@ -45,11 +48,12 @@ $(document).ready(function () {
     $(function () {
         var button = $('#dropdb_influx');
         button.click(function () {
+            console.log("dropping");
             $.ajax({
                 url: "/dropdb_influx",
                 // data: {},
                 success: function (data) {
-                    console.log(data.message);
+                    console.log("dropped");
                 }
             });
         });
@@ -58,6 +62,7 @@ $(document).ready(function () {
     $(function () {
         var button = $('#count_influx');
         button.click(function () {
+            console.log("counting");
             $.ajax({
                 url: "/count_influx",
                 // data: {},
@@ -72,6 +77,7 @@ $(document).ready(function () {
     $(function () {
         var button = $('#query_in');
         button.click(function () {
+            console.log("querying");
             $.ajax({
                 url: "/query_in",
                 // data: {},
@@ -86,11 +92,12 @@ $(document).ready(function () {
     $(function () {
         var button = $('#dropdb_pg');
         button.click(function () {
+            console.log("dropping");
             $.ajax({
                 url: "/dropdb_pg",
                 // data: {},
                 success: function (data) {
-                    console.log(data.size);
+                    console.log("dropped");
                 }
             });
         });
@@ -99,6 +106,7 @@ $(document).ready(function () {
     $(function () {
         var button = $('#count_pg');
         button.click(function () {
+            console.log("counting");
             $.ajax({
                 url: "/count_pg",
                 // data: {},
@@ -113,6 +121,7 @@ $(document).ready(function () {
     $(function () {
         var button = $('#query_pg');
         button.click(function () {
+            console.log("querying");
             $.ajax({
                 url: "/query_pg",
                 // data: {},

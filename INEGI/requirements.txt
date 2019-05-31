@@ -19,7 +19,7 @@ django-pandas==0.6.1
 django-widget-tweaks==1.4.3
 dnspython==1.16.0
 idna==2.8
-influxdb==5.2.1
+influxdb==5.2.2
 Jinja2==2.10.1
 kiwisolver==1.1.0
 kombu==4.4.0
