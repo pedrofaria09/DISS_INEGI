@@ -2430,7 +2430,7 @@ class LineHighchartJsonTESTS(HighchartPlotLineChartView):
             begin_date = begin_date.strftime("%Y-%m-%dT%H:%M:%SZ")
             end_date = end_date.strftime("%Y-%m-%dT%H:%M:%SZ")
 
-            qs = INFLUXCLIENT.query("select * FROM port525 where time >= '"+begin_date+"' and time <= '"+end_date+"' order by time")
+            qs = INFLUXCLIENT.query("select * FROM '"+tower.code_inegi+"'where time >= '"+begin_date+"' and time <= '"+end_date+"' order by time")
             qs = list(qs)[0]
 
             rows_list = []
@@ -3241,15 +3241,16 @@ def add_raw_data_pg(request):
 
 FILE_PATH_TO_UPLOAD = "./files/raw_data/1000000.row"
 ITIMES = 1
-BATCHS = 1
+BATCHS = 1000
 # SIZE_FOR_IT = 100000
 FILE_TEST_PG = './files/tests_insert_pg.csv'
 FILE_TEST_IN = './files/tests_insert_in.csv'
 FILE_TEST_MG = './files/tests_insert_mg.csv'
 
-ITIMES_QR = 1
-FILE_QR_PG = './files/tests_query_pg.csv'
-FILE_QR_MG = './files/tests_query_mg.csv'
+ITIMES_QR = 5
+ITIMES_QR_B = 20
+FILE_QR_PG = './files/tests_query_pg_b.csv'
+FILE_QR_MG = './files/tests_query_mg_b.csv'
 FILE_QR_IN = './files/tests_query_in.csv'
 
 
@@ -3271,21 +3272,27 @@ def query_pg(request):
     file_to_write = csv.writer(open(FILE_QR_PG, 'a+'), delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
     tt = 0
 
-    # for it in range(1, ITIMES_QR+1):
-    #     start_time = time.time()
-    #
-    #     # B= 1, 1 000 000 to 20190405,04:10
-    #     conta = len(DataSetPG.objects.filter(QD(tower_code="port1") & QD(time_stamp__gte=datetime(2009, 4, 8, 18, 20, tzinfo=pytz.UTC)) & QD(time_stamp__lte=datetime(2019, 4, 5, 4, 10, tzinfo=pytz.UTC))).order_by('-time_stamp'))
-    #
-    #     end = time.time()
-    #     total_time = (end - start_time)
-    #     print(it, total_time)
-    #     tt += total_time
-    #     if it is 1:
-    #         file_to_write.writerow(["SIZE: " + str(conta) + " Query PARCIAL"])
-    #         file_to_write.writerow(['Iteration', 'Query Time'])
-    #     file_to_write.writerow([str(it), str(total_time)])
+    # PARCIAL
+    end_date = datetime(2019, 4, 5, 4, 10, tzinfo=pytz.UTC)
+    begin_date = end_date - timedelta(days=90)
+    conta = DataSetPG.objects.filter(tower_code="port1", time_stamp__gte=begin_date, time_stamp__lte=end_date).count()
+    print(conta)
+    for it in range(1, ITIMES_QR_B + 1):
+        start_time = time.time()
+        dt = DataSetPG.objects.filter(tower_code="port1", time_stamp__gte=begin_date, time_stamp__lte=end_date)
+        for d in dt:
+            pass
+        end = time.time()
+        total_time = (end - start_time)
+        print(it, total_time)
+        tt += total_time
+        if it is 1:
+            file_to_write.writerow(["SIZE: " + str(conta) + " de X Query PARCIAL"])
+            file_to_write.writerow(['Iteration', 'Query Time'])
+        file_to_write.writerow([str(it), str(total_time)])
 
+    tt = 0
+    # TOTAL C/S chunks
     conta = DataSetPG.objects.all().count()
     print(conta)
     for it in range(1, ITIMES_QR+1):
@@ -3298,7 +3305,7 @@ def query_pg(request):
         print(it, total_time)
         tt += total_time
         if it is 1:
-            file_to_write.writerow(["SIZE: " + str(conta) + " Query TOTAL queryset_iterator"])
+            file_to_write.writerow(["SIZE: " + str(conta) + " Query TOTAL"])
             file_to_write.writerow(['Iteration', 'Query Time'])
         file_to_write.writerow([str(it), str(total_time)])
 
@@ -3313,12 +3320,17 @@ def query_pg(request):
 def query_in(request):
     file_to_write = csv.writer(open(FILE_QR_IN, 'a+'), delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
     tt = 0
-
     conta = 0
     print(ITIMES_QR)
-    for it in range(1, ITIMES_QR + 1):
+
+    # Parcial
+    end_date = datetime(2019, 4, 5, 4, 10, tzinfo=pytz.UTC)
+    begin_date = end_date - timedelta(days=90)
+    begin_date = begin_date.strftime("%Y-%m-%dT%H:%M:%SZ")
+    end_date = end_date.strftime("%Y-%m-%dT%H:%M:%SZ")
+    for it in range(1, ITIMES_QR_B + 1):
         start_time = time.time()
-        dt = INFLUXCLIENT.query("select * FROM /.*/")
+        dt = INFLUXCLIENT.query("select * FROM port1 where time >= '" + begin_date + "' and time <= '" + end_date + "' order by time")
         end = time.time()
         total_time = (end - start_time)
         print(it, total_time)
@@ -3326,9 +3338,25 @@ def query_in(request):
         if it is 1:
             for d in dt:
                 conta += len(d)
-            file_to_write.writerow(["SIZE: " + str(conta) + " Query TOTAL"])
+            file_to_write.writerow(["SIZE: " + str(conta) + " de 100 000 000 Query PARCIAL"])
             file_to_write.writerow(['Iteration', 'Query Time'])
         file_to_write.writerow([str(it), str(total_time)])
+
+
+    # Total
+    # for it in range(1, ITIMES_QR + 1):
+    #     start_time = time.time()
+    #     dt = INFLUXCLIENT.query("select * FROM /.*/")
+    #     end = time.time()
+    #     total_time = (end - start_time)
+    #     print(it, total_time)
+    #     tt += total_time
+    #     if it is 1:
+    #         for d in dt:
+    #             conta += len(d)
+    #         file_to_write.writerow(["SIZE: " + str(conta) + " Query TOTAL"])
+    #         file_to_write.writerow(['Iteration', 'Query Time'])
+    #     file_to_write.writerow([str(it), str(total_time)])
 
     file_to_write.writerow([])
 
@@ -3342,14 +3370,27 @@ def query_mg(request):
     file_to_write = csv.writer(open(FILE_QR_MG, 'a+'), delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
     tt = 0
 
-    # start_time = time.time()
-    # # dt = DataSetMongoPyMod.objects.all()
-    # # dt = DataSetMongoPyMod.objects.raw({'tower_code': tower.code_inegi, 'time_stamp': {'$gte': begin_date, '$lte': end_date}})
-    # dt = DataSetMongoPyMod.objects.raw({'tower_code': 'port1'})
-    # conta = dt.count()  # REAL OPERATION!!!!
-    # end = time.time()
-    # total_time = (end - start_time)
+    # PARCIAL
+    end_date = datetime(2019, 4, 5, 4, 10, tzinfo=pytz.UTC)
+    begin_date = end_date - timedelta(days=90)
+    conta = DataSetMongoPyMod.objects.raw({'tower_code': 'port1', 'time_stamp': {'$gte': begin_date, '$lte': end_date}}).count()
+    print(conta)
+    for it in range(1, ITIMES_QR_B + 1):
+        start_time = time.time()
+        dt = DataSetMongoPyMod.objects.raw({'tower_code': 'port1', 'time_stamp': {'$gte': begin_date, '$lte': end_date}})
+        for d in dt:
+            pass
+        end = time.time()
+        total_time = (end - start_time)
+        print(it, total_time)
+        tt += total_time
+        if it is 1:
+            file_to_write.writerow(["SIZE: " + str(conta) + " of 100 000 000 Query PARCIAL"])
+            file_to_write.writerow(['Iteration', 'Query Time'])
+        file_to_write.writerow([str(it), str(total_time)])
 
+    tt = 0
+    # TOTAL C/S chunks
     conta = DataSetMongoPyMod.objects.values().all().count()
     print(conta)
     for it in range(1, ITIMES_QR + 1):
@@ -3478,7 +3519,7 @@ def add_raw_data_pg2(request):
             total_time_insertion = 0
 
             for b in range(0, BATCHS):
-                print("Batch: ", b)
+                print("PG Batch: ", b)
                 if b is not 0:
                     file = open(FILE_PATH_TO_UPLOAD, "r")
 
@@ -3587,7 +3628,7 @@ def add_raw_data_influx2(request):
             total_time_insertion = 0
 
             for b in range(0, BATCHS):
-                print("Batch: ", b)
+                print("Influx Batch: ", b)
                 if b is not 0:
                     file = open(FILE_PATH_TO_UPLOAD, "r")
 
@@ -3696,7 +3737,7 @@ def add_raw_data_mongo2(request):
             total_time_operation = 0
 
             for b in range(0, BATCHS):
-                print("Batch: ", b)
+                print("Mongo Batch: ", b)
                 if b is not 0:
                     file = open(FILE_PATH_TO_UPLOAD, "r")
 

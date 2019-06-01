@@ -232,3 +232,25 @@ Iteration,Operation Time,Insertion Time
 18,112.55129766464233,144.7242739200592
 19,113.61310195922852,145.1989312171936
 20,112.48691439628601,147.32781791687012
+SIZE: 100<_io.TextIOWrapper name='./files/raw_data/1000000.row' mode='r' encoding='UTF-8'>
+Iteration,Operation Time,Insertion Time
+1,1183.5057153701782,1943.5722405910492
+2,1194.423452615738,2084.096737384796
+3,1193.7327840328217,2052.3573853969574
+4,1196.164281129837,2052.3379719257355
+5,1198.0921845436096,2076.117640733719
+SIZE: 1<_io.TextIOWrapper name='./files/raw_data/10000.row' mode='r' encoding='UTF-8'>
+Iteration,Operation Time,Insertion Time
+1,0.11292004585266113,0.17147493362426758
+SIZE: 1<_io.TextIOWrapper name='./files/raw_data/100000.row' mode='r' encoding='UTF-8'>
+Iteration,Operation Time,Insertion Time
+1,1.2685837745666504,1.6048870086669922
+SIZE: 1<_io.TextIOWrapper name='./files/raw_data/1000000.row' mode='r' encoding='UTF-8'>
+Iteration,Operation Time,Insertion Time
+1,12.428348064422607,15.23162031173706
+SIZE: 10<_io.TextIOWrapper name='./files/raw_data/1000000.row' mode='r' encoding='UTF-8'>
+Iteration,Operation Time,Insertion Time
+1,120.93395757675171,159.87117409706116
+SIZE: 100<_io.TextIOWrapper name='./files/raw_data/1000000.row' mode='r' encoding='UTF-8'>
+Iteration,Operation Time,Insertion Time
+1,1242.3323075771332,2130.330088853836
