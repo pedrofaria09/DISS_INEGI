@@ -239,32 +239,7 @@ Iteration,Operation Time,Insertion Time
 3,2193.5059378147125,4706.868982076645
 4,2188.9085648059845,4702.590515136719
 5,2208.711393594742,4702.740230321884
-SIZE: 1<_io.TextIOWrapper name='./files/raw_data/100000.row' mode='r' encoding='UTF-8'>
+SIZE: 1000<_io.TextIOWrapper name='./files/raw_data/1000000.row' mode='r' encoding='UTF-8'>
 Iteration,Operation Time,Insertion Time
-1,2.90334415435791,5.199656009674072
-SIZE: 1<_io.TextIOWrapper name='./files/raw_data/1000.row' mode='r' encoding='UTF-8'>
-Iteration,Operation Time,Insertion Time
-1,0.07770085334777832,0.05275297164916992
-SIZE: 1<_io.TextIOWrapper name='./files/raw_data/10000.row' mode='r' encoding='UTF-8'>
-Iteration,Operation Time,Insertion Time
-1,0.3576390743255615,0.7104971408843994
-SIZE: 1<_io.TextIOWrapper name='./files/raw_data/100000.row' mode='r' encoding='UTF-8'>
-Iteration,Operation Time,Insertion Time
-1,2.4901208877563477,4.813140869140625
-SIZE: 1<_io.TextIOWrapper name='./files/raw_data/1000000.row' mode='r' encoding='UTF-8'>
-Iteration,Operation Time,Insertion Time
-1,24.860451221466064,49.87756609916687
-SIZE: 10<_io.TextIOWrapper name='./files/raw_data/1000000.row' mode='r' encoding='UTF-8'>
-Iteration,Operation Time,Insertion Time
-SIZE: 10<_io.TextIOWrapper name='./files/raw_data/1000000.row' mode='r' encoding='UTF-8'>
-Iteration,Operation Time,Insertion Time
-1,225.68316197395325,475.9995129108429
-SIZE: 1<_io.TextIOWrapper name='./files/raw_data/100000.row' mode='r' encoding='UTF-8'>
-Iteration,Operation Time,Insertion Time
-1,2.521407127380371,5.126140356063843
-SIZE: 1<_io.TextIOWrapper name='./files/raw_data/10000.row' mode='r' encoding='UTF-8'>
-Iteration,Operation Time,Insertion Time
-1,0.2523040771484375,0.5143349170684814
-SIZE: 100<_io.TextIOWrapper name='./files/raw_data/1000000.row' mode='r' encoding='UTF-8'>
-Iteration,Operation Time,Insertion Time
-1,2148.693742275238,4653.583859443665
+1,21505.264187812805,47752.85615158081
+2,21091.164954931634,47135.93844915646
