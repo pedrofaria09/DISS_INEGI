@@ -335,7 +335,7 @@ class DataSetPG(models.Model):
     class Meta:
         indexes = [
             # models.Index(fields=['tower_code', 'time_stamp', 'value', ])
-            # models.Index(fields=['tower_code', 'time_stamp', ])
+            models.Index(fields=['tower_code', 'time_stamp', ])
             # models.Index(fields=['tower_code', ]),
             # models.Index(fields=['time_stamp', ]),
             # models.Index(fields=['value', ])
@@ -365,9 +365,10 @@ class DataSetMongoPyMod(MongoModel):
         write_concern = WriteConcern(j=True)
         connection_alias = 'my-app'
         # Compound index
-        # indexes = [IndexModel([('tower_code', ASCENDING),
-        #                        ('time_stamp', ASCENDING),
-        #                        ('value', ASCENDING)])]
+        indexes = [IndexModel([('tower_code', ASCENDING),
+                               ('time_stamp', ASCENDING),
+                               # ('value', ASCENDING)
+                               ])]
 
     def __str__(self):
         return "%s" % self.tower_code

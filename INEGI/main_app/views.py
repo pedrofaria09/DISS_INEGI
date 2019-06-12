@@ -3239,9 +3239,9 @@ def add_raw_data_pg(request):
 # ===============================================================================================
 
 
-FILE_PATH_TO_UPLOAD = "./files/raw_data/100000.row"
+FILE_PATH_TO_UPLOAD = "./files/raw_data/1000000.row"
 ITIMES = 1
-BATCHS = 1
+BATCHS = 100
 # SIZE_FOR_IT = 100000
 FILE_TEST_PG = './files/tests_insert_pg_ci.csv'
 FILE_TEST_IN = './files/tests_insert_in_ci.csv'
@@ -3249,9 +3249,9 @@ FILE_TEST_MG = './files/tests_insert_mg_ci.csv'
 
 ITIMES_QR = 20
 ITIMES_QR_PAR = 50
-FILE_QR_PG = './files/tests_query_pg_b.csv'
-FILE_QR_MG = './files/tests_query_mg_b.csv'
-FILE_QR_IN = './files/tests_query_in_NEW.csv'
+FILE_QR_PG = './files/tests_query_pg_ci.csv'
+FILE_QR_MG = './files/tests_query_mg_ci.csv'
+FILE_QR_IN = './files/tests_query_in_par.csv'
 
 
 def queryset_iterator(queryset, chunksize=1000):
@@ -3291,8 +3291,10 @@ def query_pg(request):
             file_to_write.writerow(['Iteration', 'Query Time'])
         file_to_write.writerow([str(it), str(total_time)])
 
+    file_to_write.writerow([])
+
     tt = 0
-    # TOTAL C/S chunks
+    # TOTAL C chunks
     conta = DataSetPG.objects.all().count()
     print(conta)
     for it in range(1, ITIMES_QR+1):
@@ -3305,11 +3307,31 @@ def query_pg(request):
         print(it, total_time)
         tt += total_time
         if it is 1:
-            file_to_write.writerow(["SIZE: " + str(conta) + " Query TOTAL"])
+            file_to_write.writerow(["SIZE: " + str(conta) + " Query TOTAL C/C"])
             file_to_write.writerow(['Iteration', 'Query Time'])
         file_to_write.writerow([str(it), str(total_time)])
 
     file_to_write.writerow([])
+
+    # tt = 0
+    # # TOTAL S chunks
+    # conta = DataSetPG.objects.all().count()
+    # print(conta)
+    # for it in range(1, ITIMES_QR + 1):
+    #     start_time = time.time()
+    #     dt = DataSetPG.objects.all()
+    #     for d in dt:
+    #         pass
+    #     end = time.time()
+    #     total_time = (end - start_time)
+    #     print(it, total_time)
+    #     tt += total_time
+    #     if it is 1:
+    #         file_to_write.writerow(["SIZE: " + str(conta) + " Query TOTAL S/C"])
+    #         file_to_write.writerow(['Iteration', 'Query Time'])
+    #     file_to_write.writerow([str(it), str(total_time)])
+    #
+    # file_to_write.writerow([])
 
     data = {}
     data['time'] = tt
@@ -3342,22 +3364,22 @@ def query_in(request):
             file_to_write.writerow(['Iteration', 'Query Time'])
         file_to_write.writerow([str(it), str(total_time)])
 
-    tt = 0
-    conta = 0
-    # Total
-    for it in range(1, ITIMES_QR + 1):
-        start_time = time.time()
-        dt = INFLUXCLIENT.query("select * FROM /.*/")
-        end = time.time()
-        total_time = (end - start_time)
-        print(it, total_time)
-        tt += total_time
-        if it is 1:
-            for d in dt:
-                conta += len(d)
-            file_to_write.writerow(["SIZE: " + str(conta) + " Query TOTAL"])
-            file_to_write.writerow(['Iteration', 'Query Time'])
-        file_to_write.writerow([str(it), str(total_time)])
+    # tt = 0
+    # conta = 0
+    # # Total
+    # for it in range(1, ITIMES_QR + 1):
+    #     start_time = time.time()
+    #     dt = INFLUXCLIENT.query("select * FROM /.*/")
+    #     end = time.time()
+    #     total_time = (end - start_time)
+    #     print(it, total_time)
+    #     tt += total_time
+    #     if it is 1:
+    #         for d in dt:
+    #             conta += len(d)
+    #         file_to_write.writerow(["SIZE: " + str(conta) + " Query TOTAL"])
+    #         file_to_write.writerow(['Iteration', 'Query Time'])
+    #     file_to_write.writerow([str(it), str(total_time)])
 
     file_to_write.writerow([])
 
@@ -3386,12 +3408,14 @@ def query_mg(request):
         print(it, total_time)
         tt += total_time
         if it is 1:
-            file_to_write.writerow(["SIZE: " + str(conta) + " of 100 000 000 Query PARCIAL"])
+            file_to_write.writerow(["SIZE: " + str(conta) + " of X Query PARCIAL"])
             file_to_write.writerow(['Iteration', 'Query Time'])
         file_to_write.writerow([str(it), str(total_time)])
 
+    file_to_write.writerow([])
+
     tt = 0
-    # TOTAL C/S chunks
+    # TOTAL C chunks
     conta = DataSetMongoPyMod.objects.values().all().count()
     print(conta)
     for it in range(1, ITIMES_QR + 1):
@@ -3404,7 +3428,27 @@ def query_mg(request):
         print(it, total_time)
         tt += total_time
         if it is 1:
-            file_to_write.writerow(["SIZE: " + str(conta) + " Query TOTAL"])
+            file_to_write.writerow(["SIZE: " + str(conta) + " Query TOTAL C/C"])
+            file_to_write.writerow(['Iteration', 'Query Time'])
+        file_to_write.writerow([str(it), str(total_time)])
+
+    file_to_write.writerow([])
+
+    tt = 0
+    # TOTAL S chunks
+    conta = DataSetMongoPyMod.objects.values().all().count()
+    print(conta)
+    for it in range(1, ITIMES_QR + 1):
+        start_time = time.time()
+        dt = DataSetMongoPyMod.objects.all()
+        for d in dt:
+            pass
+        end = time.time()
+        total_time = (end - start_time)
+        print(it, total_time)
+        tt += total_time
+        if it is 1:
+            file_to_write.writerow(["SIZE: " + str(conta) + " Query TOTAL S/C"])
             file_to_write.writerow(['Iteration', 'Query Time'])
         file_to_write.writerow([str(it), str(total_time)])
 
