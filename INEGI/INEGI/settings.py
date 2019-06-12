@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'dal',
     'dal_select2',
     'django_countries',
-    'django_nvd3',
+    # 'django_nvd3',
     'graphos',
     'dbbackup',
     'chartjs',
