@@ -159,7 +159,6 @@ class TowerForm(ModelForm):
         self.fields['gsm_number'].widget.attrs.update({'class': 'form-control mandatory'})
 
 
-
 class MachineForm(ModelForm):
     installation_date = forms.DateTimeField(required=False, input_formats=["%d/%m/%Y %H:%M"], widget=DatePickerInput(format="%d/%m/%Y %H:%M", attrs={'autocomplete': 'off',  'placeholder': 'Installation Date'}))
 
@@ -412,6 +411,8 @@ class EquipmentConfigForm(ModelForm):
         self.fields['boom_var_height'].label = "Boom vertical height"
         self.fields['slope_dl'].label = "Data Logger Slope"
         self.fields['offset_dl'].label = "Data Logger Offset"
+        self.fields['slope_dl'].required = True
+        self.fields['offset_dl'].required = True
 
         self.fields['height'].widget.attrs.update({'class': 'form-control mandatory', 'style': 'width:25%', 'autocomplete': 'off'})
         self.fields['height_label'].widget.attrs.update({'class': 'form-control mandatory', 'style': 'width:25%', 'autocomplete': 'off'})

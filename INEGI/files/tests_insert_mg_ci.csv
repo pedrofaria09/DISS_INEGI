@@ -247,5 +247,16 @@ Iteration,Operation Time,Insertion Time
 SIZE: 100<_io.TextIOWrapper name='./files/raw_data/1000000.row' mode='r' encoding='UTF-8'>
 Iteration,Operation Time,Insertion Time
 1,2158.9452209472656,5241.523233652115
+2,2150.351653814316,5272.147544622421
+3,2159.956315785144,5297.7913465124447
+4,2220.495451679461,5201.6513487246779
+5,2179.645123476457,5227.1447450767517
 
 { "_id_" : 1048162304, "tower_code_1_time_stamp_1" : 1152675840 }
+
+SIZE: 1000<_io.TextIOWrapper name='./files/raw_data/1000000.row' mode='r' encoding='UTF-8'>
+Iteration,Operation Time,Insertion Time
+1,21415.632758140564,52793.27572989464
+2,22941.947974147344,52934.48573412390
+
+{ "_id_" : 11102629888, "tower_code_1_time_stamp_1" : 12204236800 }

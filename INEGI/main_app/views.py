@@ -966,14 +966,14 @@ def add_type_metric(request):
     data = dict()
 
     if request.method == 'POST':
-        form = MetricType(request.POST)
+        form = MetricTypeForm(request.POST)
         if form.is_valid():
             form.save()
             data['form_is_valid'] = True
         else:
             data['form_is_valid'] = False
     else:
-        form = MetricType()
+        form = MetricTypeForm()
 
     context = {'form': form}
     data['html_form'] = render_to_string('add_type_metric.html', context, request=request)
@@ -1259,9 +1259,12 @@ def view_conf_period(request, period_id, tower_id):
     for c in configurations:
         dimension = Dimension.objects.filter(equipment_configuration=c)
         c.dimension = dimension
-
+        if not c.slope_dl:
+            c.slope_dl = 1
         slope_f = c.calibration.slope/c.slope_dl
         c.slope_f = slope_f
+        if not c.offset_dl:
+            c.offset_dl = 1
         offset_f = c.calibration.offset-(c.offset_dl*slope_f)
         c.offset_f = offset_f
 
@@ -3221,7 +3224,7 @@ def add_raw_data_pg(request):
 
             db_time2 = time.time()
             if dataraw:
-                DataSetPG.objects.bulk_create(dataraw)
+                DataSetPG.objects.bulk_create(dataraw, batch_size=100000)
             db_time2 = (time.time() - db_time2)
             total_time_insertion += db_time2
 
@@ -3241,14 +3244,14 @@ def add_raw_data_pg(request):
 
 FILE_PATH_TO_UPLOAD = "./files/raw_data/1000000.row"
 ITIMES = 1
-BATCHS = 100
+BATCHS = 1
 # SIZE_FOR_IT = 100000
 FILE_TEST_PG = './files/tests_insert_pg_ci.csv'
 FILE_TEST_IN = './files/tests_insert_in_ci.csv'
 FILE_TEST_MG = './files/tests_insert_mg_ci.csv'
 
-ITIMES_QR = 20
-ITIMES_QR_PAR = 50
+ITIMES_QR = 5
+ITIMES_QR_PAR = 10
 FILE_QR_PG = './files/tests_query_pg_ci.csv'
 FILE_QR_MG = './files/tests_query_mg_ci.csv'
 FILE_QR_IN = './files/tests_query_in_par.csv'
