@@ -104,9 +104,9 @@ urlpatterns = [
     # django_chartsjs
     url(r'^chart_chartjs/?$', views.chart_chartjs, name='chart_chartjs'),
     url(r'^line_chart_json/?$', views.LineChartJson.as_view(), name='line_chart_json'),
-    url(r'^line_highchart_json/?$', views.LineHighchartJson.as_view(), name='line_highchart_json'),
+    url(r'^view_raw_data/?$', views.LineHighchartRawData.as_view(), name='view_raw_data'),
     url(r'^line_highchart_json_tests/?$', views.LineHighchartJsonTESTS.as_view(), name='line_highchart_json_tests'),
-    url(r'^x_chart/?$', views.XChart, name='x_chart'),
+    url(r'^view_classifications_chart/?$', views.XChartClassifications, name='view_classifications_chart'),
 
     # Databases
     url(r'^show_towers_data_mongo/?$', views.show_towers_data_mongo, name='show_towers_data_mongo'),

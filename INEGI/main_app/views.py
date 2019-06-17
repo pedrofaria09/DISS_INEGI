@@ -2264,7 +2264,7 @@ class LineChartJson(BaseLineChartView):
                 [87, 21, 94, 3, 90, 13, 65]]
 
 
-class LineHighchartJson(HighchartPlotLineChartView):
+class LineHighchartRawData(HighchartPlotLineChartView):
 
     def __init__(self):
         self.xdata = []
@@ -2288,16 +2288,15 @@ class LineHighchartJson(HighchartPlotLineChartView):
 
         # qs = DataSetPG.objects.filter(QD(tower_code=tower)).order_by('time_stamp')
 
-        qs = DataSetPG.objects.filter(QD(tower_code=tower) & QD(time_stamp__range=(begin_date, end_date))).order_by('time_stamp')
+        qs = DataSetPG.objects.filter(QD(tower_code=tower) & QD(time_stamp__range=(begin_date, end_date))).values('time_stamp', 'value').order_by('time_stamp')
 
         conf_periods = PeriodConfiguration.objects.filter(QD(tower=tower) & QD(begin_date__gte=begin_date, end_date__lte=end_date))
 
         df = read_frame(qs)
+
         new_df = df.value.apply(lambda x: pd.Series(str(x).split(",")))
-        del df['value']
         df = pd.concat([df, new_df], axis=1, sort=False)
-        del df['id']
-        del df['tower_code']
+        del df['value']
 
         new_df = []
         flag = 1
@@ -2625,7 +2624,7 @@ def classify_from_charts(request):
     return JsonResponse(data)
 
 
-def XChart(request):
+def XChartClassifications(request):
 
     begin_date = request.GET.get('begin_date', '')
     end_date = request.GET.get('end_date', '')

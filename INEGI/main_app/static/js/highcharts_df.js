@@ -1,7 +1,7 @@
 $(document).ready(function () {
     // console.log("Highchart");
     // $.ajax({
-    //     url: "/line_highchart_json",
+    //     url: "/view_raw_data",
     //     data: {tower_id: 10},
     //     success: function (json) {
     //         console.log("Loading Line Chart");
@@ -22,7 +22,7 @@ $(document).ready(function () {
                     if (document.getElementById("FilterForm"))
                         document.getElementById("FilterForm").classList.add('show');
                     $.ajax({
-                        url: "/line_highchart_json",
+                        url: "/view_raw_data",
                         data: {tower_id: id_tower},
                         success: function (json) {
                             console.log("Loading Line Chart");
@@ -31,7 +31,7 @@ $(document).ready(function () {
                     });
 
                     $.ajax({
-                        url: "/x_chart",
+                        url: "/view_classifications_chart",
                         data: {tower_id: id_tower},
                         success: function (data) {
                             console.log("Loading X Chart");
@@ -62,7 +62,7 @@ $(document).ready(function () {
             dataToSend = {tower_id: id_tower, begin_date: begin_date, end_date: end_date};
 
             $.ajax({
-                url: "/line_highchart_json",
+                url: "/view_raw_data",
                 data: dataToSend,
                 success: function (json) {
                     console.log("Loading Line Chart");
@@ -71,7 +71,7 @@ $(document).ready(function () {
             });
 
             $.ajax({
-                url: "/x_chart",
+                url: "/view_classifications_chart",
                 data: dataToSend,
                 success: function (data) {
                     console.log("Loading X Chart");
@@ -161,7 +161,7 @@ $(document).ready(function () {
                             dataToSend = {tower_id: id_tower, begin_date: begin_date, end_date: end_date};
 
                             $.ajax({
-                                url: "/x_chart",
+                                url: "/view_classifications_chart",
                                 data: dataToSend,
                                 success: function (data) {
                                     console.log("Loading X Chart");
