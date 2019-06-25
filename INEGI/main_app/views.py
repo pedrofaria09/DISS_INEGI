@@ -1399,6 +1399,8 @@ def add_equipment_config(request, tower_id, period_id):
                                                    boom_length=form.cleaned_data.get('boom_length'),
                                                    boom_var_height=form.cleaned_data.get('boom_var_height'),
                                                    calibration=form.cleaned_data.get('calibration'),
+                                                   offset_dl=form.cleaned_data.get('offset_dl'),
+                                                   slope_dl=form.cleaned_data.get('slope_dl'),
                                                    conf_period=conf_period)
                 equipment_config.save()
                 messages.success(request, 'Equipment Configuration was added successfully')
@@ -2665,7 +2667,7 @@ def XChartClassifications(request):
                          'x2': dt2epoch(cl.end_date),
                          'y': categories.index(name),
                          'name': cl.status.name,
-                         'colorIndex': get_color_index(cl.status.name)})
+                         'colorIndex': get_color_index(cl.status.code)})
 
     dataToReturn = {}
     dataToReturn['data'] = data
@@ -3241,7 +3243,7 @@ def add_raw_data_pg(request):
 # ===============================================================================================
 
 
-FILE_PATH_TO_UPLOAD = "./files/raw_data/1000000.row"
+FILE_PATH_TO_UPLOAD = "./files/raw_data/100000.row"
 ITIMES = 1
 BATCHS = 1
 # SIZE_FOR_IT = 100000
@@ -3279,6 +3281,7 @@ def query_pg(request):
     begin_date = end_date - timedelta(days=90)
     conta = DataSetPG.objects.filter(tower_code="port1", time_stamp__gte=begin_date, time_stamp__lte=end_date).count()
     print(conta)
+    print(DataSetPG.objects.filter(tower_code="port1", time_stamp__gte=begin_date, time_stamp__lte=end_date).explain(ANALYZE=True))
     for it in range(1, ITIMES_QR_PAR + 1):
         start_time = time.time()
         dt = DataSetPG.objects.filter(tower_code="port1", time_stamp__gte=begin_date, time_stamp__lte=end_date)
@@ -3295,25 +3298,25 @@ def query_pg(request):
 
     file_to_write.writerow([])
 
-    tt = 0
-    # TOTAL C chunks
-    conta = DataSetPG.objects.all().count()
-    print(conta)
-    for it in range(1, ITIMES_QR+1):
-        start_time = time.time()
-        dt = DataSetPG.objects.all().iterator(chunk_size=100000)
-        for d in dt:
-            pass
-        end = time.time()
-        total_time = (end - start_time)
-        print(it, total_time)
-        tt += total_time
-        if it is 1:
-            file_to_write.writerow(["SIZE: " + str(conta) + " Query TOTAL C/C"])
-            file_to_write.writerow(['Iteration', 'Query Time'])
-        file_to_write.writerow([str(it), str(total_time)])
-
-    file_to_write.writerow([])
+    # tt = 0
+    # # TOTAL C chunks
+    # conta = DataSetPG.objects.all().count()
+    # print(conta)
+    # for it in range(1, ITIMES_QR+1):
+    #     start_time = time.time()
+    #     dt = DataSetPG.objects.all().iterator(chunk_size=100000)
+    #     for d in dt:
+    #         pass
+    #     end = time.time()
+    #     total_time = (end - start_time)
+    #     print(it, total_time)
+    #     tt += total_time
+    #     if it is 1:
+    #         file_to_write.writerow(["SIZE: " + str(conta) + " Query TOTAL C/C"])
+    #         file_to_write.writerow(['Iteration', 'Query Time'])
+    #     file_to_write.writerow([str(it), str(total_time)])
+    #
+    # file_to_write.writerow([])
 
     # tt = 0
     # # TOTAL S chunks

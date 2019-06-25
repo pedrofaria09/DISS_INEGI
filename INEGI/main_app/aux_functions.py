@@ -150,9 +150,15 @@ def get_date_secs(date):
 
 
 def get_color_index(value):
-    if value == 'OK':
+    if value == '0.0':
         return 10
-    elif value == 'NOT OK':
+    elif value == '1.0':
         return 11
+    elif value == '1.1':
+        return 12
+    elif value == '1.2':
+        return 13
+    elif value == '1.3':
+        return 14
     else:
         return 0

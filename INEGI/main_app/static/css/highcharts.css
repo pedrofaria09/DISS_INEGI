@@ -262,13 +262,28 @@ g.highcharts-series,
 }
 
 .highcharts-color-10 {
-  fill: #008000;
-  stroke: #008000;
+  fill: #BCF5A9;
+  stroke: #BCF5A9;
 }
 
 .highcharts-color-11 {
-  fill: #FF0000;
-  stroke: #FF0000;
+  fill: #F5A9A9;
+  stroke: #F5A9A9;
+}
+
+.highcharts-color-12 {
+  fill: #F5BCA9;
+  stroke: #F5BCA9;
+}
+
+.highcharts-color-13 {
+  fill: #F5D0A9;
+  stroke: #F5D0A9;
+}
+
+.highcharts-color-14 {
+  fill: #F3E2A9;
+  stroke: #F3E2A9;
 }
 
 .highcharts-area {

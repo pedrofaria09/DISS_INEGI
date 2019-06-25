@@ -269,3 +269,6 @@ main_app_datasetpg	r	9,207915e+07	10 GB
 main_app_da_tower_c_6a0ada_idx	i	9,207915e+07	4987 MB
 main_app_datasetpg_pkey	i	9,207915e+07	1993 MB
 
+SIZE: 1<_io.TextIOWrapper name='./files/raw_data/100000.row' mode='r' encoding='UTF-8'>
+Iteration,Operation Time,Insertion Time
+1,2.2985589504241943,7.4335150718688965
