@@ -2314,7 +2314,7 @@ class LineHighchartRawData(HighchartPlotLineChartView):
                 dim = Dimension.objects.filter(equipment_configuration=eq)
                 for d in dim:
                     # String to show in df header
-                    name = eq.calibration.equipment.model.type.name + '@' + str(eq.height_label) + d.dimension_type.statistic.name
+                    name = eq.calibration.equipment.model.type.initials + '@' + str(eq.height_label)
                     column = d.column-1
                     temp_df = temp_df.rename(columns={column: name})
                     if not temp_df.empty:
@@ -2646,7 +2646,7 @@ def XChartClassifications(request):
     data = []
     categories = []
 
-    period_conf = PeriodConfiguration.objects.filter(QD(tower=tower_id) & ((QD(begin_date__range=(begin_date, end_date)) | QD(end_date__range=(begin_date, end_date)))))
+    period_conf = PeriodConfiguration.objects.filter(QD(tower=tower_id) & ((QD(begin_date__lte=begin_date) & QD(end_date__gte=begin_date)) | (QD(begin_date__lte=end_date) & QD(end_date__gte=end_date))))
     # print(period_conf)
     # tower = Tower.objects.get(pk=10)
     # period_conf = PeriodConfiguration.objects.filter(tower=tower).order_by('id')
@@ -2654,13 +2654,13 @@ def XChartClassifications(request):
 
     # Fill categories 1st
     for eq in eq_config:
-        name = eq.calibration.equipment.model.type.name + str(eq.height)
+        name = eq.calibration.equipment.model.type.initials + '@' + str(eq.height_label)
         if name not in categories:
             categories.append(name)
 
     # Fill data
     for eq in eq_config:
-        name = eq.calibration.equipment.model.type.name + str(eq.height)
+        name = eq.calibration.equipment.model.type.initials + '@' + str(eq.height_label)
         classifications = ClassificationPeriod.objects.filter(equipment_configuration=eq).order_by('id')
         for cl in classifications:
             data.append({'x': dt2epoch(cl.begin_date),
