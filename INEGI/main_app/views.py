@@ -1749,7 +1749,7 @@ def view_dimension_type(request, dimension_type_id):
         if form.is_valid():
             form.save()
             messages.success(request, 'Dimension type was edited successfully')
-            return HttpResponseRedirect(reverse("list_status"))
+            return HttpResponseRedirect(reverse("list_dimensions_type"))
         else:
             messages.warning(request, 'Dimension type wasnt edited!!! Maybe there is already a Dimension type with that values')
 
@@ -2292,31 +2292,36 @@ class LineHighchartRawData(HighchartPlotLineChartView):
 
         qs = DataSetPG.objects.filter(QD(tower_code=tower) & QD(time_stamp__range=(begin_date, end_date))).values('time_stamp', 'value').order_by('time_stamp')
 
-        conf_periods = PeriodConfiguration.objects.filter(QD(tower=tower) & QD(begin_date__gte=begin_date, end_date__lte=end_date))
-
+        conf_periods = PeriodConfiguration.objects.filter(QD(tower=tower) & QD(begin_date__gte=begin_date, end_date__lte=end_date)).order_by('begin_date')
+        # print(conf_periods)
         df = read_frame(qs)
 
         new_df = df.value.apply(lambda x: pd.Series(str(x).split(",")))
+        if not new_df.empty:
+            new_cols = ["Undefined"+str(x+1) for x in list(new_df.columns)]
+            new_df.columns = new_cols
         df = pd.concat([df, new_df], axis=1, sort=False)
         del df['value']
 
-        new_df = []
-        flag = 1
-        # Need to change columns name and get the correct order from the columns to read in each period in Dimensions
-        for cf in conf_periods:
-            if flag:
-                new_df.append(df[(df['time_stamp'] < cf.begin_date)])
-                flag = 0
+        new_df = pd.DataFrame()
+        # new_df = []
 
-            temp_df = df[(df['time_stamp'] >= cf.begin_date) & (df['time_stamp'] < cf.end_date)]
+        # Need to change columns name and get the correct order from the columns to read in each period in Dimensions
+        for i, cf in enumerate(conf_periods):
+            if i == 0:
+                new_df = pd.concat([new_df, df[(df['time_stamp'] < cf.begin_date)]], sort=False)
+                # new_df.append(df[(df['time_stamp'] < cf.begin_date)])
+
+            temp_df = df[(df['time_stamp'] >= cf.begin_date) & (df['time_stamp'] <= cf.end_date)]
+
             equipments_conf = EquipmentConfig.objects.filter(conf_period=cf)
             for eq in equipments_conf:
                 dim = Dimension.objects.filter(equipment_configuration=eq)
                 for d in dim:
                     # String to show in df header
-                    name = eq.calibration.equipment.model.type.initials + '@' + str(eq.height_label)
-                    column = d.column-1
-                    temp_df = temp_df.rename(columns={column: name})
+                    name = eq.calibration.equipment.model.type.initials + '@' + str(eq.height_label) + d.dimension_type.statistic.name
+                    column = d.column
+                    temp_df = temp_df.rename(columns={"Undefined"+str(column): name})
                     if not temp_df.empty:
                         temp_df[name] = temp_df[name].astype(float)
                         # We need to get the original value back (raw_data-OffLogger)-SloLogger
@@ -2325,12 +2330,17 @@ class LineHighchartRawData(HighchartPlotLineChartView):
                         final = (default*(float(eq.calibration.slope)))+float(eq.calibration.offset)
                         temp_df[name] = final
             if not temp_df.empty:
-                new_df.append(temp_df)
+                # new_df.append(temp_df)
+                new_df = pd.concat([new_df, temp_df], sort=False)
 
-        # add the new_df to the df, if new_df empty, means no periods and dimensions was configured yet.
+            if i == len(conf_periods)-1:
+                new_df = pd.concat([new_df, df[(df['time_stamp'] > cf.end_date)]], sort=False)
+                # new_df.append(df[(df['time_stamp'] > cf.end_date)])
+
+        # replace the new_df to the df, if new_df empty, means no periods and dimensions was configured yet.
         if not df.empty and len(new_df) > 0:
-            df = pd.concat(new_df, axis=0, sort=False)
-
+            # df = pd.concat(new_df, axis=0, sort=False)
+            df = new_df
         # Delete columns with empty values - Columns that had periods and dimensions
         df.dropna(axis=1, how='all', inplace=True)
 
@@ -2632,9 +2642,9 @@ def XChartClassifications(request):
     end_date = request.GET.get('end_date', '')
     tower_id = request.GET.get('tower_id', '')
 
-    print("GETX - Begin: ", begin_date)
-    print("GETX - End: ", end_date)
-    print("GETX - tower_id: ", tower_id)
+    # print("GETX - Begin: ", begin_date)
+    # print("GETX - End: ", end_date)
+    # print("GETX - tower_id: ", tower_id)
 
     if not (begin_date and end_date):
         end_date = datetime.now(pytz.utc)
@@ -2646,7 +2656,10 @@ def XChartClassifications(request):
     data = []
     categories = []
 
-    period_conf = PeriodConfiguration.objects.filter(QD(tower=tower_id) & ((QD(begin_date__lte=begin_date) & QD(end_date__gte=begin_date)) | (QD(begin_date__lte=end_date) & QD(end_date__gte=end_date))))
+    # period_conf = PeriodConfiguration.objects.filter(QD(tower=tower_id) & ((QD(begin_date__lte=begin_date) & QD(end_date__gte=begin_date)) | (QD(begin_date__lte=end_date) & QD(end_date__gte=end_date))))
+    # period_conf = PeriodConfiguration.objects.filter(QD(tower=tower_id) & QD(begin_date__gte=begin_date, end_date__lte=end_date))
+    period_conf = PeriodConfiguration.objects.filter(QD(tower=tower_id) & ((QD(begin_date__range=(begin_date, end_date)) | QD(end_date__range=(begin_date, end_date)))))
+    # print(period_conf)
     # print(period_conf)
     # tower = Tower.objects.get(pk=10)
     # period_conf = PeriodConfiguration.objects.filter(tower=tower).order_by('id')
