@@ -1,0 +1,123 @@
+SIZE PG: https://wiki-bsse.ethz.ch/display/ITDOC/Check+size+of+tables+and+objects+in+PostgreSQL+database
+SELECT
+   relname AS objectname,
+   relkind AS objecttype,
+   reltuples AS "#entries", pg_size_pretty(relpages::bigint*8*1024) AS size
+   FROM pg_class
+   WHERE relpages >= 8
+   ORDER BY relpages DESC;
+
+
+
+
+USE INEGI
+db.data_set_mongo_py_mod.storageSize()
+db.data_set_mongo_py_mod.stats()
+db.data_set_mongo_py_mod.count()
+db.data_set_mongo_py_mod.stats().indexSizes
+
+
+
+/Utilizadores/pedrofaria/.influxdb/
+/usr/local/var/influxdb/
+influxd -cconfig /usr/local/etc/influxdb.conf
+
+https://github.com/psy0rz/influxdb-python/commit/f50cdbc510e84cc19fac858411f039dbef47090c#diff-6f7b00b2898af5d67cc2a1ff0346c331
+
+
+https://django-nvd3.readthedocs.io/en/latest/index.html
+https://www.geeksforgeeks.org/python-pandas-split-strings-into-two-list-columns-using-str-split/
+
+
+
+
+
+https://blog.dekstroza.io/ulimit-shenanigans-on-osx-el-capitan/
+https://superuser.com/questions/827984/open-files-limit-does-not-work-as-before-in-osx-yosemite
+
+
+
+
+http://books.agiliq.com/projects/django-orm-cookbook/en/latest/index.html
+
+
+pip freeze > requirements.txt
+virtualenv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+
+Shift:
+https://payments.tryshift.com/campaign/payment/gAAAAABchUV7w4GHMwuPg6vCHMAFn88wG0DgBDpCv1LIQoPeDq4mP4Jn7UmWzp2pO__rWZDQbFhy76jay8wuR0ZIjk4dHSIE_dErQt4RgQglxWfUF-JwedBaJsbBVbHKJ_-Q_EdOnjv6vo86GzLGrM1bCepajMqudg==/?o=app&m=e
+
+
+
+https://gerenciagram.com.br/teste7dias?ref=P7348362Q
+
+https://pypi.org/project/django-bootstrap-modal-forms/
+
+https://simpleisbetterthancomplex.com/tutorial/2016/11/15/how-to-implement-a-crud-using-ajax-and-json.html
+
+OneToOneField -> OneToOneRel
+ForeignKey -> ManyToOneRel
+ManyToManyField -> ManyToManyRel
+
+
+View django bidirectional relationship
+
+
+
+https://simpleisbetterthancomplex.com/tutorial/2016/07/26/how-to-reset-migrations.html
+
+
+Solucoes para adicionar novos campos:
+There are 2 solutions to this:
+---Add an integer (which is going to be the id of the continent model) to all of them and change it later, or
+---Change to belongs_to = models.ForeignKey(continent, on_delete=models.CASCADE, null=True, blank=True) so that after you migrate this field can be nullable, so existing rows will have that field as null.
+
+
+https://swapps.com/blog/how-to-do-a-wizard-form/
+https://django-formtools.readthedocs.io/en/latest/wizard.html
+https://stackoverflow.com/questions/5049862/django-form-wizard-choices-depending-on-first-form-step
+
+
+https://simpleisbetterthancomplex.com/tutorial/2018/01/29/how-to-implement-dependent-or-chained-dropdown-list-with-django.html
+
+
+
+class Item(models.Model):
+    name = models.CharField(max_length=500)
+    startDate = models.DateField("Start Date", unique="true")
+    endDate = models.DateField("End Date")     
+
+    def save(self, *args, **kwargs):
+        try:
+            Item.objects.get(Q(startDate__range=(self.startDate,self.endDate))|Q(endDate__range=(self.sartDate,self.endDate))|Q(startDate__lt=self.startDate,endDate__gt=self.endDate))
+            #raise some save error
+        except Item.DoesNotExist:
+            super(Item,self).save(*args,**kwargs)
+
+
+
+https://docs.djangoproject.com/en/dev/topics/db/models/#extra-fields-on-many-to-many-relationships
+
+
+FILTER:
+https://simpleisbetterthancomplex.com/tutorial/2016/11/28/how-to-filter-querysets-dynamically.html
+
+
+
+<p><label for="id_begin_date">Start Date:</label> <div class="input-group date">
+    <input type="text" name="begin_date" autocomplete="off" class="form-control" required id="id_begin_date" dp_config="{&quot;id&quot;: &quot;dp_4&quot;, &quot;picker_type&quot;: &quot;DATE&quot;, &quot;linked_to&quot;: null, &quot;options&quot;: {&quot;showClose&quot;: true, &quot;showClear&quot;: true, &quot;showTodayButton&quot;: true, &quot;format&quot;: &quot;DD/MM/YYYY HH:mm&quot;}}"/>
+    <div class="input-group-addon input-group-append" data-target="#datetimepicker1" data-toggle="datetimepickerv">
+        <div class="input-group-text"><i class="glyphicon glyphicon-calendar"></i></div>
+    </div>
+</div></p>
+
+
+<p><label for="id_begin_date">Begin date:</label> <div class="input-group date">
+    <input type="text" name="begin_date" class="form-control" id="id_begin_date" dp_config="{&quot;id&quot;: &quot;dp_12&quot;, &quot;picker_type&quot;: &quot;DATE&quot;, &quot;linked_to&quot;: null, &quot;options&quot;: {&quot;showClose&quot;: true, &quot;showClear&quot;: true, &quot;showTodayButton&quot;: true, &quot;format&quot;: &quot;YYYY/MM/DD HH:mm&quot;}}"/>
+    <div class="input-group-addon input-group-append" data-target="#datetimepicker1" data-toggle="datetimepickerv">
+        <div class="input-group-text"><i class="glyphicon glyphicon-calendar"></i></div>
+    </div>
+</div></p>

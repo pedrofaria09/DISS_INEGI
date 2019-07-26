@@ -1,0 +1,189 @@
+pg
+15 dias 
+databases.js:2 Databases
+databases.js:204 Loading Line Chart
+databases.js:207 1384
+databases.js:204 Loading Line Chart
+databases.js:207 1667
+databases.js:204 Loading Line Chart
+databases.js:207 1345
+databases.js:204 Loading Line Chart
+databases.js:207 1403
+databases.js:204 Loading Line Chart
+databases.js:207 1316
+databases.js:204 Loading Line Chart
+databases.js:207 1480
+databases.js:204 Loading Line Chart
+databases.js:207 1261
+databases.js:204 Loading Line Chart
+databases.js:207 1697
+databases.js:204 Loading Line Chart
+databases.js:207 1357
+databases.js:204 Loading Line Chart
+databases.js:207 1413
+databases.js:204 Loading Line Chart
+databases.js:207 1326
+
+
+31 dias
+databases.js:2 Databases
+databases.js:204 Loading Line Chart
+databases.js:207 2479
+databases.js:204 Loading Line Chart
+databases.js:207 4676
+databases.js:204 Loading Line Chart
+databases.js:207 3000
+databases.js:204 Loading Line Chart
+databases.js:207 3114
+databases.js:204 Loading Line Chart
+databases.js:207 3125
+databases.js:204 Loading Line Chart
+databases.js:207 2961
+databases.js:204 Loading Line Chart
+databases.js:207 2905
+databases.js:204 Loading Line Chart
+databases.js:207 2786
+databases.js:204 Loading Line Chart
+databases.js:207 3734
+databases.js:204 Loading Line Chart
+databases.js:207 3186
+databases.js:204 Loading Line Chart
+databases.js:207 3582
+
+2 anos
+Loading Line Chart
+databases.js:207 53533
+Loading Line Chart
+databases.js:207 54134
+Loading Line Chart
+databases.js:207 57211
+Loading Line Chart
+databases.js:207 55767
+Loading Line Chart
+databases.js:207 56359
+
+
+
+MO
+2 anos
+Loading Line Chart
+databases.js:207 55984
+Loading Line Chart
+databases.js:207 58524
+Loading Line Chart
+databases.js:207 59622
+Loading Line Chart
+databases.js:207 62314
+Loading Line Chart
+databases.js:207 61396
+
+30 dias
+databases.js:2 Databases
+databases.js:204 Loading Line Chart
+databases.js:207 2496
+databases.js:204 Loading Line Chart
+databases.js:207 3392
+databases.js:204 Loading Line Chart
+databases.js:207 3221
+databases.js:204 Loading Line Chart
+databases.js:207 3400
+databases.js:204 Loading Line Chart
+databases.js:207 3018
+databases.js:204 Loading Line Chart
+databases.js:207 3255
+databases.js:204 Loading Line Chart
+databases.js:207 3402
+databases.js:204 Loading Line Chart
+databases.js:207 3075
+databases.js:204 Loading Line Chart
+databases.js:207 3199
+databases.js:204 Loading Line Chart
+databases.js:207 3103
+
+15 dias
+databases.js:2 Databases
+databases.js:204 Loading Line Chart
+databases.js:207 1187
+databases.js:204 Loading Line Chart
+databases.js:207 1975
+databases.js:204 Loading Line Chart
+databases.js:207 1498
+databases.js:204 Loading Line Chart
+databases.js:207 1407
+databases.js:204 Loading Line Chart
+databases.js:207 1249
+databases.js:204 Loading Line Chart
+databases.js:207 1604
+databases.js:204 Loading Line Chart
+databases.js:207 1317
+databases.js:204 Loading Line Chart
+databases.js:207 1382
+databases.js:204 Loading Line Chart
+databases.js:207 1435
+databases.js:204 Loading Line Chart
+databases.js:207 1368
+databases.js:204 Loading Line Chart
+
+In
+2 anos
+Loading Line Chart
+databases.js:207 55353
+Loading Line Chart
+databases.js:207 59657
+Loading Line Chart
+databases.js:207 67980
+Loading Line Chart
+databases.js:207 58264
+Loading Line Chart
+databases.js:207 60357
+
+30 dias
+databases.js:2 Databases
+databases.js:204 Loading Line Chart
+databases.js:207 2616
+databases.js:204 Loading Line Chart
+databases.js:207 3570
+databases.js:204 Loading Line Chart
+databases.js:207 3236
+databases.js:204 Loading Line Chart
+databases.js:207 3213
+databases.js:204 Loading Line Chart
+databases.js:207 3354
+databases.js:204 Loading Line Chart
+databases.js:207 3198
+databases.js:204 Loading Line Chart
+databases.js:207 2979
+databases.js:204 Loading Line Chart
+databases.js:207 3567
+databases.js:204 Loading Line Chart
+databases.js:207 3366
+databases.js:204 Loading Line Chart
+databases.js:207 3300
+
+15 dias
+
+databases.js:2 Databases
+databases.js:204 Loading Line Chart
+databases.js:207 1155
+databases.js:204 Loading Line Chart
+databases.js:207 1958
+databases.js:204 Loading Line Chart
+databases.js:207 1421
+databases.js:204 Loading Line Chart
+databases.js:207 1501
+databases.js:204 Loading Line Chart
+databases.js:207 1330
+databases.js:204 Loading Line Chart
+databases.js:207 3067
+databases.js:204 Loading Line Chart
+databases.js:207 1730
+databases.js:204 Loading Line Chart
+databases.js:207 1452
+databases.js:204 Loading Line Chart
+databases.js:207 1401
+databases.js:204 Loading Line Chart
+databases.js:207 1278
+databases.js:204 Loading Line Chart
+databases.js:207 1584
+databases.js:204 Loading Line Chart
+databases.js:207 1260

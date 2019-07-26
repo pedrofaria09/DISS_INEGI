@@ -27,8 +27,8 @@
                         <td class="align-middle p-2"><a href="{% url 'view_equipment' c.calibration.equipment.pk %}">{{ c.calibration.equipment.sn }}</a></td>
                         <td class="align-middle p-2"><a href="{% url 'view_equipment_config' tower_id period_id c.pk%}">{{ c.slope_dl }}</a></td>
                         <td class="align-middle p-2"><a href="{% url 'view_equipment_config' tower_id period_id c.pk%}">{{ c.offset_dl }}</a></td>
-                        <td class="align-middle p-2"><a href="{% url 'view_calibration' c.calibration.equipment.pk c.calibration.pk %}">{{ c.calibration.offset }}</a></td>
                         <td class="align-middle p-2"><a href="{% url 'view_calibration' c.calibration.equipment.pk c.calibration.pk %}">{{ c.calibration.slope }}</a></td>
+                        <td class="align-middle p-2"><a href="{% url 'view_calibration' c.calibration.equipment.pk c.calibration.pk %}">{{ c.calibration.offset }}</a></td>
                         <td class="align-middle p-2">{{ c.slope_f }}</td>
                         <td class="align-middle p-2">{{ c.offset_f }}</td>
                         <td class="align-middle p-2"><a href="{% url 'view_equipment_config' tower_id period_id c.pk%}">{{ c.height_label }}</a></td>
